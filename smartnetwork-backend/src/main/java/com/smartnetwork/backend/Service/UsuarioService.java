@@ -59,6 +59,9 @@ public class UsuarioService {
      * @return
      */
     public Usuario updateUsuario (Usuario usuario) {
+        if (usuario.getPassword() != null) {
+            usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
+        }
         return usuarioRepository.save(usuario);
     }
 }
