@@ -92,10 +92,8 @@ public class UsuarioService {
      * @return
      */
     public Usuario updateUsuario(Usuario usuario) {
-
         usuarioRepository.findById(usuario.getId())
                 .orElseThrow(() -> new RuntimeException("No existe el usuario a actualizar"));
-
         return usuarioRepository.save(usuario);
     }
 

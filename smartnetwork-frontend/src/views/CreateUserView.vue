@@ -8,14 +8,23 @@
           </v-card-title>
 
           <v-card-subtitle class="text-center mb-4">
-            Gestión de switches y firewalls
+            Crear un nuevo usuario
           </v-card-subtitle>
 
-          <v-form @submit.prevent="handleLogin">
+          <v-form @submit.prevent="handleCrearUsuario">
             <v-text-field
               v-model="username"
               label="Usuario"
               prepend-inner-icon="mdi-account"
+              variant="outlined"
+              class="mb-3"
+              required
+            />
+
+            <v-text-field
+              v-model="email"
+              label="Email"
+              prepend-inner-icon="mdi-email"
               variant="outlined"
               class="mb-3"
               required
@@ -37,7 +46,7 @@
               block
               type="submit"
             >
-              Iniciar sesión
+              Crear Usuario
             </v-btn>
 
             <p v-if="userStore.mensaje" class="mt-3 text-center">{{ userStore.mensaje }}</p>
@@ -53,16 +62,28 @@ import { ref } from "vue";
 import { useUserStore } from "@/stores/userStore";
 
 const username = ref("");
+const email = ref("");
 const password = ref("");
+
 const userStore = useUserStore();
 
-const handleLogin = async () => {
+const handleCrearUsuario = async () => {
   try {
-    await userStore.login(username.value, password.value);
+    await userStore.crearUsuario({
+      username: username.value,
+      email: email.value,
+      password: password.value,
+    });
+
+    // Limpiar inputs tras crear usuario
     username.value = "";
+    email.value = "";
     password.value = "";
   } catch (error) {
     console.error(error);
   }
 };
 </script>
+
+<style scoped>
+</style>
