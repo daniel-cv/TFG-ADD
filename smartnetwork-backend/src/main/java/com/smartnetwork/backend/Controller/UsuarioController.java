@@ -28,4 +28,8 @@ public class UsuarioController {
     public @ResponseBody Usuario createUsuario(@RequestBody Usuario usuario) {
         return usuarioService.createUsuario(usuario);
     }
+    @PostMapping("/login")
+    public Usuario login(@RequestBody Usuario usuario) {
+        return usuarioService.loadUserByUsername(usuario.getUsername(), usuario.getPassword());
+    }
 }
