@@ -38,7 +38,11 @@ public class UsuarioService {
         return usuarioRepository.save(usuario);
     }
 
-    
+    /**
+     * Obtiene el usuario con el username que se le solicite
+     * @param username
+     * @return
+     */
     public Usuario findByUsername(String username) {
         return usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -46,7 +50,7 @@ public class UsuarioService {
 
 
     /**
-     * Obtiene todos los empleados de la bbdd
+     * Obtiene todos los usuarios de la bbdd
      * @return
      */
     public List<Usuario> findAll() {
@@ -62,6 +66,12 @@ public class UsuarioService {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
+    
+    /**
+     * Obtiene el usuario con el email que se le solicite
+     * @param email
+     * @return
+     */
     public Usuario findByEmail(String email) {
         return usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ese email"));
