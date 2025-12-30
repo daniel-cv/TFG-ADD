@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Crear instancia de Axios centralizada
 const api = axios.create({
-  baseURL: "http://localhost:8080/usuario", // Base URL de tu backend Spring
+  baseURL: "http://localhost:8082/usuario", // Base URL de tu backend Spring
   headers: { "Content-Type": "application/json" },
 });
 
@@ -33,7 +33,7 @@ export const useUserStore = defineStore("user", {
         return response.data;
       } catch (error) {
         console.error(error);
-        this.mensaje = "Error al crear usuario";
+        this.mensaje = "Error al crear usuario\n"+error;
         throw error;
       }
     },

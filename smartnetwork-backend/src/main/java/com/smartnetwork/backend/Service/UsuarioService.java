@@ -1,10 +1,15 @@
 package com.smartnetwork.backend.Service;
 
+import com.smartnetwork.backend.Config.SecurityConfig;
 import com.smartnetwork.backend.Entity.Usuario;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -66,7 +71,26 @@ public class UsuarioService {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-    
+
+    /**
+     * Busca usuario por username
+     * @param username
+     * @return
+     * @throws UsernameNotFoundException
+     */
+    public Usuario loadUserByUsername(String username, String password)
+            throws UsernameNotFoundException {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        return usuario;
+
+    }
     /**
      * Obtiene el usuario con el email que se le solicite
      * @param email
