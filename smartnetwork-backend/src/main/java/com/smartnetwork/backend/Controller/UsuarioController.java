@@ -3,13 +3,13 @@ package com.smartnetwork.backend.Controller;
 import com.smartnetwork.backend.Entity.Usuario;
 import com.smartnetwork.backend.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Controller
-@RestController ("/usuario")
+@RestController
+@RequestMapping ("/usuario")
+@CrossOrigin(origins = "http://localhost:5173") // Permite tu frontend
 public class UsuarioController {
 
     @Autowired
