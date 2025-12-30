@@ -6,14 +6,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UsuarioService {
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
     }
@@ -23,10 +24,26 @@ public class UsuarioService {
      * @param usuario
      * @return
      */
-    public Usuario createUsuario (Usuario usuario) {
+    public Usuario createUsuario(Usuario usuario) {
+
+        if (usuarioRepository.existsByUsername(usuario.getUsername())) {
+            throw new RuntimeException("El nombre de usuario ya existe");
+        }
+
+        if (usuarioRepository.existsByEmail(usuario.getEmail())) {
+            throw new RuntimeException("El email ya está registrado");
+        }
+
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }
+
+    
+    public Usuario findByUsername(String username) {
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
 
     /**
      * Obtiene todos los empleados de la bbdd
@@ -41,9 +58,15 @@ public class UsuarioService {
      * @param id
      * @return
      */
-    public Optional<Usuario> findById(int id) {
-        return usuarioRepository.findById(id);
+    public Usuario findById(int id) {
+        return usuarioRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
+    public Usuario findByEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ese email"));
+    }
+
 
     /**
      * Elimina el usuario con el id solicitado de la bbdd
@@ -58,7 +81,12 @@ public class UsuarioService {
      * @param usuario
      * @return
      */
-    public Usuario updateUsuario (Usuario usuario) {
+    public Usuario updateUsuario(Usuario usuario) {
+
+        usuarioRepository.findById(usuario.getId())
+                .orElseThrow(() -> new RuntimeException("No existe el usuario a actualizar"));
+
         return usuarioRepository.save(usuario);
     }
+
 }
