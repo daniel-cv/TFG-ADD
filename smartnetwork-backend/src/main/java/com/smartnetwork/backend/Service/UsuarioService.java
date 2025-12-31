@@ -3,11 +3,13 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.Config.SecurityConfig;
 import com.smartnetwork.backend.Entity.Usuario;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,11 +34,17 @@ public class UsuarioService {
     public Usuario createUsuario(Usuario usuario) {
 
         if (usuarioRepository.existsByUsername(usuario.getUsername())) {
-            throw new RuntimeException("El nombre de usuario ya existe");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El nombre de usuario ya existe");
         }
 
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            throw new RuntimeException("El email ya está registrado");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El email ya está registrado");
+        }
+
+        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).{8,}$";
+        if (!usuario.getPassword().matches(regex)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La contraseña debe tener 8 o más caracteres y debe contener al menos 1 mayúscula, 1 minúscula, 1 número y un carácter especial");
         }
 
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));

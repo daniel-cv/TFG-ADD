@@ -33,10 +33,11 @@ export const useUserStore = defineStore("user", {
         return response.data;
       } catch (error) {
         console.error(error);
-        this.mensaje = "Error al crear usuario\n"+error;
+        this.mensaje = "Error al crear usuario: "+ error.response.data.message;
         throw error;
       }
     },
+    
 
     // Login de usuario
     async login(username, password) {
