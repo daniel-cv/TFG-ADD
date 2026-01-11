@@ -33,7 +33,7 @@ export const useUserStore = defineStore("user", {
         return response.data;
       } catch (error) {
         console.error(error);
-        this.mensaje = "Error al crear usuario";
+        this.mensaje = "Error al crear usuario\n"+error;
         throw error;
       }
     },
