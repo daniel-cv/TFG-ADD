@@ -23,12 +23,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuario no encontrado"));
+                        new UsernameNotFoundException("Usuario no encontrado: " + username));
 
-        return User.builder()
-                .username(usuario.getUsername())
-                .password(usuario.getPassword()) // BCrypt desde BD
-                .roles("USER")
+        return User.withUsername(usuario.getUsername())
+                .password(usuario.getPassword())   // ya encriptada
+                .roles("USER")                     // aquí ya no da error
                 .build();
+
+
     }
 }
