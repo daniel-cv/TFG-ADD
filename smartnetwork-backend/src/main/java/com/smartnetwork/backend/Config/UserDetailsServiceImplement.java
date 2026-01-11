@@ -1,6 +1,6 @@
 package com.smartnetwork.backend.Config;
 
-import com.smartnetwork.backend.Entity.Usuario;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

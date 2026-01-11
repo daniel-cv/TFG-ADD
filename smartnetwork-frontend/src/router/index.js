@@ -3,7 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import LoginView from "../views/LoginView.vue";
 import CreateUserView from "../views/CreateUserView.vue"; // <-- nueva vista
 import DashboardView from "../views/DashboardView.vue";
-import DevicesView from "../views/DevicesView.vue";
+import DispositivosView from "../views/DispositivosView.vue";
 
 const routes = [
   {
@@ -28,7 +28,7 @@ const routes = [
   {
     path: "/devices",
     name: "devices",
-    component: DevicesView,
+    component: DispositivosView,
   },
 ];
 

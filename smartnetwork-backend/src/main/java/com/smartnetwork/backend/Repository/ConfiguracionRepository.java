@@ -1,6 +1,6 @@
 package com.smartnetwork.backend.Repository;
 
-import com.smartnetwork.backend.Entity.Configuracion;
+import com.smartnetwork.backend.domain.Entity.Configuracion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

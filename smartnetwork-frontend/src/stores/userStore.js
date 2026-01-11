@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Crear instancia de Axios centralizada
 const api = axios.create({
-  baseURL: "http://localhost:8080/usuario", // Base URL de tu backend Spring
+  baseURL: "http://localhost:8080/api/usuario", // Base URL de tu backend Spring
   headers: { "Content-Type": "application/json" },
 });
 
@@ -41,10 +41,19 @@ export const useUserStore = defineStore("user", {
     // Login de usuario
     async login(username, password) {
       try {
-        const response = await api.post("/login", { username, password });
-        this.usuarioActual = response.data;
-        this.mensaje = `Bienvenido, ${response.data.username}`;
-        return response.data;
+        const response = await fetch("http://localhost:8080/api/dispositivos/mios", {
+          method: "GET",
+          headers: {
+            "Authorization": "Basic " + btoa(username + ":" + password)
+          }
+        });
+      
+        if (!response.ok) throw new Error("Credenciales incorrectas");
+      
+        this.usuarioActual = { username };
+        this.mensaje = `Bienvenido, ${username}`;
+        return this.usuarioActual;
+      
       } catch (error) {
         console.error(error);
         this.mensaje = "Usuario o contraseña incorrectos";
