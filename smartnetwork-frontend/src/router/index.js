@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import LoginView from "../views/LoginView.vue";
 import CreateUserView from "../views/CreateUserView.vue"; // <-- nueva vista
 import DashboardView from "../views/DashboardView.vue";
+import NewDevicesView from "../views/AniadirDispositivo.vue";
 import DispositivosView from "../views/DispositivosView.vue";
 
 const routes = [
@@ -30,6 +31,11 @@ const routes = [
     name: "devices",
     component: DispositivosView,
   },
+  {
+    path: "/newdevice",
+    name: "newdevices",
+    component: NewDevicesView,
+  }
 ];
 
 const router = createRouter({

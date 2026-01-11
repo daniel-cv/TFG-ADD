@@ -28,7 +28,10 @@ public class DispositivoService {
         return dispositivoRepository.findByUsuario(usuario);
     }
 
-    public Dispositivo crearDispositivo(Dispositivo dispositivo) {
+    public Dispositivo crearDispositivo(Dispositivo dispositivo,String username) {
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        dispositivo.setUsuario(usuario);
         return dispositivoRepository.save(dispositivo);
     }
 }

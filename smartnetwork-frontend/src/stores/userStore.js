@@ -3,7 +3,7 @@ import axios from "axios";
 
 // Crear instancia de Axios centralizada
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/usuario", // Base URL de tu backend Spring
+  baseURL: "http://localhost:8082/api/usuario", // Base URL de tu backend Spring
   headers: { "Content-Type": "application/json" },
 });
 
