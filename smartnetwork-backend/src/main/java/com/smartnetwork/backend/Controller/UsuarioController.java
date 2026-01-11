@@ -1,14 +1,15 @@
 package com.smartnetwork.backend.Controller;
 
-import com.smartnetwork.backend.Entity.Usuario;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping ("/usuario")
+@RequestMapping ("/api/usuario")
 @CrossOrigin(origins = "http://localhost:5173") // Permite tu frontend
 public class UsuarioController {
 
@@ -29,7 +30,9 @@ public class UsuarioController {
         return usuarioService.createUsuario(usuario);
     }
     @PostMapping("/login")
-    public @ResponseBody Usuario login(@RequestBody Usuario usuario) {
-        return usuarioService.login(usuario.getUsername(), usuario.getPassword());
+    public Usuario login(Authentication authentication) {
+        String username = authentication.getName();
+        String password = authentication.getCredentials().toString();
+        return usuarioService.loadUserByUsername(username, password);
     }
 }

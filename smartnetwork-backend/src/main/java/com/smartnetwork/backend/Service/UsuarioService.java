@@ -1,7 +1,6 @@
 package com.smartnetwork.backend.Service;
 
-import com.smartnetwork.backend.Config.SecurityConfig;
-import com.smartnetwork.backend.Entity.Usuario;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;

@@ -1,5 +1,6 @@
-package com.smartnetwork.backend.Entity;
+package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class Usuario {
     private String role; // ROLE_USER, ROLE_ADMIN
 
     @OneToMany(mappedBy = "usuario")
+    @JsonManagedReference
     private List<Dispositivo> dispositivos;
 
     public int getId() {

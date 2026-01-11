@@ -1,4 +1,4 @@
-package com.smartnetwork.backend.Entity;
+package com.smartnetwork.backend.domain.Entity;
 
 import jakarta.persistence.*;
 
