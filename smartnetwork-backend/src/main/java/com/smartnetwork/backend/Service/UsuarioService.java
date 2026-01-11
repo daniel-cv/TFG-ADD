@@ -3,6 +3,7 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -42,7 +43,7 @@ public class UsuarioService {
             );
         }
 
-        String regexemail = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
+        String regexemail = "^[A-Za-z0-9.%+-]+@[A-Za-z0-9.-]+[A-Za-z]{2,}$";
         if (!usuario.getEmail().matches(regexemail)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -50,15 +51,15 @@ public class UsuarioService {
             );
         }
 
-        String regexusername = "^[A-Za-z0-9][A-Za-z0-9._]*$";
+        String regexusername = "^[A-Za-z0-9][A-Za-z0-9.]$";
         if (!usuario.getUsername().matches(regexusername)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Nombre no válido, debe empezar por letras o números y solo puede contener '.' y '_'"
+                    "Nombre no válido, debe empezar por letras o números y solo puede contener '.' y ''"
             );
         }
 
-        String regex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,}$";
+        String regex = "^(?=.[a-z])(?=.[A-Z])(?=.[^A-Za-z0-9]).{8,}$";
         if (!usuario.getPassword().matches(regex)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -98,7 +99,26 @@ public class UsuarioService {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
-    
+
+    /**
+     * Busca usuario por username
+     * @param username
+     * @return
+     * @throws UsernameNotFoundException
+     */
+    public Usuario loadUserByUsername(String username, String password)
+            throws UsernameNotFoundException {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        if (!passwordEncoder.matches(password, usuario.getPassword())) {
+            throw new RuntimeException("Contraseña incorrecta");
+        }
+
+        return usuario;
+
+    }
     /**
      * Obtiene el usuario con el email que se le solicite
      * @param email
@@ -128,19 +148,5 @@ public class UsuarioService {
                 .orElseThrow(() -> new RuntimeException("No existe el usuario a actualizar"));
         return usuarioRepository.save(usuario);
     }
-    public Usuario login(String username, String password) {
-        Usuario usuario = usuarioRepository.findByUsername(username)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST,
-                        "Usuario o contraseña incorrectos"
-                ));
-        if (!passwordEncoder.matches(password, usuario.getPassword())) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Usuario o contraseña incorrectos"
-            );
-        }
-        usuario.setPassword(null);
-        return usuario;
-    }
+
 }
