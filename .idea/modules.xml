@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/TFG-ADD.iml" filepath="$PROJECT_DIR$/.idea/TFG-ADD.iml" />
-      <module fileurl="file://$PROJECT_DIR$/smartnetwork-backend/smartnetwork.iml" filepath="$PROJECT_DIR$/smartnetwork-backend/smartnetwork.iml" />
     </modules>
   </component>
 </project>

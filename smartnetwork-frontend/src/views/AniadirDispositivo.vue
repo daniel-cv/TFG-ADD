@@ -81,10 +81,12 @@
 <script setup>
 import { ref } from "vue";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
+import { useRouter } from "vue-router";
 
 const dispositivoStore = useDispositivoStore();
 const form = ref(null);
 const mensaje = ref("");
+const router = useRouter();
 
 // Campos del dispositivo
 const nombre = ref("");
@@ -126,6 +128,8 @@ const handleSubmit = async () => {
     tipo.value = "";
     ip.value = "";
     puerto.value = "";
+
+    router.push("/devices");
 
   } catch (error) {
     mensaje.value = "Error al crear el dispositivo";
