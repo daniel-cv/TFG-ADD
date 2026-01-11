@@ -4,6 +4,7 @@ import LoginView from "../views/LoginView.vue";
 import CreateUserView from "../views/CreateUserView.vue"; // <-- nueva vista
 import DashboardView from "../views/DashboardView.vue";
 import DevicesView from "../views/DevicesView.vue";
+import NewDevicesView from "../views/AniadirDispositivo.vue";
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     name: "devices",
     component: DevicesView,
   },
+  {
+    path: "/newdevice",
+    name: "newdevices",
+    component: NewDevicesView,
+  }
 ];
 
 const router = createRouter({
