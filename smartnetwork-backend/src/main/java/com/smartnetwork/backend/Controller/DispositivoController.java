@@ -22,6 +22,11 @@ public class DispositivoController {
         String username = authentication.getName();
         return dispositivoService.obtenerDispositivosDelUsuario(username);
     }
+    @PostMapping("/crear")
+    public Dispositivo crear(@RequestBody Dispositivo dispositivo, Authentication authentication) {
+        String username = authentication.getName();
+        return dispositivoService.crearDispositivo(dispositivo,username);
+    }
 
 }
 

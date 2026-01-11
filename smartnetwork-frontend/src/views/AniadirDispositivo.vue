@@ -8,22 +8,41 @@
           </v-card-title>
 
           <v-form @submit.prevent="handleSubmit" ref="form">
+            <!-- Nombre -->
             <v-text-field
-              v-model="code"
+              v-model="nombre"
+              label="Nombre"
+              prepend-inner-icon="mdi-tag"
+              variant="outlined"
+              class="mb-3"
+              required
+            />
+
+            <!-- Fabricante -->
+            <v-select
+              v-model="fabricante"
+              :items="fabricantes"
               label="Fabricante"
-              prepend-inner-icon="mdi-shield-key"
+              prepend-inner-icon="mdi-factory"
               variant="outlined"
-              class="mb-4"
+              class="mb-3"
+              :rules="[v => !!v || 'Selecciona un fabricante']"
               required
             />
-            <v-text-field
-              v-model="code"
-              label="Dispositivo"
-              prepend-inner-icon="mdi-shield-key"
+
+            <!-- Tipo de dispositivo -->
+            <v-select
+              v-model="tipo"
+              :items="tipos"
+              label="Tipo de dispositivo"
+              prepend-inner-icon="mdi-devices"
               variant="outlined"
-              class="mb-4"
+              class="mb-3"
+              :rules="[v => !!v || 'Selecciona un tipo']"
               required
             />
+
+            <!-- Dirección IP -->
             <v-text-field
               v-model="ip"
               label="Dirección IP"
@@ -33,19 +52,13 @@
               :rules="ipRules"
               required
             />
-            <v-text-field
-              v-model="code"
-              label="Puerto"
-              prepend-inner-icon="mdi-shield-key"
-              variant="outlined"
-              class="mb-4"
-              required
-            />
 
+            <!-- Puerto -->
             <v-text-field
-              v-model="code"
-              label="Token"
-              prepend-inner-icon="mdi-shield-key"
+              v-model="puerto"
+              label="Puerto"
+              type="number"
+              prepend-inner-icon="mdi-ethernet"
               variant="outlined"
               class="mb-4"
               required
@@ -67,11 +80,22 @@
 
 <script setup>
 import { ref } from "vue";
+import { useDispositivoStore } from "@/stores/dispositivoStore";
 
-const ip = ref("");
-const token = ref("");
-const mensaje = ref("");
+const dispositivoStore = useDispositivoStore();
 const form = ref(null);
+const mensaje = ref("");
+
+// Campos del dispositivo
+const nombre = ref("");
+const fabricante = ref("");
+const tipo = ref("");
+const ip = ref("");
+const puerto = ref("");
+
+// ENUMS (deben coincidir EXACTAMENTE con el backend)
+const fabricantes = ["FORTINET", "CISCO", "ARISTA"];
+const tipos = ["FIREWALL", "SWITCH"];
 
 const ipRules = [
   v => !!v || "La IP es obligatoria",
@@ -84,8 +108,27 @@ const handleSubmit = async () => {
   const { valid } = await form.value.validate();
   if (!valid) return;
 
-  mensaje.value = "Datos enviados correctamente";
-  ip.value = "";
-  token.value = "";
+  try {
+    await dispositivoStore.crearNuevoDispositivo({
+      nombre: nombre.value,
+      fabricante: fabricante.value,
+      tipo: tipo.value,
+      ip: ip.value,
+      puerto: Number(puerto.value),
+      estado: "ACTIVO",
+    });
+
+    mensaje.value = "Dispositivo creado correctamente";
+
+    // Reset formulario
+    nombre.value = "";
+    fabricante.value = "";
+    tipo.value = "";
+    ip.value = "";
+    puerto.value = "";
+
+  } catch (error) {
+    mensaje.value = "Error al crear el dispositivo";
+  }
 };
 </script>
