@@ -40,6 +40,17 @@
               Iniciar sesión
             </v-btn>
 
+            <div class="text-center mt-4">
+              <span>¿No tienes cuenta?</span>
+              <v-btn
+                variant="text"
+                color="primary"
+                @click="irARegistro"
+              >
+                Crear usuario
+              </v-btn>
+            </div>
+
             <p v-if="userStore.mensaje" class="mt-3 text-center">{{ userStore.mensaje }}</p>
           </v-form>
         </v-card>
@@ -51,18 +62,27 @@
 <script setup>
 import { ref } from "vue";
 import { useUserStore } from "@/stores/userStore";
+import { useRouter } from "vue-router";
 
 const username = ref("");
 const password = ref("");
 const userStore = useUserStore();
+const router = useRouter();
 
 const handleLogin = async () => {
   try {
     await userStore.login(username.value, password.value);
     username.value = "";
     password.value = "";
+
+      router.push("/dashboard");
   } catch (error) {
     console.error(error);
   }
 };
+
+const irARegistro = () => {
+  router.push("/register"); // Asegúrate de tener esta ruta creada
+};
+
 </script>

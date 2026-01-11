@@ -3,6 +3,7 @@ package com.smartnetwork.backend.Controller;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,7 +30,9 @@ public class UsuarioController {
         return usuarioService.createUsuario(usuario);
     }
     @PostMapping("/login")
-    public Usuario login(@RequestBody Usuario usuario) {
-        return usuarioService.loadUserByUsername(usuario.getUsername(), usuario.getPassword());
+    public Usuario login(Authentication authentication) {
+        String username = authentication.getName();
+        String password = authentication.getCredentials().toString();
+        return usuarioService.loadUserByUsername(username, password);
     }
 }
