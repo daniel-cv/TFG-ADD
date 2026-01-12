@@ -1,59 +1,49 @@
 import { defineStore } from "pinia";
-import axios from "axios";
-
-// Crear instancia de Axios centralizada
-const api = axios.create({
-  baseURL: "http://localhost:8082/api/dispositivos", // Base URL de tu backend Spring
-  headers: { "Content-Type": "application/json" },
-});
+import { useUserStore } from "@/stores/userStore";
+import api from "@/services/api";   // ← usa la instancia global
 
 export const useDispositivoStore = defineStore("dispositivo", {
-    state: () => ({
-        dispositivos: [],
-        mensaje: "",
-    }),
-    actions: {
-        // Traer todos los dispositivos del usuario actual
-        async getMisDispositivos() {
-            try {
-                const username = "admin"; // usuario predefinido
-                const password = "1234";  // contraseña predefinida
+  state: () => ({
+    dispositivos: [],
+    mensaje: "",
+  }),
 
-                const response = await api.get("/mios", {
-                    headers: {
-                        "Authorization": "Basic " + btoa(username + ":" + password)
-                    }
-                });
-
-                this.dispositivos = response.data;
-
-            } catch (error) {
-                console.error(error)
-                this.mensaje = "Error al obtener dispositivos";
-            }
-        },
-        async crearNuevoDispositivo(dispositivo) {
+  actions: {
+    async getMisDispositivos() {
       try {
-        const username = "admin";
-        const password = "1234";
+        const userStore = useUserStore();
 
-        const response = await api.post(
-          "/crear",
-          {
-            nombre: dispositivo.nombre,
-            tipo: dispositivo.tipo,           // FIREWALL | SWITCH
-            ip: dispositivo.ip,
-            puerto: dispositivo.puerto,
-            fabricante: dispositivo.fabricante,
-            estado: "ONLINE",       // ACTIVO | INACTIVO (opcional)
-          },
-          {
-            headers: {
-              Authorization: "Basic " + btoa(username + ":" + password),
-              "Content-Type": "application/json",
-            },
-          }
-        );
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+
+        const response = await api.get("/api/dispositivos/mios");
+        this.dispositivos = response.data;
+
+      } catch (error) {
+        console.error(error);
+        this.mensaje = "Error al obtener dispositivos";
+      }
+    },
+
+    async crearNuevoDispositivo(dispositivo) {
+      try {
+        const userStore = useUserStore();
+
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+
+        const response = await api.post("/api/dispositivos/crear", {
+          nombre: dispositivo.nombre,
+          tipo: dispositivo.tipo,
+          ip: dispositivo.ip,
+          puerto: dispositivo.puerto,
+          fabricante: dispositivo.fabricante,
+          estado: "ONLINE",
+        });
 
         this.dispositivos.push(response.data);
         this.mensaje = "Dispositivo creado correctamente";
@@ -66,35 +56,5 @@ export const useDispositivoStore = defineStore("dispositivo", {
         throw error;
       }
     },
-    /*async crearReglaFirewall(dispositivo) {
-      try {
-
-        const response = await axios.post(
-          "/crearpolitica",
-          {
-            headers: {
-              Authorization: "Bearer " + dispositivo.token,
-              "Content-Type": "application/json",
-            },
-            params: {
-              vdom: "root",
-              with_meta: 1,
-              datasource: 1,
-            },
-          }
-        );
-
-        return response.data;
-      } catch (error) {
-        console.error(
-          "Error al crear regla de firewall:",
-          error.response?.data || error.message
-        );
-        this.mensaje =
-          "Error al crear regla de firewall: " +
-          (error.response?.data || error.message);
-        throw error;
-      }
-    },*/
     },
 });
