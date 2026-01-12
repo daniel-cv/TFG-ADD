@@ -33,7 +33,9 @@
             Estado: {{ d.estado }}
           </v-card-text>
           <v-card-actions>
-            <v-btn color="primary">Configurar</v-btn>
+            <v-btn color="primary" @click="configurar(d.id)">
+              Configurar
+            </v-btn>
           </v-card-actions>
         </v-card>
       </v-col>
@@ -46,13 +48,23 @@ import { ref, onMounted } from "vue";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
 import { useUserStore } from "@/stores/userStore";
 import { useRouter } from "vue-router";
+import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore";
+
+
 
 const dispositivos = ref([]);
 const mensaje = ref("");
+const seleccionadoStore = useDispositivoSeleccionadoStore();
 
 const dispositivoStore = useDispositivoStore();
 const userStore = useUserStore();   // ← usuario logado
 const router = useRouter();
+
+function configurar(id) {
+  seleccionadoStore.seleccionar(id);
+  router.push("/crearpolicy");   // sin params
+}
+
 
 // Cargar dispositivos al montar
 onMounted(async () => {

@@ -29,11 +29,18 @@
 <script setup>
 import { ref } from 'vue'
 import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
+import { useRoute } from "vue-router";
 
+const route = useRoute();
+const dispositivoId = Number(route.params.id);
 const emit = defineEmits(['creada'])
 const props = defineProps({
-  dispositivoId: 11
-})
+  dispositivoId: {
+    type: Number,
+    required: true
+  }
+});
+
 
 const store = useReglaFirewallStore()
 
@@ -48,7 +55,7 @@ const regla = ref({
   action: 'accept',
   nat: 'disable',
   habilitada: true,
-  dispositivo: { id: 12 }
+  dispositivo: { id: props.dispositivoId }
 })
 
 async function guardar() {

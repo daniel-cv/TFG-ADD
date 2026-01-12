@@ -12,12 +12,13 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
 import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
 import ReglaFirewallList from '@/components/ReglaFirewallList.vue'
+import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore";
 
-const dispositivoId = 1 // luego vendrá de la ruta
+const seleccionadoStore = useDispositivoSeleccionadoStore();
+const dispositivoId = seleccionadoStore.id;
 
 const reglaStore = useReglaFirewallStore()
 

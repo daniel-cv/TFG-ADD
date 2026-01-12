@@ -1,4 +1,6 @@
 import { defineStore } from 'pinia'
+import { useUserStore } from "@/stores/userStore";
+
 import {
   obtenerReglasPorDispositivo,
   crearReglaFirewall
@@ -7,7 +9,8 @@ import {
 export const useReglaFirewallStore = defineStore('reglaFirewall', {
   state: () => ({
     reglas: [],
-    cargando: false
+    cargando: false,
+    mensaje: "",
   }),
 
   actions: {
@@ -19,7 +22,25 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
     },
 
     async crearRegla(regla) {
-      await crearReglaFirewall(regla)
+      try {
+        const userStore = useUserStore();
+
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+
+        const res = await crearReglaFirewall(regla);
+
+        this.mensaje = "Regla creada correctamente";
+        return res.data;
+
+      } catch (error) {
+        console.error(error);
+        this.mensaje = "Error al crear la regla";
+        throw error;
+      }
     }
+
   }
 })
