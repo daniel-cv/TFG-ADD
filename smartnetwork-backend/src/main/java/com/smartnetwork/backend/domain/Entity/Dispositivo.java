@@ -20,6 +20,8 @@ public class Dispositivo {
     @Column(nullable = false)
     private String nombre;
 
+    private String token;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoDispositivo tipo; // FIREWALL | SWITCH
@@ -50,6 +52,9 @@ public class Dispositivo {
     private List<Configuracion> configuraciones;
 
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
+    private List<ReglaFirewall> reglasFirewall;
 
     public Long getId() {
         return id;
@@ -137,6 +142,14 @@ public class Dispositivo {
 
     public void setConfiguraciones(List<Configuracion> configuraciones) {
         this.configuraciones = configuraciones;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }
 

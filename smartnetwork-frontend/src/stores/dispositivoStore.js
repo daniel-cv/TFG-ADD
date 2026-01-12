@@ -18,17 +18,17 @@ export const useDispositivoStore = defineStore("dispositivo", {
             try {
                 const username = "admin"; // usuario predefinido
                 const password = "1234";  // contraseña predefinida
-            
+
                 const response = await api.get("/mios", {
                     headers: {
                         "Authorization": "Basic " + btoa(username + ":" + password)
                     }
                 });
-            
+
                 this.dispositivos = response.data;
-            
+
             } catch (error) {
-                console.error(error);
+                console.error(error)
                 this.mensaje = "Error al obtener dispositivos";
             }
         },
@@ -66,5 +66,35 @@ export const useDispositivoStore = defineStore("dispositivo", {
         throw error;
       }
     },
+    /*async crearReglaFirewall(dispositivo) {
+      try {
+
+        const response = await axios.post(
+          "/crearpolitica",
+          {
+            headers: {
+              Authorization: "Bearer " + dispositivo.token,
+              "Content-Type": "application/json",
+            },
+            params: {
+              vdom: "root",
+              with_meta: 1,
+              datasource: 1,
+            },
+          }
+        );
+
+        return response.data;
+      } catch (error) {
+        console.error(
+          "Error al crear regla de firewall:",
+          error.response?.data || error.message
+        );
+        this.mensaje =
+          "Error al crear regla de firewall: " +
+          (error.response?.data || error.message);
+        throw error;
+      }
+    },*/
     },
 });

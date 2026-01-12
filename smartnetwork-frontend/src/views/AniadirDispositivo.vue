@@ -53,6 +53,15 @@
               required
             />
 
+            <v-text-field
+              v-model="tooken"
+              label="Token"
+              prepend-inner-icon="mdi-token"
+              variant="outlined"
+              class="mb-3"
+              required
+            />
+
             <!-- Puerto -->
             <v-text-field
               v-model="puerto"
@@ -98,13 +107,16 @@ const puerto = ref("");
 // ENUMS (deben coincidir EXACTAMENTE con el backend)
 const fabricantes = ["FORTINET", "CISCO", "ARISTA"];
 const tipos = ["FIREWALL", "SWITCH"];
-
+const token = [
+  v => !!v || "El token es obligatorio"
+];
 const ipRules = [
   v => !!v || "La IP es obligatoria",
   v =>
     /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/.test(v)
       || "Formato de IP no válido"
 ];
+
 
 const handleSubmit = async () => {
   const { valid } = await form.value.validate();
@@ -117,22 +129,13 @@ const handleSubmit = async () => {
       tipo: tipo.value,
       ip: ip.value,
       puerto: Number(puerto.value),
-      estado: "ACTIVO",
+      estado: "ONLINE",
+      token: "aaaaaaaa"
     });
-
-    mensaje.value = "Dispositivo creado correctamente";
-
-    // Reset formulario
-    nombre.value = "";
-    fabricante.value = "";
-    tipo.value = "";
-    ip.value = "";
-    puerto.value = "";
-
     router.push("/devices");
-
-  } catch (error) {
+     } catch (error) {
     mensaje.value = "Error al crear el dispositivo";
   }
+    
 };
 </script>

@@ -41,19 +41,19 @@ export const useUserStore = defineStore("user", {
     // Login de usuario
     async login(username, password) {
       try {
-        const response = await fetch("http://localhost:8080/api/dispositivos/mios", {
+        const response = await fetch("http://localhost:8082/api/dispositivos/mios", {
           method: "GET",
           headers: {
             "Authorization": "Basic " + btoa(username + ":" + password)
           }
         });
-      
+
         if (!response.ok) throw new Error("Credenciales incorrectas");
-      
+
         this.usuarioActual = { username };
         this.mensaje = `Bienvenido, ${username}`;
         return this.usuarioActual;
-      
+
       } catch (error) {
         console.error(error);
         this.mensaje = "Usuario o contraseña incorrectos";
