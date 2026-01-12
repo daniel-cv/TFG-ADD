@@ -28,5 +28,10 @@ public class DispositivoController {
         return dispositivoService.crearDispositivo(dispositivo,username);
     }
 
+    @PostMapping("/crearpolitica")
+    public Dispositivo createPolicy(@RequestBody Dispositivo dispositivo, Authentication authentication) {
+        String username = authentication.getName();
+        return dispositivoService.crearDispositivo(dispositivo,username);
+    }
 }
 

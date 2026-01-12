@@ -56,5 +56,5 @@ export const useDispositivoStore = defineStore("dispositivo", {
         throw error;
       }
     },
-  },
+    },
 });

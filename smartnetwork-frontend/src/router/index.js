@@ -5,6 +5,7 @@ import CreateUserView from "../views/CreateUserView.vue"; // <-- nueva vista
 import DashboardView from "../views/DashboardView.vue";
 import NewDevicesView from "../views/AniadirDispositivo.vue";
 import DispositivosView from "../views/DispositivosView.vue";
+import ReglaFirewallView from "../views/ReglasFirewallView.vue";
 
 const routes = [
   {
@@ -35,6 +36,11 @@ const routes = [
     path: "/newdevice",
     name: "newdevices",
     component: NewDevicesView,
+  },
+  {
+    path: "/crearpolicy",
+    name: "crearpolicy",
+    component: ReglaFirewallView,
   }
 ];
 
