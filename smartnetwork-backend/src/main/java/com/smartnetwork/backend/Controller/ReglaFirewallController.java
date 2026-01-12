@@ -26,7 +26,8 @@ public class ReglaFirewallController {
 
     @GetMapping("/dispositivo/{id}")
     public List<ReglaFirewall> listar(@PathVariable Long id,
-                                      String name) {
+                                      Authentication authentication) {
+        String name = authentication.getName();
         return service.obtenerPorDispositivo(id, name);
     }
 }
