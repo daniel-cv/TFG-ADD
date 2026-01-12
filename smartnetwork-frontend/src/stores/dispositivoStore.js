@@ -43,6 +43,7 @@ export const useDispositivoStore = defineStore("dispositivo", {
           puerto: dispositivo.puerto,
           fabricante: dispositivo.fabricante,
           estado: "ONLINE",
+          token: dispositivo.token,
         });
 
         this.dispositivos.push(response.data);

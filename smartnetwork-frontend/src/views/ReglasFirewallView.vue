@@ -16,17 +16,18 @@ import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
 import ReglaFirewallList from '@/components/ReglaFirewallList.vue'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore";
+import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore();
 const dispositivoId = seleccionadoStore.id;
 
 const reglaStore = useReglaFirewallStore()
 
-/*function recargar() {
+function recargar() {
   reglaStore.cargarReglas(dispositivoId)
 }
 
 onMounted(() => {
   reglaStore.cargarReglas(dispositivoId)
-})*/
+})
 </script>

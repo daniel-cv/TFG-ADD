@@ -1,7 +1,7 @@
 import api from './api' // tu axios configurado
 
 export function obtenerReglasPorDispositivo(dispositivoId) {
-  return api.get('/api/firewalls/reglas/dispositivo/11')
+  return api.get('/api/firewalls/reglas/dispositivo/' + dispositivoId)
 }
 
 export function crearReglaFirewall(regla) {

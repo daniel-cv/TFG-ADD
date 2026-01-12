@@ -35,7 +35,6 @@ public class DispositivoService {
     public Dispositivo crearDispositivo(Dispositivo dispositivo, String username) {
 
         String url = "http://" + dispositivo.getIp() + "/api/v2/monitor/system/status";
-        dispositivo.setToken("ftc7wjd6bfqhkc5t4ym09c4d19nktf");
 
         try {
             HttpHeaders headers = new HttpHeaders();

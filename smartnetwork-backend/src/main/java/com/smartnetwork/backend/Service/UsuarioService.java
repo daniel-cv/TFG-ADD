@@ -51,7 +51,7 @@ public class UsuarioService {
             );
         }
 
-        String regexusername = "^[A-Za-z0-9][A-Za-z0-9.]$";
+        String regexusername = "^[A-Za-z0-9][A-Za-z0-9._]*$";
         if (!usuario.getUsername().matches(regexusername)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
@@ -59,7 +59,7 @@ public class UsuarioService {
             );
         }
 
-        String regex = "^(?=.[a-z])(?=.[A-Z])(?=.[^A-Za-z0-9]).{8,}$";
+        String regex = "^(?=.[a-z])(?=.[A-Z])(?=.*[^A-Za-z0-9]).{8,}$";
         if (!usuario.getPassword().matches(regex)) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
