@@ -61,6 +61,10 @@ public class Dispositivo {
     private List<ReglaFirewall> reglasFirewall;
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> vlans;
+    private List<Address> addresses;
+
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Service> services ;
+
 }
 
