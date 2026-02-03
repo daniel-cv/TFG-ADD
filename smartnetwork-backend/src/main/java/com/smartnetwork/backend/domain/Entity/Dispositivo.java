@@ -5,11 +5,14 @@ import com.smartnetwork.backend.domain.Enum.EstadoDispositivo;
 import com.smartnetwork.backend.domain.Enum.Fabricante;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Data
 @Table(name = "dispositivos")
 public class Dispositivo {
 
@@ -20,6 +23,7 @@ public class Dispositivo {
     @Column(nullable = false)
     private String nombre;
 
+    @Column(nullable = false)
     private String token;
 
     @Enumerated(EnumType.STRING)
@@ -56,100 +60,7 @@ public class Dispositivo {
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
     private List<ReglaFirewall> reglasFirewall;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getNombre() {
-        return nombre;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public TipoDispositivo getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(TipoDispositivo tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getIp() {
-        return ip;
-    }
-
-    public void setIp(String ip) {
-        this.ip = ip;
-    }
-
-    public Integer getPuerto() {
-        return puerto;
-    }
-
-    public void setPuerto(Integer puerto) {
-        this.puerto = puerto;
-    }
-
-    public Fabricante getFabricante() {
-        return fabricante;
-    }
-
-    public void setFabricante(Fabricante fabricante) {
-        this.fabricante = fabricante;
-    }
-
-    public EstadoDispositivo getEstado() {
-        return estado;
-    }
-
-    public void setEstado(EstadoDispositivo estado) {
-        this.estado = estado;
-    }
-
-    public Usuario getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
-    public Credencial getCredencial() {
-        return credencial;
-    }
-
-    public void setCredencial(Credencial credencial) {
-        this.credencial = credencial;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public List<Configuracion> getConfiguraciones() {
-        return configuraciones;
-    }
-
-    public void setConfiguraciones(List<Configuracion> configuraciones) {
-        this.configuraciones = configuraciones;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> vlans;
 }
 

@@ -1,8 +1,10 @@
 package com.smartnetwork.backend.domain.Entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 @Entity
+@Data
 @Table(name = "credenciales")
 public class Credencial {
 
