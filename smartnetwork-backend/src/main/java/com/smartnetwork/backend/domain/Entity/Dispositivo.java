@@ -66,5 +66,8 @@ public class Dispositivo {
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Service> services ;
 
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VirtualIp> virtualaddress;
+
 }
 
