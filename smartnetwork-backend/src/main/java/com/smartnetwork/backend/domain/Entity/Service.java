@@ -18,11 +18,21 @@ public class Service {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String nombre;
+
     private String comentario;
+
+    @Column(nullable = false)
     private String categoria;
+
+    @Column(nullable = false)
     private String tipoProtocolo;
+
+    @Column(nullable = false)
     private String ip;
+
+    @Column(nullable = false)
     private String destinationPort;
 
     @ManyToOne
