@@ -1,5 +1,6 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,4 +19,9 @@ public class Interfaz {
 
     @OneToMany(mappedBy = "interfaz")
     private List<Address> addresses = new ArrayList<>();
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "dispositivo_id", nullable = false)
+    private Dispositivo dispositivo;
 }
