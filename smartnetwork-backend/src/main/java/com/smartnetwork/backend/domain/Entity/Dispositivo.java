@@ -69,5 +69,7 @@ public class Dispositivo {
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<VirtualIp> virtualaddress;
 
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioFirewall> usuarioFirewall;
 }
 

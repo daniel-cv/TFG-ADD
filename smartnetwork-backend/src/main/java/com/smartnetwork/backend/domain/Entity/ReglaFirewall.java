@@ -1,4 +1,5 @@
 package com.smartnetwork.backend.domain.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smartnetwork.backend.domain.Enum.AccionFirewall;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -14,6 +15,7 @@ public class ReglaFirewall {
 
     // Asociación al firewall (Dispositivo)
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
 

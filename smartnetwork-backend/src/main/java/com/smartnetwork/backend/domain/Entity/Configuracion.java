@@ -1,5 +1,6 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -22,6 +23,7 @@ public class Configuracion {
     private LocalDateTime fechaCreacion;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "dispositivo_id")
     private Dispositivo dispositivo;
 }

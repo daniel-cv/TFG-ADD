@@ -1,5 +1,6 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,4 +26,10 @@ public class UsuarioFirewall {
 
     @Column(nullable = false)
     private String password;
+
+    @ManyToOne
+    @JsonIgnore
+    @JoinColumn(name = "dispositivo_id", nullable = false)
+    private Dispositivo dispositivo;
+
 }

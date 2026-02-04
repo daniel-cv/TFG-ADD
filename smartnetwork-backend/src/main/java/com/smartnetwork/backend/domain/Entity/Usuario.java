@@ -1,5 +1,6 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -27,6 +28,7 @@ public class Usuario {
     private String role; // ROLE_USER, ROLE_ADMIN
 
     @OneToMany(mappedBy = "usuario")
+    @JsonIgnore
     @JsonManagedReference
     private List<Dispositivo> dispositivos;
 }
