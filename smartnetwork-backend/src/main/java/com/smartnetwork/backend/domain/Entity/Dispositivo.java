@@ -5,17 +5,32 @@ import com.smartnetwork.backend.domain.Enum.EstadoDispositivo;
 import com.smartnetwork.backend.domain.Enum.Fabricante;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Data
 @Table(name = "dispositivos")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {
+        "usuario",
+        "credencial",
+        "configuraciones",
+        "reglasFirewall",
+        "addresses",
+        "services",
+        "virtualaddress",
+        "usuarioFirewall"
+})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Dispositivo {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,7 +43,7 @@ public class Dispositivo {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TipoDispositivo tipo; // FIREWALL | SWITCH
+    private TipoDispositivo tipo;
 
     @Column(nullable = false, unique = true)
     private String ip;
@@ -39,7 +54,6 @@ public class Dispositivo {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Fabricante fabricante;
-
 
     @Enumerated(EnumType.STRING)
     private EstadoDispositivo estado;
@@ -53,23 +67,23 @@ public class Dispositivo {
     private Credencial credencial;
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
-    private List<Configuracion> configuraciones;
+    private List<Configuracion> configuraciones = new ArrayList<>();
 
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
-    private List<ReglaFirewall> reglasFirewall;
+    private List<ReglaFirewall> reglasFirewall = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses;
+    private List<Address> addresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Service> services ;
+    private List<Service> services = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<VirtualIp> virtualaddress;
+    private List<VirtualIp> virtualaddress = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<UsuarioFirewall> usuarioFirewall;
+    private List<UsuarioFirewall> usuarioFirewall = new ArrayList<>();
 }
 

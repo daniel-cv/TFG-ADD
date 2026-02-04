@@ -1,16 +1,21 @@
 package com.smartnetwork.backend.domain.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-@Data
 @Table(name = "configuraciones")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "dispositivo")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Configuracion {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,9 +27,8 @@ public class Configuracion {
 
     private LocalDateTime fechaCreacion;
 
-    @ManyToOne
-    @JsonIgnore
-    @JoinColumn(name = "dispositivo_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
 }
 

@@ -1,11 +1,7 @@
 package com.smartnetwork.backend.domain.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
@@ -13,7 +9,11 @@ import lombok.Setter;
 @AllArgsConstructor
 @Entity
 @Table(name = "usuario_firewall")
+@ToString(exclude = "dispositivo")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UsuarioFirewall {
+
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,9 +27,8 @@ public class UsuarioFirewall {
     @Column(nullable = false)
     private String password;
 
-    @ManyToOne
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
-
 }
+

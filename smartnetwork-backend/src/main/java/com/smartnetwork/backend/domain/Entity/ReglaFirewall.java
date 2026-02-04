@@ -1,21 +1,24 @@
 package com.smartnetwork.backend.domain.Entity;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.smartnetwork.backend.domain.Enum.AccionFirewall;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
-@Data
 @Table(name = "reglas_firewall")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = "dispositivo")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReglaFirewall {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     // Asociación al firewall (Dispositivo)
-    @ManyToOne
-    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
 

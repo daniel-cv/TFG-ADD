@@ -1,17 +1,22 @@
 package com.smartnetwork.backend.domain.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Data
 @Table(name = "usuarios")
+@ToString(exclude = "dispositivos")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Usuario {
 
+    @EqualsAndHashCode.Include
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -27,9 +32,8 @@ public class Usuario {
 
     private String role; // ROLE_USER, ROLE_ADMIN
 
-    @OneToMany(mappedBy = "usuario")
-    @JsonIgnore
-    @JsonManagedReference
-    private List<Dispositivo> dispositivos;
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Dispositivo> dispositivos = new ArrayList<>();
 }
+
 
