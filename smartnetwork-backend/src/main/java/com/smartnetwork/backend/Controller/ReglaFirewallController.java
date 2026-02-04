@@ -12,22 +12,22 @@ import java.util.List;
 @RequestMapping("/api/firewalls/reglas")
 public class ReglaFirewallController {
 
-    private final ReglaFirewallService service;
+    private final ReglaFirewallService reglaFirewallService;
 
-    public ReglaFirewallController(ReglaFirewallService service) {
-        this.service = service;
+    public ReglaFirewallController(ReglaFirewallService reglaFirewallService) {
+        this.reglaFirewallService = reglaFirewallService;
     }
 
     @PostMapping
     public ReglaFirewall crear(@RequestBody ReglaFirewall regla, Authentication authentication) {
         String name = authentication.getName();
-        return service.crearRegla(regla, name);
+        return reglaFirewallService.crearRegla(regla, name);
     }
 
     @GetMapping("/dispositivo/{id}")
     public List<ReglaFirewall> listar(@PathVariable Long id,
                                       Authentication authentication) {
         String name = authentication.getName();
-        return service.obtenerPorDispositivo(id, name);
+        return reglaFirewallService.obtenerPorDispositivo(id, name);
     }
 }
