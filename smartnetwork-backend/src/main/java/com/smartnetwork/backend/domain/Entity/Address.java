@@ -27,7 +27,7 @@ public class Address {
     private String ip;
 
     @ManyToOne
-    @JoinColumn(name = "interfaz_id", nullable = false)
+    @JoinColumn(name = "interfaz_id")
     private Interfaz interfaz;
 
     private String comentario;

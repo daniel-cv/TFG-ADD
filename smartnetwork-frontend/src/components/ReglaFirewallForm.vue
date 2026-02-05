@@ -51,7 +51,7 @@ const regla = ref({
   action: 'accept',
   nat: 'disable',
   habilitada: true,
-  dispositivo: {id:dispositivoId }
+  dispositivoId: dispositivoId
 })
 
 async function guardar() {

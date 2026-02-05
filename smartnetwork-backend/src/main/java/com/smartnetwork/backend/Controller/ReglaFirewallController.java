@@ -21,7 +21,7 @@ public class ReglaFirewallController {
 
 
     @PostMapping
-    public ReglaFirewallDTO crear(@RequestBody ReglaFirewall dto, Authentication auth) {
+    public ReglaFirewallDTO crear(@RequestBody CrearReglaFirewallDTO dto, Authentication auth) {
 
         return reglaFirewallService.crearRegla(dto, auth.getName());
     }

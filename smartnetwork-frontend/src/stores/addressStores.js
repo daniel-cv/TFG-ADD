@@ -2,26 +2,26 @@ import { defineStore } from 'pinia'
 import { useUserStore } from "@/stores/userStore";
 
 import {
-  obtenerReglasPorDispositivo,
-  crearReglaFirewall
-} from '@/services/reglaFirewallService'
+  obtenerAddressesPorDispositivo,
+  crearAddress
+} from '@/services/addressService'
 
-export const useReglaFirewallStore = defineStore('reglaFirewall', {
+export const useAddressStore = defineStore('address', {
   state: () => ({
-    reglas: [],
+    addresses: [],
     cargando: false,
     mensaje: "",
   }),
 
   actions: {
-    async cargarReglas(dispositivoId) {
+    async cargarAddresses(dispositivoId) {
       this.cargando = true
-      const res = await obtenerReglasPorDispositivo(dispositivoId)
-      this.reglas = res.data
+      const res = await obtenerAddressesPorDispositivo(dispositivoId)
+      this.addresses = res.data
       this.cargando = false
     },
 
-    async crearRegla(regla) {
+    async crearAddress(address) {
       try {
         const userStore = useUserStore();
 
@@ -30,14 +30,14 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
           return;
         }
 
-        const res = await crearReglaFirewall(regla);
+        const res = await crearAddress(address);
 
-        this.mensaje = "Regla creada correctamente";
+        this.mensaje = "Address creada correctamente";
         return res.data;
 
       } catch (error) {
         console.error(error);
-        this.mensaje = "Error al crear la regla";
+        this.mensaje = "Error al crear la address";
         throw error;
       }
     }

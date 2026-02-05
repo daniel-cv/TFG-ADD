@@ -23,14 +23,14 @@ public class ReglaFirewallService {
         this.dispositivoRepo = dispositivoRepo;
     }
 
-    public ReglaFirewallDTO crearRegla(ReglaFirewall dto, String username) {
+    public ReglaFirewallDTO crearRegla(CrearReglaFirewallDTO dto, String username) {
 
-        if (dto.getDispositivo() == null) {
+        if (dto.getDispositivoId() == null) {
             throw new RuntimeException("dispositivoId obligatorio");
         }
 
         Dispositivo dispositivo = dispositivoRepo
-                .findById(dto.getDispositivo().getId())
+                .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
@@ -41,8 +41,8 @@ public class ReglaFirewallService {
         regla.setNombre(dto.getNombre());
         regla.setOrigen(dto.getOrigen());
         regla.setDestino(dto.getDestino());
-        regla.setIporigen(dto.getIporigen());
-        regla.setIpdestino(dto.getIpdestino());
+        regla.setIporigen(dto.getOrigen());
+        regla.setIpdestino(dto.getDestino());
         regla.setServicio(dto.getServicio());
         regla.setDispositivo(dispositivo);
         regla.setHabilitada(true);

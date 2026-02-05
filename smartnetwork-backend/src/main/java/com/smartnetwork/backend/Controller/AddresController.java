@@ -15,7 +15,7 @@ public class AddresController {
         this.addressService = addressService;
     }
     // 🔹 CREAR address
-    @PostMapping
+    @PostMapping("/create")
     public Address crear(
             @PathVariable Long dispositivoId,
             @RequestBody Address address,

@@ -4,10 +4,8 @@ export function obtenerReglasPorDispositivo(dispositivoId) {
   return api.get('/api/firewalls/reglas/dispositivo/' + dispositivoId)
 }
 
-export function crearReglaFirewall(regla, dispositivoId) {
-  console.log('dispositivoId:', dispositivoId)
+export function crearReglaFirewall(regla) {
   return api.post('/api/firewalls/reglas', {
-    ...regla,
-    dispositivoId
+    ...regla
   })
 }
