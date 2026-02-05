@@ -1,6 +1,7 @@
 package com.smartnetwork.backend.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smartnetwork.backend.domain.Enum.EstadoDispositivo;
 import com.smartnetwork.backend.domain.Enum.Fabricante;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
@@ -72,18 +73,23 @@ public class Dispositivo {
     private LocalDateTime createdAt;
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<ReglaFirewall> reglasFirewall = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Address> addresses = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Service> services = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<VirtualIp> virtualaddress = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<UsuarioFirewall> usuarioFirewall = new ArrayList<>();
 }
 

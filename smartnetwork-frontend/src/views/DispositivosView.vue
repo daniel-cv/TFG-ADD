@@ -31,6 +31,7 @@
           <v-card-text>
             IP: {{ d.ip }} <br>
             Estado: {{ d.estado }}
+            D:{{ d.id }}
           </v-card-text>
           <v-card-actions>
             <v-btn color="primary" @click="configurar(d.id)">
@@ -62,7 +63,8 @@ const router = useRouter();
 
 function configurar(id) {
   seleccionadoStore.seleccionar(id);
-  router.push("/crearpolicy");   // sin params
+  router.push(`/crearpolicy/${id}`);
+   // sin params
 }
 
 

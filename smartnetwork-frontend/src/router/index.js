@@ -38,9 +38,10 @@ const routes = [
     component: NewDevicesView,
   },
   {
-    path: "/crearpolicy",
-    name: "crearpolicy",
+    path: '/crearpolicy/:id',
+    name: 'crearpolicy',
     component: ReglaFirewallView,
+
   }
 ];
 

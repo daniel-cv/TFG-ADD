@@ -16,8 +16,8 @@
         <td>{{ r.nombre }}</td>
         <td>{{ r.origen }}</td>
         <td>{{ r.destino }}</td>
-        <td>{{ r.iporigen }}</td>
-        <td>{{ r.ipdestino }}</td>
+        <td>{{ r.ipOrigen }}</td>
+        <td>{{ r.ipDestino }}</td>
         <td>{{ r.servicio }}</td>
       </tr>
     </tbody>

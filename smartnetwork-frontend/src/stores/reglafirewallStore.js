@@ -21,7 +21,7 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
       this.cargando = false
     },
 
-    async crearRegla(regla) {
+    async crearRegla(regla,dispositivoId) {
       try {
         const userStore = useUserStore();
 
@@ -30,7 +30,7 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
           return;
         }
 
-        const res = await crearReglaFirewall(regla);
+        const res = await crearReglaFirewall(regla,dispositivoId);
 
         this.mensaje = "Regla creada correctamente";
         return res.data;
