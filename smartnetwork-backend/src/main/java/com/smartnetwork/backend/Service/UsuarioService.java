@@ -58,7 +58,7 @@ public class UsuarioService {
                     "Nombre no válido, debe empezar por letras o números y solo puede contener '.' y ''"
             );
         }
-
+/*
         String regex = "^(?=.[a-z])(?=.[A-Z])(?=.*[^A-Za-z0-9]).{8,}$";
         if (!usuario.getPassword().matches(regex)) {
             throw new ResponseStatusException(
@@ -66,7 +66,7 @@ public class UsuarioService {
                     "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un carácter especial"
             );
         }
-
+*/
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         return usuarioRepository.save(usuario);
     }

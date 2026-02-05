@@ -29,7 +29,7 @@ public class ReglaFirewallService {
                 .findById(regla.getDispositivo().getId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad básica: el dispositivo es del usuario
+
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
