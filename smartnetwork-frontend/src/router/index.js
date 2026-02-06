@@ -6,6 +6,7 @@ import DashboardView from "../views/DashboardView.vue";
 import NewDevicesView from "../views/AniadirDispositivo.vue";
 import DispositivosView from "../views/DispositivosView.vue";
 import ReglaFirewallView from "../views/ReglasFirewallView.vue";
+import InterfazView from "@/views/InterfazView.vue";
 
 const routes = [
   {
@@ -42,6 +43,11 @@ const routes = [
     name: 'crearpolicy',
     component: ReglaFirewallView,
 
+  },
+  {
+    path: "/dispositivos/:id/interfaces/crear",
+    name: "CrearInterfaz",
+    component: InterfazView,
   }
 ];
 
