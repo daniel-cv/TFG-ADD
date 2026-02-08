@@ -282,7 +282,7 @@ public class FortiGateService {
         {
           "name": "%s",
           "type": "%s",
-          "password": "%s"
+          "passwd": "%s"
         }
         """.formatted(usuarioFirewall.getNombre(), usuarioFirewall.getTipo(), usuarioFirewall.getPassword());
 
