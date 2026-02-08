@@ -22,14 +22,6 @@
       required
     />
 
-    <!-- EMAIL (opcional) -->
-    <v-text-field
-      v-model="email"
-      label="Email (opcional)"
-      prepend-inner-icon="mdi-email"
-      variant="outlined"
-      class="mb-3"
-    />
 
     <!-- TWO FACTOR -->
     <v-select

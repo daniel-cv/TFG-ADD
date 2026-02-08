@@ -20,6 +20,9 @@
     <v-btn color="primary" @click="irCrearUsuarioFirewall(dispositivoId)">
       Crear Usuario Firewall
     </v-btn>
+    <v-btn color="primary" @click="irCrearVirtualIp(dispositivoId)">
+      Crear Virtual Ip
+    </v-btn>
   </div>
 </template>
 
@@ -50,6 +53,11 @@ function irCrearService(id: number | string) {
 function irCrearUsuarioFirewall(id: number | string) {
   seleccionadoStore.seleccionar(id);
   router.push(`/usuariofirewall/${id}`);
+}
+
+function irCrearVirtualIp(id: number | string) {
+  seleccionadoStore.seleccionar(id);
+  router.push(`/virtualIp/${id}`);
 }
 </script>
 

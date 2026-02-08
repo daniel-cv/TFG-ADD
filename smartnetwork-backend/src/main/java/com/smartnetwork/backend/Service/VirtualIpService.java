@@ -1,88 +1,97 @@
 package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
+import com.smartnetwork.backend.Repository.InterfazRepository;
 import com.smartnetwork.backend.Repository.VirtualIpRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Interfaz;
 import com.smartnetwork.backend.domain.Entity.VirtualIp;
+import com.smartnetwork.backend.domain.dtos.virtualIp.CrearVirtualIpDTO;
+import com.smartnetwork.backend.domain.dtos.virtualIp.VirtualIpDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @Service
 public class VirtualIpService {
 
-    private final VirtualIpRepository virtualIpRepository;
+    private final VirtualIpRepository virtualIpRepo;
     private final DispositivoRepository dispositivoRepo;
+    private final InterfazRepository interfazRepo;
+    private final FortiGateService fortiGateService;
 
-    public VirtualIpService(
-            VirtualIpRepository virtualIpRepository,
-            DispositivoRepository dispositivoRepo
-    ) {
-        this.virtualIpRepository = virtualIpRepository;
+    public VirtualIpService(VirtualIpRepository virtualIpRepo,
+                            DispositivoRepository dispositivoRepo,
+                            InterfazRepository interfazRepo,
+                            FortiGateService fortiGateService) {
+        this.virtualIpRepo = virtualIpRepo;
         this.dispositivoRepo = dispositivoRepo;
+        this.interfazRepo = interfazRepo;
+        this.fortiGateService = fortiGateService;
     }
 
-    public VirtualIp create(VirtualIp virtualIp, String username) {
+    public VirtualIpDTO crear(CrearVirtualIpDTO dto, String username) {
 
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(virtualIp.getDispositivo().getId())
+        if (dto.getDispositivoId() == null) throw new RuntimeException("dispositivoId obligatorio");
+
+        Dispositivo dispositivo = dispositivoRepo.findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+        if (!dispositivo.getUsuario().getUsername().equals(username))
             throw new RuntimeException("No autorizado");
+
+
+
+        VirtualIp vip = new VirtualIp();
+        vip.setName(dto.getName());
+        vip.setComments(dto.getComments());
+        if(dto.getInterfazId()!=null) {
+            Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
+                    .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+            vip.setInterfaz(interfaz);
         }
 
-        virtualIp.setDispositivo(dispositivo);
-        return virtualIpRepository.save(virtualIp);
+        vip.setType(dto.getType());
+        vip.setExternal_ip(dto.getExternalIp());
+        vip.setInternal_ip(dto.getInternalIp());
+        vip.setDispositivo(dispositivo);
+
+        VirtualIp saved = virtualIpRepo.save(vip);
+
+        Map<String, Object> result = fortiGateService.crearVirtualIp(dispositivo, saved);
+
+        if (!(Boolean) result.get("success")) {
+            throw new RuntimeException("Error creando VirtualIP en FortiGate: " + result);
+        }
+
+        return toDTO(saved);
     }
 
-    public List<VirtualIp> findAllByDispositivo(Long dispositivoId, String username) {
+    public List<VirtualIpDTO> listarPorDispositivo(Long dispositivoId, String username) {
 
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
+        Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+        if (!dispositivo.getUsuario().getUsername().equals(username))
             throw new RuntimeException("No autorizado");
-        }
 
-        return virtualIpRepository.findByDispositivoId(dispositivoId);
+        return virtualIpRepo.findByDispositivoId(dispositivoId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    public Optional<VirtualIp> findById(
-            Long virtualIpId,
-            Long dispositivoId,
-            String username
-    ) {
-
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
-
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
-        }
-
-        return virtualIpRepository.findByIdAndDispositivoId(
-                virtualIpId,
-                dispositivoId
-        );
-    }
-
-    public VirtualIp update(VirtualIp virtualIp, String username, Long dispositivoId) {
-
-        findById(virtualIp.getId(), dispositivoId, username)
-                .orElseThrow(() -> new RuntimeException("VirtualIp no existe"));
-
-        return virtualIpRepository.save(virtualIp);
-    }
-
-    public void delete(Long virtualIpId, Long dispositivoId, String username) {
-
-        VirtualIp virtualIp = findById(virtualIpId, dispositivoId, username)
-                .orElseThrow(() -> new RuntimeException("VirtualIp no existe"));
-
-        virtualIpRepository.delete(virtualIp);
+    private VirtualIpDTO toDTO(VirtualIp vip) {
+        VirtualIpDTO dto = new VirtualIpDTO();
+        dto.setId(vip.getId());
+        dto.setName(vip.getName());
+        dto.setComments(vip.getComments());
+        dto.setInterfazId(vip.getInterfaz().getId());
+        dto.setType(vip.getType());
+        dto.setExternalIp(vip.getExternal_ip());
+        dto.setInternalIp(vip.getInternal_ip());
+        dto.setDispositivoId(vip.getDispositivo().getId());
+        return dto;
     }
 }

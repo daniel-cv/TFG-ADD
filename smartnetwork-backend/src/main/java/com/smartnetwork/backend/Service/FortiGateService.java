@@ -272,7 +272,88 @@ public class FortiGateService {
 
         return result;
     }
+    public Map<String, Object> crearVirtualIp(Dispositivo dispositivo, VirtualIp vip) {
 
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/firewall/vip";
+
+        Map<String, Object> result = new HashMap<>();
+
+        // Construcción del JSON mínimo
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("{");
+
+        // Campos obligatorios
+        jsonBuilder.append("""
+        "name": "%s",
+        "type": "%s",
+        "extintf": "any",
+        "extip": "%s",
+        "mappedip":[
+        {
+            "range": "%s"
+        }
+        ]
+        
+    """.formatted(
+                vip.getName(),
+                vip.getType(),
+                vip.getExternal_ip(),
+                vip.getInternal_ip()
+
+        ));
+
+        // Interfaz asociada (opcional)
+        if (vip.getInterfaz() != null) {
+            jsonBuilder.append("""
+            ,
+            "interface": "%s"
+        """.formatted(vip.getInterfaz().getName()));
+        }
+
+        // Comentarios
+        if (vip.getComments() != null && !vip.getComments().isBlank()) {
+            jsonBuilder.append("""
+            ,
+            "comments": "%s"
+        """.formatted(vip.getComments()));
+        }
+
+        jsonBuilder.append("}");
+
+        String json = jsonBuilder.toString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(dispositivo.getToken().trim());
+
+        HttpEntity<String> entity = new HttpEntity<>(json, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getBody() != null &&
+                    response.getBody().contains("\"status\":\"success\"")) {
+                result.put("success", true);
+            } else {
+                result.put("success", false);
+                result.put("error", response.getBody());
+            }
+
+            result.put("httpStatus", response.getStatusCode());
+
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
+        }
+
+        return result;
+    }
     public Map<String, Object> crearUsuarioFirewall(Dispositivo dispositivo, UsuarioFirewall usuarioFirewall) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/user/local";

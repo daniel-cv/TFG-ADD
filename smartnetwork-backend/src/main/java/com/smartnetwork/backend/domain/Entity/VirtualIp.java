@@ -25,7 +25,7 @@ public class VirtualIp {
     private String comments;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interfaz_id", nullable = false)
+    @JoinColumn(name = "interfaz_id")
     private Interfaz interfaz;
 
     @Column(nullable = false)
