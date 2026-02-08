@@ -2,13 +2,15 @@ package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.UsuarioFirewallService;
 import com.smartnetwork.backend.domain.Entity.UsuarioFirewall;
+import com.smartnetwork.backend.domain.dtos.usuarioFirewall.CreaUsuarioFirewallDTO;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/usuarioFirewall")
+@RequestMapping("/api/firewall/usuarioFirewall")
 public class UsuarioFirewallController {
 
     private final UsuarioFirewallService usuarioFirewallService;
@@ -20,12 +22,9 @@ public class UsuarioFirewallController {
     /**
      * Crear un UsuarioFirewall
      */
-    @PostMapping
-    public ResponseEntity<UsuarioFirewall> create(
-            @RequestBody UsuarioFirewall usuarioFirewall,
-            @RequestParam String username // username del usuario autenticado
-    ) {
-        UsuarioFirewall created = usuarioFirewallService.create(usuarioFirewall, username);
+    @PostMapping("/create")
+    public ResponseEntity<UsuarioFirewall> create(@RequestBody CreaUsuarioFirewallDTO dto, Authentication auth) {
+        UsuarioFirewall created = usuarioFirewallService.create(dto, auth.getName());
         return ResponseEntity.ok(created);
     }
 

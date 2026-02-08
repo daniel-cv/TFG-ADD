@@ -16,6 +16,10 @@
     <v-btn color="primary" @click="irCrearService(dispositivoId)">
       Crear Service
     </v-btn>
+
+    <v-btn color="primary" @click="irCrearUsuarioFirewall(dispositivoId)">
+      Crear Usuario Firewall
+    </v-btn>
   </div>
 </template>
 
@@ -41,6 +45,11 @@ function irCrearAddress(id: number | string) {
 function irCrearService(id: number | string) {
   seleccionadoStore.seleccionar(id);
   router.push(`/service/${id}`);
+}
+
+function irCrearUsuarioFirewall(id: number | string) {
+  seleccionadoStore.seleccionar(id);
+  router.push(`/usuariofirewall/${id}`);
 }
 </script>
 

@@ -1,9 +1,6 @@
 package com.smartnetwork.backend.Service;
 
-import com.smartnetwork.backend.domain.Entity.Address;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.Interfaz;
-import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.*;
 import com.smartnetwork.backend.domain.dtos.Services.ServiceJsonBuilder;
 import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
 import org.springframework.http.*;
@@ -269,6 +266,51 @@ public class FortiGateService {
             result.put("httpStatus", response.getStatusCode());
 
         } catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
+        }
+
+        return result;
+    }
+
+    public Map<String, Object> crearUsuarioFirewall(Dispositivo dispositivo, UsuarioFirewall usuarioFirewall) {
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/user/local";
+
+        Map<String, Object> result = new HashMap<>();
+        String json = """
+        {
+          "name": "%s",
+          "type": "%s",
+          "password": "%s"
+        }
+        """.formatted(usuarioFirewall.getNombre(), usuarioFirewall.getTipo(), usuarioFirewall.getPassword());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(dispositivo.getToken().trim());
+
+        HttpEntity<String> entity = new HttpEntity<>(json, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getBody() != null &&
+                    response.getBody().contains("\"status\":\"success\"")) {
+                result.put("success", true);
+            }else {
+                result.put("success", false);
+                result.put("error", response.getBody());
+            }
+
+            result.put("httpStatus", response.getStatusCode());
+
+        }catch (Exception e) {
             result.put("success", false);
             result.put("exception", e.getMessage());
         }

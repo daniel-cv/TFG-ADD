@@ -10,6 +10,7 @@ import ConfigurationView from "@/views/ConfigurationView.vue";
 import InterfazView from "@/views/InterfazView.vue";
 import AddressView from "@/views/AddressView.vue";
 import ServiceView from "@/views/ServiceView.vue";
+import UsuarioFirewallView from "@/views/UsuarioFirewallView.vue";
 
 const routes = [
   {
@@ -66,6 +67,11 @@ const routes = [
     path: "/service/:id",
     name: "CrearService",
     component: ServiceView,
+  },
+  {
+    path: "/usuariofirewall/:id",
+    name: "UsuarioFirewall",
+    component: UsuarioFirewallView,
   }
 ];
 
