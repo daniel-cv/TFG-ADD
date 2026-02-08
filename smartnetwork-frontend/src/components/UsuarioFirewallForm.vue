@@ -52,12 +52,12 @@
 <script setup>
 import { ref } from "vue";
 import { useRoute } from "vue-router";
-import { useUserStore } from "@/stores/userStore";
+import { useUsuarioFirewallStore } from "@/stores/usuarioFirewallStore";
 
 const route = useRoute();
 const emit = defineEmits(['creado'])
 
-const userStore = useUserStore()
+const userStore = useUsuarioFirewallStore()
 
 const name = ref("");
 const password = ref("");
@@ -79,11 +79,11 @@ const handleCrearUsuario = async () => {
       name: name.value,
       password: password.value,
       email: email.value || null,
-      tipo: 'password',
+      type: 'password',
       dispositivoId: dispositivoId
     };
 
-    await userStore.crearUsuario(payload);
+    await userStore.crearUsuarioFirewall(payload);
 
     mensaje.value = "Usuario creado correctamente";
 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/firewall/usuarioFirewall")
+@RequestMapping("/api/firewalls/usuarioFirewall")
 public class UsuarioFirewallController {
 
     private final UsuarioFirewallService usuarioFirewallService;
