@@ -45,11 +45,11 @@
 <script setup>
 import { ref } from "vue"
 import { useRoute } from "vue-router"
-//import api from "@/api"
+import {useInterfazStore} from "@/stores/interfazStore"
 
 const route = useRoute()
 const dispositivoId = route.params.id  // 🔹 ID automático
-
+const store = useInterfazStore()
 const name = ref("")
 const ip = ref("")
 const tipo = ref("")
@@ -58,14 +58,16 @@ const mensaje = ref("")
 
 const handleCrearInterfaz = async () => {
   try {
-    await api.post(`/api/dispositivos/${dispositivoId}/interfaces`, {
+    const payload = {
       name: name.value,
       ip: ip.value,
       tipo: tipo.value,
-      comentario: comentario.value
-    })
-
+      comentario: comentario.value,
+      dispositivoId: dispositivoId
+    }
+    await store.crearInterfaz(payload)
     mensaje.value = "Interfaz creada correctamente"
+    emit("Creada");
   } catch (e) {
     mensaje.value = "Error al crear la interfaz"
   }

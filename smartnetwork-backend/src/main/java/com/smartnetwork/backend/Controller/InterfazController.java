@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/dispositivos/{dispositivoId}/interfaces")
+@RequestMapping("/api/firewall/interfaz")
 public class InterfazController {
 
     private final InterfazService interfazService;
@@ -18,7 +18,7 @@ public class InterfazController {
     }
 
     // 🔹 CREAR interfaz
-    @PostMapping
+    @PostMapping("/create")
     public Interfaz crear(
             @PathVariable Long dispositivoId,
             @RequestBody Interfaz interfaz,
@@ -33,8 +33,8 @@ public class InterfazController {
     }
 
     // 🔹 LISTAR interfaces del dispositivo
-    @GetMapping("/findAll")
-    public List<Interfaz> listar(
+    @GetMapping("/findById/{dispositivoId}")
+    public List<Interfaz> listarPorDispositivo(
             @PathVariable Long dispositivoId,
             Authentication authentication
     ) {
