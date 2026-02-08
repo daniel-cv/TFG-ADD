@@ -2,6 +2,7 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Interfaz;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.Services.ServiceJsonBuilder;
 import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
@@ -133,10 +134,8 @@ public class FortiGateService {
 
     public Map<String, Object> crearServicio(Dispositivo dispositivo, com.smartnetwork.backend.domain.Entity.Service service){
         String url = "http://" + dispositivo.getIp() +
-                "/api/v2/cmdb/firewall.service/custom?vdom=root";
+                "/api/v2/cmdb/firewall.service/custom";
 
-        Map<String, Object> body = new HashMap<>();
-        body.put("name", service.getNombre());
 
         String json = ServiceJsonBuilder.build(service);
 
@@ -144,8 +143,8 @@ public class FortiGateService {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(dispositivo.getToken().trim());
 
-        HttpEntity<Map<String, Object>> entity =
-                new HttpEntity<>(body, headers);
+        HttpEntity<String> entity =
+                new HttpEntity<>(json, headers);
 
         Map<String, Object> result = new HashMap<>();
 
@@ -174,20 +173,107 @@ public class FortiGateService {
 
         return result;
     }
-    private AddressDTO toDTO(Address address) {
 
-        AddressDTO dto = new AddressDTO();
-        dto.setId(address.getId());
-        dto.setName(address.getName());
-        dto.setType(address.getType());
-        dto.setIp(address.getIp());
-        dto.setComentario(address.getComentario());
-        dto.setDispositivoId(address.getDispositivo().getId());
+    public Map<String, Object> crearInterfaz(Dispositivo dispositivo, Interfaz interfaz) {
 
-        if (address.getInterfaz() != null) {
-            dto.setInterfazId(address.getInterfaz().getId());
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/system/interface?vdom=root";
+
+        Map<String, Object> result = new HashMap<>();
+
+        // Construcción del JSON mínimo
+        StringBuilder jsonBuilder = new StringBuilder();
+        jsonBuilder.append("{");
+
+        jsonBuilder.append("""
+        "name": "%s",
+        "vdom": "root"
+    """.formatted(interfaz.getName()));
+
+        // VLAN
+        if ("vlan".equals(interfaz.getTipo())) {
+            jsonBuilder.append("""
+            ,
+            "interface": "%s",
+            "vlanid": %d
+        """.formatted(
+                    interfaz.getInterfacePadre(),
+                    interfaz.getVlanid()
+            ));
         }
 
-        return dto;
+        // IP
+        if ("static".equals(interfaz.getMode()) && interfaz.getIp() != null) {
+            jsonBuilder.append("""
+            ,
+            "mode": "static",
+            "ip": "%s"
+        """.formatted(interfaz.getIp()));
+        } else {
+            jsonBuilder.append("""
+            ,
+            "mode": "dhcp"
+        """);
+        }
+
+        // allowaccess
+        if (interfaz.getAllowaccess() != null && !interfaz.getAllowaccess().isBlank()) {
+            jsonBuilder.append("""
+            ,
+            "allowaccess": "%s"
+        """.formatted(interfaz.getAllowaccess()));
+        }
+
+        // role
+        if (interfaz.getRole() != null) {
+            jsonBuilder.append("""
+            ,
+            "role": "%s"
+        """.formatted(interfaz.getRole()));
+        }
+
+        // description
+        if (interfaz.getDescription() != null) {
+            jsonBuilder.append("""
+            ,
+            "description": "%s"
+        """.formatted(interfaz.getDescription()));
+        }
+
+        jsonBuilder.append("}");
+
+        String json = jsonBuilder.toString();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(dispositivo.getToken().trim());
+
+        HttpEntity<String> entity = new HttpEntity<>(json, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getBody() != null &&
+                    response.getBody().contains("\"status\":\"success\"")) {
+                result.put("success", true);
+            } else {
+                result.put("success", false);
+                result.put("error", response.getBody());
+            }
+
+            result.put("httpStatus", response.getStatusCode());
+
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
+        }
+
+        return result;
     }
+
 }

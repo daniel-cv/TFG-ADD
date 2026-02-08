@@ -1,0 +1,4 @@
+package com.smartnetwork.backend.domain.dtos.usuarioFirewall;
+
+public class UsuarioFirewallDTO {
+}

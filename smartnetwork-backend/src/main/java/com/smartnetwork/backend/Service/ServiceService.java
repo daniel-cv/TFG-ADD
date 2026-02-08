@@ -50,7 +50,7 @@ public class ServiceService {
 
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
-                    "Error creando policy en FortiGate: " + resultado
+                    "Error creando service en FortiGate: " + resultado
             );
         }
 

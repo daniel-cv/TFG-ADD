@@ -19,10 +19,8 @@ public class ReglaFirewallController {
         this.reglaFirewallService = reglaFirewallService;
     }
 
-
     @PostMapping
     public ReglaFirewallDTO crear(@RequestBody CrearReglaFirewallDTO dto, Authentication auth) {
-
         return reglaFirewallService.crearRegla(dto, auth.getName());
     }
 
@@ -32,15 +30,5 @@ public class ReglaFirewallController {
             Authentication authentication) {
 
         return reglaFirewallService.obtenerPorDispositivo(id, authentication.getName());
-    }
-    private ReglaFirewallDTO toDTO(ReglaFirewall regla) {
-        ReglaFirewallDTO dto = new ReglaFirewallDTO();
-        dto.setId(regla.getId());
-        dto.setNombre(regla.getNombre());
-        dto.setOrigen(regla.getOrigen());
-        dto.setDestino(regla.getDestino());
-        dto.setServicio(regla.getServicio());
-        dto.setHabilitada(regla.isHabilitada());
-        return dto;
     }
 }

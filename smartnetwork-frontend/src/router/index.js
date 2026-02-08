@@ -48,7 +48,7 @@ const routes = [
 
   },
   {
-    path: "/dispositivos/:id/interfaces/crear",
+    path: "/interfaces/:id",
     name: "CrearInterfaz",
     component: InterfazView,
   },

@@ -4,85 +4,112 @@ import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.InterfazRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Interfaz;
+import com.smartnetwork.backend.domain.dtos.interfaz.CrearInterfazDTO;
+import com.smartnetwork.backend.domain.dtos.interfaz.InterfazDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 @Service
 public class InterfazService {
-    private final InterfazRepository interfazRepository;
+
+    private final InterfazRepository interfazRepo;
     private final DispositivoRepository dispositivoRepo;
+    private final FortiGateService fortiGateService;
 
     public InterfazService(
-            InterfazRepository interfazRepository,
-            DispositivoRepository dispositivoRepo
+            InterfazRepository interfazRepo,
+            DispositivoRepository dispositivoRepo,
+            FortiGateService fortiGateService
     ) {
-        this.interfazRepository = interfazRepository;
+        this.interfazRepo = interfazRepo;
         this.dispositivoRepo = dispositivoRepo;
+        this.fortiGateService = fortiGateService;
     }
 
-    public Interfaz create(Interfaz interfaz, String username) {
+    public InterfazDTO crear(CrearInterfazDTO dto, String username) {
+
+        if (dto.getDispositivoId() == null) {
+            throw new RuntimeException("dispositivoId obligatorio");
+        }
 
         Dispositivo dispositivo = dispositivoRepo
-                .findById(interfaz.getDispositivo().getId())
+                .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad: comprobar propietario
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
+        // Validaciones básicas
+        if ("vlan".equals(dto.getTipo())) {
+            if (dto.getVlanid() == null || dto.getInterfacePadre() == null) {
+                throw new RuntimeException("VLAN requiere interfacePadre y vlanid");
+            }
+        }
+
+        Interfaz interfaz = new Interfaz();
+        interfaz.setName(dto.getName());
+        interfaz.setTipo(dto.getTipo());
+        interfaz.setInterfacePadre(dto.getInterfacePadre());
+        interfaz.setVlanid(dto.getVlanid());
+        interfaz.setVdom(dto.getVdom() != null ? dto.getVdom() : "root");
+        interfaz.setMode(dto.getMode());
+        interfaz.setIp(dto.getIp());
+        interfaz.setAllowaccess(dto.getAllowaccess());
+        interfaz.setRole(dto.getRole());
+        interfaz.setDescription(dto.getDescription());
         interfaz.setDispositivo(dispositivo);
-        return interfazRepository.save(interfaz);
+
+        Interfaz saved = interfazRepo.save(interfaz);
+
+        // 🔥 Crear interfaz en FortiGate
+        Map<String, Object> resultado =
+                fortiGateService.crearInterfaz(saved.getDispositivo(), saved);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error creando interfaz en FortiGate: " + resultado
+            );
+        }
+
+        return toDTO(saved);
     }
 
-    public List<Interfaz> findAllByDispositivo(Long dispositivoId, String username) {
+    public List<InterfazDTO> listarPorDispositivo(Long dispositivoId, String username) {
 
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
+        Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
-        return interfazRepository.findByDispositivoId(dispositivoId);
+        return interfazRepo.findByDispositivoId(dispositivoId)
+                .stream()
+                .map(this::toDTO)
+                .toList();
     }
 
-    public Optional<Interfaz> findById(
-            Long interfazId,
-            Long dispositivoId,
-            String username
-    ) {
+    private InterfazDTO toDTO(Interfaz interfaz) {
 
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+        InterfazDTO dto = new InterfazDTO();
+        dto.setId(interfaz.getId());
+        dto.setName(interfaz.getName());
+        dto.setTipo(interfaz.getTipo());
+        dto.setInterfacePadre(interfaz.getInterfacePadre());
+        dto.setVlanid(interfaz.getVlanid());
+        dto.setVdom(interfaz.getVdom());
+        dto.setMode(interfaz.getMode());
+        dto.setIp(interfaz.getIp());
+        dto.setAllowaccess(interfaz.getAllowaccess());
+        dto.setRole(interfaz.getRole());
+        dto.setDescription(interfaz.getDescription());
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
-        }
+        // 🔑 siempre ID
+        dto.setDispositivoId(interfaz.getDispositivo().getId());
 
-        return interfazRepository.findByIdAndDispositivoId(
-                interfazId,
-                dispositivoId
-        );
-    }
-
-    public Interfaz update(Interfaz interfaz, String username, Long dispositivoId) {
-
-        findById(interfaz.getId(), dispositivoId, username)
-                .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-
-        return interfazRepository.save(interfaz);
-    }
-
-    public void delete(Long interfazId, Long dispositivoId, String username) {
-
-        Interfaz interfaz = findById(interfazId, dispositivoId, username)
-                .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-
-        interfazRepository.delete(interfaz);
+        return dto;
     }
 }

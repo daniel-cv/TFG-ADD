@@ -21,7 +21,6 @@ public class ServiceJsonBuilder {
         return """
             {
               "name": "%s",
-              "protocol": "TCP/UDP/SCTP",
               "tcp-portrange": "%s",
               "comment": "%s"
             }
@@ -36,7 +35,6 @@ public class ServiceJsonBuilder {
         return """
             {
               "name": "%s",
-              "protocol": "TCP/UDP/SCTP",
               "udp-portrange": "%s",
               "comment": "%s"
             }

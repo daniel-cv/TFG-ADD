@@ -8,23 +8,18 @@
     <v-text-field v-model="regla.destino" label="Destino" />
     <v-text-field v-model="regla.ipOrigen" label="ipOrigen" />
     <v-text-field v-model="regla.ipDestino" label="ipDestino" />
-
     <v-select
       v-model="regla.servicio"
       :items="['HTTP', 'HTTPS', 'ALL']"
       label="Servicio"
     />
-
-
     <v-select
       v-model="regla.nat"
       :items="['disable', 'enable']"
       label="NAT"
     />
-
     <v-btn color="primary" @click="guardar">Guardar</v-btn>
   </v-card>
-  <v-text-field v-model="dispositivoId" label="ipDestino" />
 </template>
 
 <script setup>

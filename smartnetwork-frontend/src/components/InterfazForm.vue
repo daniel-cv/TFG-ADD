@@ -1,75 +1,175 @@
 <template>
   <v-form @submit.prevent="handleCrearInterfaz">
 
+    <!-- NAME -->
     <v-text-field
       v-model="name"
-      label="Nombre de la interfaz"
+      label="Nombre"
       prepend-inner-icon="mdi-lan"
       variant="outlined"
+      class="mb-3"
       required
     />
 
-    <v-text-field
-      v-model="ip"
-      label="IP / Máscara"
-      placeholder="192.168.1.1/24"
-      prepend-inner-icon="mdi-ip"
-      variant="outlined"
-      required
-    />
-
+    <!-- TIPO -->
     <v-select
       v-model="tipo"
-      :items="['physical', 'vlan', 'loopback']"
+      :items="['fisica', 'vlan']"
       label="Tipo"
-      prepend-inner-icon="mdi-cog"
       variant="outlined"
+      class="mb-3"
       required
     />
 
-    <v-textarea
-      v-model="comentario"
-      label="Comentario"
+    <!-- INTERFAZ PADRE (solo VLAN) -->
+    <v-select
+      v-if="tipo === 'vlan'"
+      v-model="interfacePadre"
+      :items="['port1']"
+      item-title="name"
+      item-value="name"
+      label="Interfaz padre"
       variant="outlined"
+      class="mb-3"
+      required
     />
 
-    <v-btn type="submit" block color="primary">
+    <!-- VLAN ID (solo VLAN) -->
+    <v-text-field
+      v-if="tipo === 'vlan'"
+      v-model="vlanid"
+      label="VLAN ID"
+      type="number"
+      variant="outlined"
+      class="mb-3"
+      required
+    />
+
+    <!-- VDOM (fijo) -->
+    <v-text-field
+      v-model="vdom"
+      label="VDOM"
+      variant="outlined"
+      class="mb-3"
+      disabled
+    />
+
+    <!-- MODE -->
+    <v-select
+      v-model="mode"
+      :items="['static', 'dhcp']"
+      label="Modo IP"
+      variant="outlined"
+      class="mb-3"
+      required
+    />
+
+    <!-- IP (solo static) -->
+    <v-text-field
+      v-if="mode === 'static'"
+      v-model="ip"
+      label="IP / Máscara (ej: 192.168.1.1/24)"
+      variant="outlined"
+      class="mb-3"
+      required
+    />
+
+    <!-- ALLOW ACCESS -->
+    <v-text-field
+      v-model="allowaccess"
+      label="Allow Access (ping https ssh)"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <!-- ROLE -->
+    <v-select
+      v-model="role"
+      :items="['lan', 'wan', 'dmz']"
+      label="Rol"
+      variant="outlined"
+      class="mb-3"
+      required
+    />
+
+    <!-- DESCRIPTION -->
+    <v-textarea
+      v-model="description"
+      label="Descripción"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <v-btn color="primary" size="large" block type="submit">
       Crear Interfaz
     </v-btn>
 
-    <p v-if="mensaje" class="text-center mt-3">{{ mensaje }}</p>
+    <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
 
   </v-form>
 </template>
 
 <script setup>
-import { ref } from "vue"
-import { useRoute } from "vue-router"
-import {useInterfazStore} from "@/stores/interfazStore"
+import { ref, onMounted, watch } from "vue";
+import { useRoute } from "vue-router";
+import { useInterfazStore } from "@/stores/interfazStore";
 
-const route = useRoute()
-const dispositivoId = route.params.id  // 🔹 ID automático
-const store = useInterfazStore()
-const name = ref("")
-const ip = ref("")
-const tipo = ref("")
-const comentario = ref("")
-const mensaje = ref("")
+const route = useRoute();
+const emit = defineEmits(["creada"]);
+
+const interfazStore = useInterfazStore();
+
+const name = ref("");
+const tipo = ref("fisica");
+const interfacePadre = ref(null);
+const vlanid = ref(null);
+const vdom = ref("root");
+const mode = ref("dhcp");
+const ip = ref(null);
+const allowaccess = ref("ping");
+const role = ref("lan");
+const description = ref("");
+
+const mensaje = ref("");
+const interfaces = ref([]);
+const dispositivoId = Number(route.params.id);
+
+
+
+// Limpiar campos si cambian tipo o modo
+watch(tipo, (t) => {
+  if (t !== "vlan") {
+    interfacePadre.value = null;
+    vlanid.value = null;
+  }
+});
+watch(mode, (m) => {
+  if (m !== "static") {
+    ip.value = null;
+  }
+});
 
 const handleCrearInterfaz = async () => {
   try {
     const payload = {
       name: name.value,
-      ip: ip.value,
       tipo: tipo.value,
-      comentario: comentario.value,
+      interfacePadre: interfacePadre.value,
+      vlanid: vlanid.value,
+      vdom: vdom.value,
+      mode: mode.value,
+      ip: ip.value,
+      allowaccess: allowaccess.value,
+      role: role.value,
+      description: description.value,
       dispositivoId: dispositivoId
-    }
-    await store.crearInterfaz(payload)
-    mensaje.value = "Interfaz creada correctamente"
-    emit("Creada");
-  } catch (e) {
-    mensaje.value = "Error al crear la interfaz"
+    };
+
+    await interfazStore.crearInterfaz(payload);
+    mensaje.value = "Interfaz creada correctamente";
+    emit("creada");
+  } catch (error) {
+    mensaje.value = "Error al crear la interfaz";
   }
-}
+};
 </script>

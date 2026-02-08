@@ -88,9 +88,7 @@ const comentario = ref("");
 const interfaces = ref([]);
 const mensaje = ref("");
 const dispositivoId = Number(route.params.id);
-onMounted(async () => {
-  interfaces.value = (await interfazStore.cargarInterfaces(dispositivoId)) || [];
-});
+
 
 const handleCrearAddress = async () => {
   try {
