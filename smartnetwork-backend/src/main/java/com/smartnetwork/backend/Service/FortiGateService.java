@@ -3,6 +3,7 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
+import com.smartnetwork.backend.domain.dtos.Services.ServiceJsonBuilder;
 import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -137,25 +138,7 @@ public class FortiGateService {
         Map<String, Object> body = new HashMap<>();
         body.put("name", service.getNombre());
 
-        String protocolo = service.getTipoProtocolo();
-
-        if ("TCP".equalsIgnoreCase(protocolo)) {
-            body.put("tcp-portrange", service.getDestinationPort());
-            body.put("protocol", "TCP/UDP/SCTP");
-        }
-
-        if ("UDP".equalsIgnoreCase(protocolo)) {
-            body.put("udp-portrange", service.getDestinationPort());
-            body.put("protocol", "TCP/UDP/SCTP");
-        }
-
-        if ("ICMP".equalsIgnoreCase(protocolo)) {
-            body.put("protocol", "ICMP");
-        }
-
-        if (service.getComentario() != null) {
-            body.put("comment", service.getComentario());
-        }
+        String json = ServiceJsonBuilder.build(service);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
