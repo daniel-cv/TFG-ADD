@@ -1,35 +1,30 @@
 package com.smartnetwork.backend.Controller;
 
+import com.smartnetwork.backend.Service.DispositivoService;
 import com.smartnetwork.backend.Service.ServiceService;
 import com.smartnetwork.backend.domain.Entity.Service;
+import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/dispositivos/{dispositivoId}/services")
+@RequestMapping("/api/firewalls/services")
 public class ServiceController {
 
     private final ServiceService serviceService;
+    private final DispositivoService dispositivoService;
 
-    public ServiceController(ServiceService serviceService) {
+    public ServiceController(ServiceService serviceService, DispositivoService dispositivoService) {
         this.serviceService = serviceService;
+        this.dispositivoService = dispositivoService;
     }
 
     // 🔹 CREAR service
-    @PostMapping
-    public Service crear(
-            @PathVariable Long dispositivoId,
-            @RequestBody Service service,
-            Authentication authentication
-    ) {
-        String username = authentication.getName();
-
-        // aseguramos asociación correcta
-        service.getDispositivo().setId(dispositivoId);
-
-        return serviceService.create(service, username, dispositivoId);
+    @PostMapping("/create")
+    public Service crear(@RequestBody CrearServiceDTO dto, Authentication auth) {
+        return serviceService.create(dto, auth.getName());
     }
 
     // 🔹 LISTAR services de un dispositivo

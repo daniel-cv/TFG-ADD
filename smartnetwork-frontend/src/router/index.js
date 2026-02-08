@@ -9,6 +9,7 @@ import ReglaFirewallView from "../views/ReglasFirewallView.vue";
 import ConfigurationView from "@/views/ConfigurationView.vue";
 import InterfazView from "@/views/InterfazView.vue";
 import AddressView from "@/views/AddressView.vue";
+import ServiceView from "@/views/ServiceView.vue";
 
 const routes = [
   {
@@ -60,6 +61,11 @@ const routes = [
     path: '/device/:id',
     name: 'deviceConfiguration',
     component: ConfigurationView,
+  },
+  {
+    path: "/service/:id",
+    name: "CrearService",
+    component: ServiceView,
   }
 ];
 

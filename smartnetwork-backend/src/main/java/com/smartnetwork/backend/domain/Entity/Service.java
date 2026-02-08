@@ -23,7 +23,6 @@ public class Service {
 
     private String comentario;
 
-    @Column(nullable = false)
     private String categoria;
 
     @Column(nullable = false)

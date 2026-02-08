@@ -129,6 +129,68 @@ public class FortiGateService {
 
         return result;
     }
+
+    public Map<String, Object> crearServicio(Dispositivo dispositivo, com.smartnetwork.backend.domain.Entity.Service service){
+        String url = "http://" + dispositivo.getIp() +
+                "/api/v2/cmdb/firewall.service/custom?vdom=root";
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", service.getNombre());
+
+        String protocolo = service.getTipoProtocolo();
+
+        if ("TCP".equalsIgnoreCase(protocolo)) {
+            body.put("tcp-portrange", service.getDestinationPort());
+            body.put("protocol", "TCP/UDP/SCTP");
+        }
+
+        if ("UDP".equalsIgnoreCase(protocolo)) {
+            body.put("udp-portrange", service.getDestinationPort());
+            body.put("protocol", "TCP/UDP/SCTP");
+        }
+
+        if ("ICMP".equalsIgnoreCase(protocolo)) {
+            body.put("protocol", "ICMP");
+        }
+
+        if (service.getComentario() != null) {
+            body.put("comment", service.getComentario());
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(dispositivo.getToken().trim());
+
+        HttpEntity<Map<String, Object>> entity =
+                new HttpEntity<>(body, headers);
+
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
+
+            if (response.getBody() != null &&
+                    response.getBody().contains("\"status\":\"success\"")) {
+                result.put("success", true);
+            } else {
+                result.put("success", false);
+                result.put("error", response.getBody());
+            }
+
+            result.put("httpStatus", response.getStatusCode());
+
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
+        }
+
+        return result;
+    }
     private AddressDTO toDTO(Address address) {
 
         AddressDTO dto = new AddressDTO();

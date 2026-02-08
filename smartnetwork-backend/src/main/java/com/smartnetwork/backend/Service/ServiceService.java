@@ -3,9 +3,11 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ServiceRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -13,20 +15,19 @@ public class ServiceService {
 
     private final ServiceRepository serviceRepository;
     private final DispositivoRepository dispositivoRepository;
+    private final FortiGateService fortiGateService;
 
     public ServiceService(ServiceRepository serviceRepository,
-                          DispositivoRepository dispositivoRepository) {
+                          DispositivoRepository dispositivoRepository, FortiGateService fortiGateService) {
         this.serviceRepository = serviceRepository;
         this.dispositivoRepository = dispositivoRepository;
+        this.fortiGateService = fortiGateService;
     }
 
-    public com.smartnetwork.backend.domain.Entity.Service create(
-            com.smartnetwork.backend.domain.Entity.Service service,
-            String username,
-            Long dispositivoId) {
+    public com.smartnetwork.backend.domain.Entity.Service create(CrearServiceDTO dto, String username) {
 
         Dispositivo dispositivo = dispositivoRepository
-                .findById(dispositivoId)
+                .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
         // 🔐 Seguridad: comprobar propietario
@@ -34,8 +35,26 @@ public class ServiceService {
             throw new RuntimeException("No autorizado");
         }
 
+        com.smartnetwork.backend.domain.Entity.Service service = new com.smartnetwork.backend.domain.Entity.Service();
+        service.setNombre(dto.getName());
         service.setDispositivo(dispositivo);
-        return serviceRepository.save(service);
+        service.setTipoProtocolo(dto.getProtocol());
+        service.setDestinationPort(dto.getPortRange());
+        service.setIp(dto.getAddress());
+        service.setComentario(dto.getComentario());
+
+        serviceRepository.save(service);
+
+        Map<String, Object> resultado =
+                fortiGateService.crearServicio(dispositivo, service);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error creando policy en FortiGate: " + resultado
+            );
+        }
+
+        return service;
     }
 
     public com.smartnetwork.backend.domain.Entity.Service update(

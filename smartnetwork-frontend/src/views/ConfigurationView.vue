@@ -12,6 +12,10 @@
     <v-btn color="primary" @click="irCrearAddress(dispositivoId)">
       Crear Address
     </v-btn>
+
+    <v-btn color="primary" @click="irCrearService(dispositivoId)">
+      Crear Service
+    </v-btn>
   </div>
 </template>
 
@@ -32,6 +36,11 @@ function irCrearPolicity(id: number | string) {
 function irCrearAddress(id: number | string) {
   seleccionadoStore.seleccionar(id);
   router.push(`/crearAddress/${id}`);
+}
+
+function irCrearService(id: number | string) {
+  seleccionadoStore.seleccionar(id);
+  router.push(`/service/${id}`);
 }
 </script>
 
