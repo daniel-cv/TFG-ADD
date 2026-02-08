@@ -59,6 +59,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/api/usuario/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuario/create").permitAll()
                         .requestMatchers("/api/dispositivos/**").authenticated()
                         .anyRequest().authenticated()
                 )

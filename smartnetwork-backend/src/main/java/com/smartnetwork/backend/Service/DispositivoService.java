@@ -2,6 +2,7 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
+import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.Entity.Usuario;
@@ -138,5 +139,9 @@ public class DispositivoService {
         }
 
         return result;
+    }
+
+    public Map<String, Object> crearAddress(Dispositivo dispositivo, Address address){
+        return null;
     }
 }

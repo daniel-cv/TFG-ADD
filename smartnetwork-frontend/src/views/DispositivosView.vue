@@ -31,12 +31,18 @@
           <v-card-text>
             IP: {{ d.ip }} <br>
             Estado: {{ d.estado }}
+            D:{{ d.id }}
           </v-card-text>
-          <v-card-actions>
-            <v-btn color="primary" @click="configurar(d.id)">
-              Configurar
-            </v-btn>
-          </v-card-actions>
+         <v-card-actions>
+  <v-btn color="primary" @click="configurar(d.id)">
+    Configurar
+  </v-btn>
+
+  <!-- 🔹 Nuevo botón Crear Interfaz -->
+  <v-btn color="secondary" @click="crearInterfaz(d.id)">
+    Crear Interfaz
+  </v-btn>
+</v-card-actions>
         </v-card>
       </v-col>
     </v-row>
@@ -62,7 +68,8 @@ const router = useRouter();
 
 function configurar(id) {
   seleccionadoStore.seleccionar(id);
-  router.push("/crearpolicy");   // sin params
+  router.push(`/device/${id}`);
+   // sin params
 }
 
 
@@ -89,4 +96,8 @@ onMounted(async () => {
 const irACrearDispositivo = () => {
   router.push("/newdevice");
 };
+function crearInterfaz(id) {
+  // Redirige a la vista de crear interfaz con el ID del dispositivo
+  router.push({ name: "CrearInterfaz", params: { id } });
+}
 </script>

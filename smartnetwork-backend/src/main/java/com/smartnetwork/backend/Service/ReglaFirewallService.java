@@ -1,49 +1,71 @@
 package com.smartnetwork.backend.Service;
 
-import com.smartnetwork.backend.Controller.DispositivoController;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ReglaFirewallRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
+import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReglaFirewallService {
 
     private final ReglaFirewallRepository reglaRepo;
     private final DispositivoRepository dispositivoRepo;
-    private final DispositivoService dispositivoService;
+    private final FortiGateService fortiGateService;
 
     public ReglaFirewallService(ReglaFirewallRepository reglaRepo,
-                                DispositivoRepository dispositivoRepo,DispositivoService dispositivoService) {
+                                DispositivoRepository dispositivoRepo,
+                                FortiGateService fortiGateService) {
         this.reglaRepo = reglaRepo;
         this.dispositivoRepo = dispositivoRepo;
-        this.dispositivoService = dispositivoService;
+        this.fortiGateService = fortiGateService;
     }
 
-    public ReglaFirewall crearRegla(ReglaFirewall regla, String username) {
+    public ReglaFirewallDTO crearRegla(CrearReglaFirewallDTO dto,
+                                       String username) {
+
+        if (dto.getDispositivoId() == null) {
+            throw new RuntimeException("dispositivoId obligatorio");
+        }
 
         Dispositivo dispositivo = dispositivoRepo
-                .findById(regla.getDispositivo().getId())
+                .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad básica: el dispositivo es del usuario
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
+        ReglaFirewall regla = new ReglaFirewall();
+        regla.setNombre(dto.getNombre());
+        regla.setOrigen(dto.getOrigen());
+        regla.setDestino(dto.getDestino());
+        regla.setIporigen(dto.getIpOrigen());
+        regla.setIpdestino(dto.getIpDestino());
+        regla.setServicio(dto.getServicio());
         regla.setDispositivo(dispositivo);
         regla.setHabilitada(true);
-        try {
-            dispositivoService.crearPolicy(dispositivo,regla);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+
+        reglaRepo.save(regla);
+
+        // 🔥 PUSH AL FORTIGATE
+        Map<String, Object> resultado =
+                fortiGateService.crearPolicy(dispositivo, regla);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error creando policy en FortiGate: " + resultado
+            );
         }
 
-        return reglaRepo.save(regla);
+        return toDTO(regla);
     }
+
 
     public List<ReglaFirewall> obtenerPorDispositivo(Long dispositivoId, String username) {
 
@@ -56,5 +78,18 @@ public class ReglaFirewallService {
         }
 
         return reglaRepo.findByDispositivoId(dispositivoId);
+    }
+    private ReglaFirewallDTO toDTO(ReglaFirewall regla) {
+        ReglaFirewallDTO dto = new ReglaFirewallDTO();
+        dto.setId(regla.getId());
+        dto.setNombre(regla.getNombre());
+        dto.setOrigen(regla.getOrigen());
+        dto.setDestino(regla.getDestino());
+        dto.setIpOrigen(regla.getIporigen());
+        dto.setIpDestino(regla.getIpdestino());
+        dto.setServicio(regla.getServicio());
+        dto.setHabilitada(regla.isHabilitada());
+        dto.setDispositivoId(regla.getDispositivo().getId());
+        return dto;
     }
 }

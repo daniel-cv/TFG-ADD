@@ -5,5 +5,7 @@ export function obtenerReglasPorDispositivo(dispositivoId) {
 }
 
 export function crearReglaFirewall(regla) {
-  return api.post('/api/firewalls/reglas', regla)
+  return api.post('/api/firewalls/reglas', {
+    ...regla
+  })
 }

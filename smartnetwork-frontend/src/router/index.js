@@ -6,6 +6,10 @@ import DashboardView from "../views/DashboardView.vue";
 import NewDevicesView from "../views/AniadirDispositivo.vue";
 import DispositivosView from "../views/DispositivosView.vue";
 import ReglaFirewallView from "../views/ReglasFirewallView.vue";
+import ConfigurationView from "@/views/ConfigurationView.vue";
+import InterfazView from "@/views/InterfazView.vue";
+import AddressView from "@/views/AddressView.vue";
+import ServiceView from "@/views/ServiceView.vue";
 
 const routes = [
   {
@@ -38,9 +42,30 @@ const routes = [
     component: NewDevicesView,
   },
   {
-    path: "/crearpolicy",
-    name: "crearpolicy",
+    path: '/crearpolicy/:id',
+    name: 'crearpolicy',
     component: ReglaFirewallView,
+
+  },
+  {
+    path: "/interfaces/:id",
+    name: "CrearInterfaz",
+    component: InterfazView,
+  },
+  {
+    path: "/crearaddress/:id",
+    name: "CrearAddress",
+    component: AddressView,
+  },
+  {
+    path: '/device/:id',
+    name: 'deviceConfiguration',
+    component: ConfigurationView,
+  },
+  {
+    path: "/service/:id",
+    name: "CrearService",
+    component: ServiceView,
   }
 ];
 

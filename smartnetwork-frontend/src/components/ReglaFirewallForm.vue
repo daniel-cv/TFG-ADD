@@ -6,22 +6,18 @@
 
     <v-text-field v-model="regla.origen" label="Origen" />
     <v-text-field v-model="regla.destino" label="Destino" />
-    <v-text-field v-model="regla.iporigen" label="ipOrigen" />
-    <v-text-field v-model="regla.ipdestino" label="ipDestino" />
-
+    <v-text-field v-model="regla.ipOrigen" label="ipOrigen" />
+    <v-text-field v-model="regla.ipDestino" label="ipDestino" />
     <v-select
       v-model="regla.servicio"
       :items="['HTTP', 'HTTPS', 'ALL']"
       label="Servicio"
     />
-
-
     <v-select
       v-model="regla.nat"
       :items="['disable', 'enable']"
       label="NAT"
     />
-
     <v-btn color="primary" @click="guardar">Guardar</v-btn>
   </v-card>
 </template>
@@ -33,13 +29,8 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const dispositivoId = Number(route.params.id);
-const emit = defineEmits(['creada'])
-const props = defineProps({
-  dispositivoId: {
-    type: Number,
-    required: true
-  }
-});
+const emit = defineEmits(['creada']);
+
 
 
 const store = useReglaFirewallStore()
@@ -48,14 +39,14 @@ const regla = ref({
   nombre: '',
   origen: '',
   destino: '',
-  iporigen: '',
-  ipdestino: '',
+  ipOrigen: '',
+  ipDestino: '',
   servicio: 'ALL',
   schedule :'always',
   action: 'accept',
   nat: 'disable',
   habilitada: true,
-  dispositivo: { id: props.dispositivoId }
+  dispositivoId: dispositivoId
 })
 
 async function guardar() {
