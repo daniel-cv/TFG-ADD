@@ -1,4 +1,4 @@
-package com.smartnetwork.backend.domain.dtos;
+package com.smartnetwork.backend.domain.dtos.Policys;
 
 import lombok.Getter;
 import lombok.Setter;

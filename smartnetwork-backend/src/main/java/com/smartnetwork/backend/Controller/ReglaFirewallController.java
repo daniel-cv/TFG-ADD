@@ -2,8 +2,8 @@ package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.ReglaFirewallService;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
-import com.smartnetwork.backend.domain.dtos.CrearReglaFirewallDTO;
-import com.smartnetwork.backend.domain.dtos.ReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
