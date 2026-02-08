@@ -12,6 +12,7 @@ import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AddressService {
@@ -38,7 +39,8 @@ public class AddressService {
             throw new RuntimeException("dispositivoId obligatorio");
         }
 
-        Dispositivo dispositivo = dispositivoRepo.findById(dto.getDispositivoId())
+        Dispositivo dispositivo = dispositivoRepo
+                .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
@@ -60,7 +62,14 @@ public class AddressService {
         }
 
         Address saved = addressRepo.save(address);
+        Map<String, Object> resultado =
         fortiGateService.crearAddress(saved.getDispositivo(), saved);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error creando policy en FortiGate: " + resultado
+            );
+        }
         return toDTO(saved);
     }
 

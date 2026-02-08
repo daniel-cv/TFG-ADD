@@ -6,6 +6,7 @@ import DashboardView from "../views/DashboardView.vue";
 import NewDevicesView from "../views/AniadirDispositivo.vue";
 import DispositivosView from "../views/DispositivosView.vue";
 import ReglaFirewallView from "../views/ReglasFirewallView.vue";
+import ConfigurationView from "@/views/ConfigurationView.vue";
 import InterfazView from "@/views/InterfazView.vue";
 import AddressView from "@/views/AddressView.vue";
 
@@ -51,9 +52,14 @@ const routes = [
     component: InterfazView,
   },
   {
-    path: "/dispositivos/:id/address/crear",
+    path: "/crearaddress/:id",
     name: "CrearAddress",
     component: AddressView,
+  },
+  {
+    path: '/device/:id',
+    name: 'deviceConfiguration',
+    component: ConfigurationView,
   }
 ];
 

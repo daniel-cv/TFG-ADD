@@ -83,10 +83,12 @@ public class FortiGateService {
 
         return result;
     }
-    public void crearAddress(Dispositivo dispositivo, Address address) {
+    public Map<String, Object> crearAddress(Dispositivo dispositivo, Address address) {
 
         String url = "http://" + dispositivo.getIp() +
                 "/api/v2/cmdb/firewall/address?vdom=root";
+
+        Map<String, Object> result = new HashMap<>();
 
         String json = """
         {
@@ -102,16 +104,30 @@ public class FortiGateService {
 
         HttpEntity<String> entity = new HttpEntity<>(json, headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                entity,
-                String.class
-        );
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.POST,
+                    entity,
+                    String.class
+            );
 
-        if (response.getBody() == null || !response.getBody().contains("\"status\":\"success\"")) {
-            throw new RuntimeException("Error creando address en Forti: " + response.getBody());
+            if (response.getBody() != null &&
+                    response.getBody().contains("\"status\":\"success\"")) {
+                result.put("success", true);
+            }else {
+                result.put("success", false);
+                result.put("error", response.getBody());
+            }
+
+            result.put("httpStatus", response.getStatusCode());
+
+        }catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
         }
+
+        return result;
     }
     private AddressDTO toDTO(Address address) {
 

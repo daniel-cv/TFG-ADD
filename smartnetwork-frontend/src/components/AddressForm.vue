@@ -65,6 +65,7 @@
 import { ref, onMounted } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
 import { useRoute } from "vue-router";
+import { useInterfazStore } from '@/stores/interfazStore'
 
 const route = useRoute();
 const emit = defineEmits(['creada'])
@@ -75,7 +76,8 @@ const props = defineProps({
   }
 });
 
-const store = useAddressStore()
+const addressStore = useAddressStore()
+const interfazStore = useInterfazStore()
 
 const name = ref("");
 const type = ref("");
@@ -87,21 +89,21 @@ const interfaces = ref([]);
 const mensaje = ref("");
 const dispositivoId = Number(route.params.id);
 onMounted(async () => {
-  interfaces.value = (await api.get("/api/interfaces")).data;
+  interfaces.value = (await interfazStore.cargarInterfaces(dispositivoId)) || [];
 });
 
 const handleCrearAddress = async () => {
   try {
     const payload = {
       name: name.value,
-      type: type.value,
       ip: ip.value,
-      comentario: comentario.value,
+      type: type.value,
       interfaz: interfazId.value ? { id: interfazId.value } : null,
-      dispositivo: dispositivoId
+      comentario: comentario.value,
+      dispositivoId: dispositivoId
     };
 
-    await store.crearAddress(payload);
+    await addressStore.crearAddress(payload);
 
     mensaje.value = "Address creada correctamente";
 

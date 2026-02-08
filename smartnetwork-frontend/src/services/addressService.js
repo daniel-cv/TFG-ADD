@@ -5,5 +5,7 @@ export function obtenerAddressesPorDispositivo(dispositivoId) {
 }
 
 export function crearAddress(address) {
-  return api.post('/api/firewalls/address/create', address)
+  return api.post('/api/firewalls/addresses/create', {
+    ...address
+  })
 }

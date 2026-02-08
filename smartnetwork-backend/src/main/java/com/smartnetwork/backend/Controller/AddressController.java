@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/addresses")
+@RequestMapping("/api/firewalls/addresses")
 public class AddressController {
 
     private final AddressService addressService;
@@ -18,9 +18,8 @@ public class AddressController {
         this.addressService = addressService;
     }
 
-    @PostMapping
-    public AddressDTO crear(@RequestBody CrearAddressDTO dto, Authentication auth
-    ) {
+    @PostMapping("/create")
+    public AddressDTO crear(@RequestBody CrearAddressDTO dto, Authentication auth) {
         return addressService.crear(dto, auth.getName());
     }
 

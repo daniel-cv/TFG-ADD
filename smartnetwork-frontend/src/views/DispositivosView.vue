@@ -68,7 +68,7 @@ const router = useRouter();
 
 function configurar(id) {
   seleccionadoStore.seleccionar(id);
-  router.push(`/crearpolicy/${id}`);
+  router.push(`/device/${id}`);
    // sin params
 }
 
