@@ -33,7 +33,6 @@ public class Address {
     private String comentario;
 
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
 }

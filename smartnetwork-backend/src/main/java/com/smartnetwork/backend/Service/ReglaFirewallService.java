@@ -1,29 +1,33 @@
 package com.smartnetwork.backend.Service;
 
-import com.smartnetwork.backend.Controller.DispositivoController;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ReglaFirewallRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
-import com.smartnetwork.backend.domain.dtos.CrearReglaFirewallDTO;
-import com.smartnetwork.backend.domain.dtos.ReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReglaFirewallService {
 
     private final ReglaFirewallRepository reglaRepo;
     private final DispositivoRepository dispositivoRepo;
+    private final FortiGateService fortiGateService;
 
     public ReglaFirewallService(ReglaFirewallRepository reglaRepo,
-                                DispositivoRepository dispositivoRepo) {
+                                DispositivoRepository dispositivoRepo,
+                                FortiGateService fortiGateService) {
         this.reglaRepo = reglaRepo;
         this.dispositivoRepo = dispositivoRepo;
+        this.fortiGateService = fortiGateService;
     }
 
-    public ReglaFirewallDTO crearRegla(CrearReglaFirewallDTO dto, String username) {
+    public ReglaFirewallDTO crearRegla(CrearReglaFirewallDTO dto,
+                                       String username) {
 
         if (dto.getDispositivoId() == null) {
             throw new RuntimeException("dispositivoId obligatorio");
@@ -41,16 +45,27 @@ public class ReglaFirewallService {
         regla.setNombre(dto.getNombre());
         regla.setOrigen(dto.getOrigen());
         regla.setDestino(dto.getDestino());
-        regla.setIporigen(dto.getOrigen());
-        regla.setIpdestino(dto.getDestino());
+        regla.setIporigen(dto.getIpOrigen());
+        regla.setIpdestino(dto.getIpDestino());
         regla.setServicio(dto.getServicio());
         regla.setDispositivo(dispositivo);
         regla.setHabilitada(true);
 
         reglaRepo.save(regla);
 
+        // 🔥 PUSH AL FORTIGATE
+        Map<String, Object> resultado =
+                fortiGateService.crearPolicy(dispositivo, regla);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error creando policy en FortiGate: " + resultado
+            );
+        }
+
         return toDTO(regla);
     }
+
 
     public List<ReglaFirewall> obtenerPorDispositivo(Long dispositivoId, String username) {
 
