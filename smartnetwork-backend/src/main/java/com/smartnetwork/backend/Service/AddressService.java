@@ -51,6 +51,12 @@ public class AddressService {
         address.setName(dto.getName());
         address.setType(dto.getType());
         address.setIp(dto.getIp());
+        String ipDestino = dto.getIpdestino();
+        if(ipDestino != null && !ipDestino.isBlank()){
+            address.setIpdestino(ipDestino.trim()); // eliminar espacios
+        } else {
+            address.setIpdestino(null); // evita string vacío
+        }
         address.setComentario(dto.getComentario());
         address.setDispositivo(dispositivo);
 
@@ -89,22 +95,18 @@ public class AddressService {
     }
 
     private AddressDTO toDTO(Address address) {
-
         AddressDTO dto = new AddressDTO();
         dto.setId(address.getId());
         dto.setName(address.getName());
         dto.setType(address.getType());
         dto.setIp(address.getIp());
+        dto.setIpdestino(address.getIpdestino()); // <-- línea nueva
         dto.setComentario(address.getComentario());
-
-        // 🔑 SIEMPRE .getId()
         dto.setDispositivoId(address.getDispositivo().getId());
-
-        // 🔑 AQUÍ VA LA LÍNEA
-        if (address.getInterfaz() != null) {
+        if(address.getInterfaz() != null) {
             dto.setInterfazId(address.getInterfaz().getId());
         }
-
         return dto;
     }
+
 }

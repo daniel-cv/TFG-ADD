@@ -3,6 +3,7 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.domain.Entity.*;
 import com.smartnetwork.backend.domain.dtos.Services.ServiceJsonBuilder;
 import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
+import com.smartnetwork.backend.domain.dtos.address.AddressJsonBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -89,13 +90,7 @@ public class FortiGateService {
 
         Map<String, Object> result = new HashMap<>();
 
-        String json = """
-        {
-          "name": "%s",
-          "type": "%s",
-          "subnet": "%s"
-        }
-        """.formatted(address.getName(), address.getType(), address.getIp());
+        String json = AddressJsonBuilder.build(address);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

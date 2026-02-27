@@ -36,11 +36,11 @@ public class ServiceService {
         }
 
         com.smartnetwork.backend.domain.Entity.Service service = new com.smartnetwork.backend.domain.Entity.Service();
-        service.setNombre(dto.getName());
+        service.setNombre(dto.getNombre());
         service.setDispositivo(dispositivo);
-        service.setTipoProtocolo(dto.getProtocol());
-        service.setDestinationPort(dto.getPortRange());
-        service.setIp(dto.getAddress());
+        service.setTipoProtocolo(dto.getTipoProtocolo());
+        service.setDestinationPort(dto.getDestinationPort());
+        service.setIp(dto.getIp());
         service.setComentario(dto.getComentario());
 
         serviceRepository.save(service);
