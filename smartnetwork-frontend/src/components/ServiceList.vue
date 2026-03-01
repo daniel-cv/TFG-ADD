@@ -1,15 +1,15 @@
 <template>
-  <div class="policy-list">
+  <div class="service-list">
 
     <!-- HEADER -->
     <div class="table-header">
-      <h2>Policies</h2>
+      <h2>Services</h2>
 
       <v-btn
         class="add-btn"
         size="small"
       >
-        Añadir Policy
+        Añadir Service
       </v-btn>
     </div>
 
@@ -20,45 +20,44 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>IP Origen</th>
-          <th>IP Destino</th>
-          <th>Servicio</th>
+          <th>Protocolo</th>
+          <th>IP</th>
+          <th>Puerto</th>
+          <th>Categoría</th>
+          <th>Comentario</th>
         </tr>
       </thead>
 
 
       <tbody>
         <tr
-          v-for="regla in reglaStore.reglas"
-          :key="regla.id"
+          v-for="service in serviceStore.services"
+          :key="service.id"
         >
-
           <td class="name">
-            {{ regla.nombre }}
+            {{ service.nombre }}
           </td>
 
           <td>
-            {{ regla.origen }}
+            {{ service.tipo_protocolo }}
           </td>
 
           <td>
-            {{ regla.destino }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipOrigen }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipDestino }}
+            {{ service.ip }}
           </td>
 
           <td>
-            <span class="service-badge">
-              {{ regla.servicio }}
+            {{ service.destination_port }}
+          </td>
+
+          <td>
+            <span class="category">
+              {{ service.categoria }}
             </span>
+          </td>
+
+          <td class="comment">
+            {{ service.comentario }}
           </td>
 
         </tr>
@@ -72,20 +71,18 @@
 
 
 <script setup>
-
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
+import { useServiceStore } from '@/stores/serviceStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 
-const reglaStore = useReglaFirewallStore()
+const serviceStore = useServiceStore()
 
 onMounted(() => {
-  reglaStore.cargarReglas(dispositivoId)
+  serviceStore.cargarServices(dispositivoId)
 })
-
 </script>
 
 
@@ -94,7 +91,7 @@ onMounted(() => {
 
 /* CONTENEDOR */
 
-.policy-list {
+.service-list {
   width: 100%;
 }
 
@@ -174,17 +171,16 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.ip {
-  font-family: monospace;
-  color: #334155;
+.comment {
+  color: #64748b;
 }
 
 
-/* BADGE SERVICIO */
+/* BADGE */
 
-.service-badge {
-  background: #dbeafe;
-  color: #1d4ed8;
+.category {
+  background: #e0f2fe;
+  color: #0369a1;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;

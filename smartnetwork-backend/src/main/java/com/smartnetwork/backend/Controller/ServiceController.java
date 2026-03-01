@@ -28,7 +28,7 @@ public class ServiceController {
     }
 
     // 🔹 LISTAR services de un dispositivo
-    @GetMapping("/findAll")
+    @GetMapping("/dispositivo/{dispositivoId}")
     public List<Service> listar(
             @PathVariable Long dispositivoId,
             Authentication authentication

@@ -79,6 +79,7 @@ public class ReglaFirewallService {
 
         return reglaRepo.findByDispositivoId(dispositivoId);
     }
+
     private ReglaFirewallDTO toDTO(ReglaFirewall regla) {
         ReglaFirewallDTO dto = new ReglaFirewallDTO();
         dto.setId(regla.getId());

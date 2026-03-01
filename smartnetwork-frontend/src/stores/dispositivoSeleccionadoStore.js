@@ -2,15 +2,15 @@ import { defineStore } from "pinia";
 
 export const useDispositivoSeleccionadoStore = defineStore("dispositivoSeleccionado", {
   state: () => ({
-    id: null,
+    dispositivo: null,
   }),
 
   actions: {
-    seleccionar(id) {
-      this.id = id;
+    seleccionar(dispositivo) {
+      this.dispositivo = dispositivo;
     },
     limpiar() {
-      this.id = null;
+      this.dispositivo = null;
     }
   }
 });

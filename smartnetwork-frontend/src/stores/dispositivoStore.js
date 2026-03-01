@@ -57,5 +57,23 @@ export const useDispositivoStore = defineStore("dispositivo", {
         throw error;
       }
     },
+    async getDispositivo(id) {
+      try {
+        const userStore = useUserStore();
+
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return null;
+        }
+
+        const response = await api.get(`/api/dispositivos/${id}`);
+        return response.data;
+
+      } catch (error) {
+        console.error(error);
+        this.mensaje = "Error al obtener el dispositivo";
+        return null;
+      }
+    },
     },
 });
