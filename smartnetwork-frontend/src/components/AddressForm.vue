@@ -12,8 +12,9 @@
     />
 
     <!-- TYPE -->
-    <v-text-field
+    <v-select
       v-model="type"
+      :items="['subnet', 'iprange', 'ipmask']"
       label="Tipo"
       prepend-inner-icon="mdi-tag"
       variant="outlined"
@@ -30,6 +31,26 @@
       class="mb-3"
       required
     />
+    <!-- IP DESTINO (solo iprange) -->
+    <v-text-field
+      v-if="type === 'iprange'"
+      v-model="ipdestino"
+      label="IP Final"
+      prepend-inner-icon="mdi-ip"
+      variant="outlined"
+      class="mb-3"
+      required
+    />
+    <!-- MASCARA SI IPMASK -->
+    <v-text-field
+        v-if="type === 'ipmask'"
+        v-model="ipdestino"
+        label="Máscara"
+        prepend-inner-icon="mdi-ip"
+        variant="outlined"
+        class="mb-3"
+        required
+      />
 
     <!-- INTERFAZ (opcional) -->
     <v-select
@@ -82,6 +103,7 @@ const interfazStore = useInterfazStore()
 const name = ref("");
 const type = ref("");
 const ip = ref("");
+const ipdestino = ref("");
 const interfazId = ref(null);
 const comentario = ref("");
 
@@ -96,7 +118,11 @@ const handleCrearAddress = async () => {
       name: name.value,
       ip: ip.value,
       type: type.value,
-      interfaz: interfazId.value ? { id: interfazId.value } : null,
+      ipdestino:
+        type.value === 'iprange' || type.value === 'ipmask'
+        ? ipdestino.value
+        : null,
+      interfazId: interfazId.value || null,
       comentario: comentario.value,
       dispositivoId: dispositivoId
     };

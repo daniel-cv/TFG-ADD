@@ -7,10 +7,10 @@ import lombok.Setter;
 @Setter
 public class CrearServiceDTO {
 
-    private String name;
-    private String protocol;
-    private String address;
-    private String portRange;
+    private String nombre;        // ← antes era 'name'
+    private String tipoProtocolo; // ← antes 'protocol'
+    private String ip;            // ← antes 'address'
+    private String destinationPort; // ← antes 'portRange'
     private String comentario;
     private Long dispositivoId;
 }

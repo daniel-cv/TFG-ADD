@@ -33,12 +33,13 @@
 
     <!-- UDP PORT RANGE -->
     <v-text-field
-      v-if="protocol === 'TCP' || protocol === 'UDP'"
-      v-model="portRange"
-      label="Rango de Puertos UDP (ej: 53 o 1000-2000)"
-      prepend-inner-icon="mdi-lan-connect"
-      variant="outlined"
-      class="mb-3"
+        v-if="protocol === 'TCP' || protocol === 'UDP'"
+        v-model="portRange"
+        label="Rango de Puertos (ej: 53 o 1000-2000)"
+        prepend-inner-icon="mdi-lan-connect"
+        variant="outlined"
+        class="mb-3"
+        required
     />
 
     <!-- COMENTARIO -->
@@ -82,13 +83,13 @@ const dispositivoId = Number(route.params.id);
 const handleCrearService = async () => {
   try {
     const payload = {
-      name: name.value,
-      protocol: protocol.value,
-      address: address.value,
-      portRange: protocol.value === "ICMP" ? null : portRange.value,
-      comentario: comentario.value,
-      dispositivoId: dispositivoId
-    };
+    nombre: name.value,
+    tipoProtocolo: protocol.value,
+    ip: protocol.value === "ICMP" ? "0.0.0.0" : address.value,
+    destinationPort: protocol.value === "ICMP" ? null : portRange.value,
+    comentario: comentario.value,
+    dispositivoId: dispositivoId
+  };
 
     await serviceStore.crearService(payload);
 

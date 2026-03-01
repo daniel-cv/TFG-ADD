@@ -11,6 +11,7 @@ public class AddressDTO {
     private Long id;
     private String name;
     private String ip;
+    private String ipdestino;
     private String type;
     private Long interfazId;
     private String comentario;

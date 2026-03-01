@@ -32,6 +32,9 @@ public class Address {
 
     private String comentario;
 
+    @Column(nullable = true)
+    private String ipdestino;
+
     @ManyToOne
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;

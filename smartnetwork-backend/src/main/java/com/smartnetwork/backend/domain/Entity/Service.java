@@ -28,10 +28,10 @@ public class Service {
     @Column(nullable = false)
     private String tipoProtocolo;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String ip;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String destinationPort;
 
     @ManyToOne(fetch = FetchType.LAZY)
