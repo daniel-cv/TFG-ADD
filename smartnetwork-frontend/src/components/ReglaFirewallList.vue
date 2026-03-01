@@ -8,6 +8,7 @@
       <v-btn
         class="add-btn"
         size="small"
+        @click="emit('crear')"
       >
         Añadir Policy
       </v-btn>
@@ -72,20 +73,28 @@
 
 
 <script setup>
-
+import { useRouter } from 'vue-router'
 import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
+const router = useRouter()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
-
+const emit = defineEmits(['crear'])
 const reglaStore = useReglaFirewallStore()
 
 onMounted(() => {
   reglaStore.cargarReglas(dispositivoId)
 })
 
+
+function irANuevaRegla() {
+  router.push({
+    name: 'crearpolicy',
+    params: { id: dispositivoId }
+  })
+}
 </script>
 
 

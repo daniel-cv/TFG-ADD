@@ -19,6 +19,7 @@
       label="NAT"
     />
     <v-btn color="primary" @click="guardar">Guardar</v-btn>
+    <v-btn text @click="cancelar">Cancelar</v-btn>
   </v-card>
 </template>
 
@@ -29,7 +30,7 @@ import { useRoute } from "vue-router";
 
 const route = useRoute();
 const dispositivoId = Number(route.params.id);
-const emit = defineEmits(['creada']);
+const emit = defineEmits(['creada', 'cancelar'])
 
 
 
@@ -52,5 +53,9 @@ const regla = ref({
 async function guardar() {
   await store.crearRegla(regla.value)
   emit('creada')
+}
+
+function cancelar() {
+  emit('cancelar')
 }
 </script>

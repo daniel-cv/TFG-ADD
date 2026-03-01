@@ -6,37 +6,37 @@
       <ul>
         <li
           :class="{ active: selectedForm === 'policy' }"
-          @click="selectedForm = 'policy'"
+          @click="selectSection('policy')"
         >
           Policies
         </li>
         <li
           :class="{ active: selectedForm === 'address' }"
-          @click="selectedForm = 'address'"
+          @click="selectSection('address')"
         >
           Addresses
         </li>
         <li
           :class="{ active: selectedForm === 'service' }"
-          @click="selectedForm = 'service'"
+          @click="selectSection('service')"
         >
           Services
         </li>
         <li
           :class="{ active: selectedForm === 'vip' }"
-          @click="selectedForm = 'vip'"
+          @click="selectSection('vip')"
         >
           Virtual IPs
         </li>
         <li
           :class="{ active: selectedForm === 'user' }"
-          @click="selectedForm = 'user'"
+          @click="selectSection('user')"
         >
           Users
         </li>
         <li
           :class="{ active: selectedForm === 'interface' }"
-          @click="selectedForm = 'interface'"
+          @click="selectSection('interface')"
         >
           Interfaces
         </li>
@@ -110,6 +110,9 @@
         <component
           :is="currentComponent"
           :device-id="dispositivoId"
+          @crear="currentMode = 'create'"
+          @creada="currentMode = 'list'"
+          @cancelar="currentMode = 'list'"
         />
       </div>
     </main>
@@ -123,12 +126,24 @@ import { useRoute } from "vue-router";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
 
 // Formularios
-import CreatePolicy from "@/components/ReglaFirewallList.vue";
-import CreateAddress from "@/components/AddressForm.vue";
-import CreateService from "@/components/ServiceList.vue";
-import CreateUserFirewall from "@/components/UsuarioFirewallForm.vue";
-import CreateVirtualIp from "@/components/VirtualIpForm.vue";
-import InterfazForm from "@/components/InterfazForm.vue";
+import ReglaFirewallList from "@/components/ReglaFirewallList.vue"
+import ReglaFirewallForm from "@/components/ReglaFirewallForm.vue"
+
+//import AddressList from "@/components/AddressList.vue"
+import AddressForm from "@/components/AddressForm.vue"
+
+import ServiceList from "@/components/ServiceList.vue"
+import ServiceForm from "@/components/ServiceForm.vue"
+
+//import UsuarioFirewallList from "@/components/UsuarioFirewallList.vue"
+import UsuarioFirewallForm from "@/components/UsuarioFirewallForm.vue"
+
+//import VirtualIpList from "@/components/VirtualIpList.vue"
+import VirtualIpForm from "@/components/VirtualIpForm.vue"
+
+//import InterfazList from "@/components/InterfazList.vue"
+import InterfazForm from "@/components/InterfazForm.vue"
+
 
 
 const route = useRoute();
@@ -141,27 +156,46 @@ onMounted(async () => {
   seleccionadoStore.seleccionar(dispositivo);
 });
 
-const selectedForm = ref<string | null>(null);
+const selectedForm = ref<string | null>(null)
+const currentMode = ref<'list' | 'create'>('list')
 
 const currentComponent = computed(() => {
-  switch (selectedForm.value) {
-    case "policy":
-      return CreatePolicy;
-    case "address":
-      return CreateAddress;
-    case "service":
-      return CreateService;
-    case "user":
-      return CreateUserFirewall;
-    case "vip":
-      return CreateVirtualIp;
-    case "interface":
-      return InterfazForm;
-;
-    default:
-      return null;
+  if (!selectedForm.value) return null
+
+  return componentMap[selectedForm.value]?.[currentMode.value] || null
+})
+
+const componentMap: Record<string, any> = {
+  policy: {
+    list: ReglaFirewallList,
+    create: ReglaFirewallForm
+  },
+  address: {
+    //list: AddressList,
+    create: AddressForm
+  },
+  service: {
+    list: ServiceList,
+    create: ServiceForm
+  },
+  user: {
+    //list: UsuarioFirewallList,
+    create: UsuarioFirewallForm
+  },
+  vip: {
+    //list: VirtualIpList,
+    create: VirtualIpForm
+  },
+  interface: {
+    //list: InterfazList,
+    create: InterfazForm
   }
-});
+}
+
+function selectSection(section: string) {
+  selectedForm.value = section
+  currentMode.value = 'list'
+}
 </script>
 
 <style scoped>
