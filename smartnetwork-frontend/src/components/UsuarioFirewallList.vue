@@ -21,11 +21,8 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Tipo</th>
-          <th>IP</th>
-          <th>Interfaz</th>
-          <th>Comentario</th>
-          <th>IP Destino</th>
+          <th>Email</th>
+          <th>Rol</th>
         </tr>
       </thead>
 
@@ -36,31 +33,16 @@
           :key="usuarioFirewall.id"
         >
           <td class="name">
-            {{ usuarioFirewall.name }}
+            {{ usuarioFirewall.username }}
           </td>
 
           <td>
-            {{ usuarioFirewall.type }}
+            {{ usuarioFirewall.email }}
           </td>
 
           <td>
-            {{ usuarioFirewall.ip }}
+            {{ usuarioFirewall.role }}
           </td>
-
-          <td>
-            {{ usuarioFirewall.interfaz ? usuarioFirewall.interfaz.name : 'N/A' }}
-          </td>
-
-          <td>
-            <span class="comment">
-              {{ usuarioFirewall.comentario ? usuarioFirewall.comentario : 'Sin comentario' }}
-            </span>
-          </td>
-
-          <td>
-            {{ usuarioFirewall.ipdestino ? usuarioFirewall.ipdestino : '' }}
-          </td>
-
         </tr>
       </tbody>
 
