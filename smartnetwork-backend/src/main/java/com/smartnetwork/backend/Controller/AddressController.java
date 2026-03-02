@@ -1,8 +1,8 @@
 package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.AddressService;
-import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
-import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.address.CrearAddressDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 

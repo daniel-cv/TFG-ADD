@@ -1,5 +1,6 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
 import jakarta.persistence.*;
 import lombok.*;
 

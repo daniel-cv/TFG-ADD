@@ -2,10 +2,10 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.InterfazRepository;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.Interfaz;
-import com.smartnetwork.backend.domain.dtos.interfaz.CrearInterfazDTO;
-import com.smartnetwork.backend.domain.dtos.interfaz.InterfazDTO;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Interfaz;
+import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.CrearInterfazDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.InterfazDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

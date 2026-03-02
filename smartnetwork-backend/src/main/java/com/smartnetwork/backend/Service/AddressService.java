@@ -3,12 +3,11 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.Repository.AddressRepository;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.InterfazRepository;
-import com.smartnetwork.backend.Service.FortiGateService;
-import com.smartnetwork.backend.domain.Entity.Address;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.Interfaz;
-import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
-import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Address;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Interfaz;
+import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.address.CrearAddressDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

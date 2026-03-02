@@ -1,13 +1,12 @@
 package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.DispositivoService;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/dispositivos")

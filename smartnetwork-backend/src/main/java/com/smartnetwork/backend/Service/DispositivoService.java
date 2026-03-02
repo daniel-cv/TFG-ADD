@@ -2,21 +2,13 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
-import com.smartnetwork.backend.domain.Entity.Address;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import tools.jackson.databind.ObjectMapper;
 
-import java.net.http.HttpResponse;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service

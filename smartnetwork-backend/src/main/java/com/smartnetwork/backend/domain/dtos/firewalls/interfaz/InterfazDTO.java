@@ -1,0 +1,37 @@
+package com.smartnetwork.backend.domain.dtos.firewalls.interfaz;
+
+import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressDTO;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.List;
+
+@Getter
+@Setter
+public class InterfazDTO {
+    private Long id;
+
+    private String name;
+
+    private String tipo;
+
+    private String interfacePadre;
+
+    private Integer vlanid;
+
+    private String vdom;
+
+    private String mode;
+
+    private String ip;
+
+    private String allowaccess;
+
+    private String role;
+
+    private String description;
+
+    private Long dispositivoId; // solo el id del dispositivo
+
+    private List<AddressDTO> addresses; // si quieres devolver las addresses de esa interfaz
+}

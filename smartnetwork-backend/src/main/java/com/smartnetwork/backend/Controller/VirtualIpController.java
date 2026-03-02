@@ -1,8 +1,8 @@
 package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.VirtualIpService;
-import com.smartnetwork.backend.domain.dtos.virtualIp.CrearVirtualIpDTO;
-import com.smartnetwork.backend.domain.dtos.virtualIp.VirtualIpDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.virtualIp.CrearVirtualIpDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.virtualIp.VirtualIpDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 

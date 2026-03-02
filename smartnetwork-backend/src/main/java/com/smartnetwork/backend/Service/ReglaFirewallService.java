@@ -2,10 +2,10 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ReglaFirewallRepository;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
-import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
-import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.ReglaFirewall;
+import com.smartnetwork.backend.domain.dtos.firewalls.Policys.CrearReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.Policys.ReglaFirewallDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

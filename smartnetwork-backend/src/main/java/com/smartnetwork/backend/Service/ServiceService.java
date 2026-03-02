@@ -2,8 +2,8 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ServiceRepository;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
+import com.smartnetwork.backend.domain.dtos.firewalls.Services.CrearServiceDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +24,7 @@ public class ServiceService {
         this.fortiGateService = fortiGateService;
     }
 
-    public com.smartnetwork.backend.domain.Entity.Service create(CrearServiceDTO dto, String username) {
+    public com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service create(CrearServiceDTO dto, String username) {
 
         Dispositivo dispositivo = dispositivoRepository
                 .findById(dto.getDispositivoId())
@@ -35,7 +35,7 @@ public class ServiceService {
             throw new RuntimeException("No autorizado");
         }
 
-        com.smartnetwork.backend.domain.Entity.Service service = new com.smartnetwork.backend.domain.Entity.Service();
+        com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service service = new com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service();
         service.setNombre(dto.getNombre());
         service.setDispositivo(dispositivo);
         service.setTipoProtocolo(dto.getTipoProtocolo());
@@ -57,8 +57,8 @@ public class ServiceService {
         return service;
     }
 
-    public com.smartnetwork.backend.domain.Entity.Service update(
-            com.smartnetwork.backend.domain.Entity.Service service,
+    public com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service update(
+            com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service service,
             String username,
             Long dispositivoId) {
 
@@ -74,7 +74,7 @@ public class ServiceService {
         return serviceRepository.save(service);
     }
 
-    public List<com.smartnetwork.backend.domain.Entity.Service> findAllByDispositivo(
+    public List<com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service> findAllByDispositivo(
             Long dispositivoId,
             String username) {
 
@@ -90,7 +90,7 @@ public class ServiceService {
         return serviceRepository.findByDispositivoId(dispositivoId);
     }
 
-    public Optional<com.smartnetwork.backend.domain.Entity.Service> findById(
+    public Optional<com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service> findById(
             Long serviceId,
             Long dispositivoId,
             String username) {
@@ -108,7 +108,7 @@ public class ServiceService {
     }
 
     public void delete(
-            com.smartnetwork.backend.domain.Entity.Service service,
+            com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service service,
             Long dispositivoId,
             String username) {
 

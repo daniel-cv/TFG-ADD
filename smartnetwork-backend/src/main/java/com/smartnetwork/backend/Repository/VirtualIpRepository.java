@@ -1,6 +1,6 @@
 package com.smartnetwork.backend.Repository;
 
-import com.smartnetwork.backend.domain.Entity.VirtualIp;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.VirtualIp;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

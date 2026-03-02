@@ -3,11 +3,11 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.InterfazRepository;
 import com.smartnetwork.backend.Repository.VirtualIpRepository;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.Interfaz;
-import com.smartnetwork.backend.domain.Entity.VirtualIp;
-import com.smartnetwork.backend.domain.dtos.virtualIp.CrearVirtualIpDTO;
-import com.smartnetwork.backend.domain.dtos.virtualIp.VirtualIpDTO;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.VirtualIp;
+import com.smartnetwork.backend.domain.dtos.firewalls.virtualIp.CrearVirtualIpDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.virtualIp.VirtualIpDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

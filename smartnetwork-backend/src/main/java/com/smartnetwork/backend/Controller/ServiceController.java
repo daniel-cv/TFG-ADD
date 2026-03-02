@@ -2,8 +2,8 @@ package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.DispositivoService;
 import com.smartnetwork.backend.Service.ServiceService;
-import com.smartnetwork.backend.domain.Entity.Service;
-import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
+import com.smartnetwork.backend.domain.Entity.firewalls.fortinet.Service;
+import com.smartnetwork.backend.domain.dtos.firewalls.Services.CrearServiceDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 

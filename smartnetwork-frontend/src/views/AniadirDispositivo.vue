@@ -8,6 +8,7 @@
           </v-card-title>
 
           <v-form @submit.prevent="handleSubmit" ref="form">
+
             <!-- Nombre -->
             <v-text-field
               v-model="nombre"
@@ -53,10 +54,35 @@
               required
             />
 
+            <!-- TOKEN (solo FIREWALL) -->
             <v-text-field
+              v-if="tipo === 'FIREWALL'"
               v-model="tooken"
               label="Token"
               prepend-inner-icon="mdi-token"
+              variant="outlined"
+              class="mb-3"
+              required
+            />
+
+            <!-- USUARIO (solo SWITCH) -->
+            <v-text-field
+              v-if="tipo === 'SWITCH'"
+              v-model="usuario"
+              label="Usuario"
+              prepend-inner-icon="mdi-account"
+              variant="outlined"
+              class="mb-3"
+              required
+            />
+
+            <!-- PASSWORD (solo SWITCH) -->
+            <v-text-field
+              v-if="tipo === 'SWITCH'"
+              v-model="password"
+              label="Password"
+              type="password"
+              prepend-inner-icon="mdi-lock"
               variant="outlined"
               class="mb-3"
               required
@@ -80,6 +106,7 @@
             <p v-if="mensaje" class="mt-3 text-center">
               {{ mensaje }}
             </p>
+
           </v-form>
         </v-card>
       </v-col>
@@ -88,27 +115,32 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
 import { useRouter } from "vue-router";
 
 const dispositivoStore = useDispositivoStore();
+const router = useRouter();
 const form = ref(null);
 const mensaje = ref("");
-const router = useRouter();
 
-// Campos del dispositivo
+// Campos principales
 const nombre = ref("");
 const fabricante = ref("");
 const tipo = ref("");
 const ip = ref("");
 const puerto = ref("");
+
+// Credenciales
 const tooken = ref("");
+const usuario = ref("");
+const password = ref("");
 
 // ENUMS (deben coincidir EXACTAMENTE con el backend)
 const fabricantes = ["FORTINET", "CISCO", "ARISTA"];
 const tipos = ["FIREWALL", "SWITCH"];
 
+// Validación IP
 const ipRules = [
   v => !!v || "La IP es obligatoria",
   v =>
@@ -116,7 +148,14 @@ const ipRules = [
       || "Formato de IP no válido"
 ];
 
+// Limpiar credenciales al cambiar tipo
+watch(tipo, () => {
+  tooken.value = "";
+  usuario.value = "";
+  password.value = "";
+});
 
+// Envío del formulario
 const handleSubmit = async () => {
   const { valid } = await form.value.validate();
   if (!valid) return;
@@ -129,12 +168,15 @@ const handleSubmit = async () => {
       ip: ip.value,
       puerto: Number(puerto.value),
       estado: "ONLINE",
-      token: tooken.value,
+      token: tipo.value === "FIREWALL" ? tooken.value : null,
+      usuario: tipo.value === "SWITCH" ? usuario.value : null,
+      password: tipo.value === "SWITCH" ? password.value : null,
     });
+
     router.push("/devices");
-     } catch (error) {
+
+  } catch (error) {
     mensaje.value = "Error al crear el dispositivo";
   }
-    
 };
 </script>
