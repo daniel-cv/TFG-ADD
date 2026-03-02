@@ -32,7 +32,7 @@
 
       <tbody>
         <tr
-          v-for="service in serviceStore.services"
+          v-for="service in serviceStore.reglas"
           :key="service.id"
         >
           <td class="name">

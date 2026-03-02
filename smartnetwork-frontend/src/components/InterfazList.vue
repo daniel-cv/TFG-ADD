@@ -35,7 +35,7 @@
 
       <tbody>
         <tr
-          v-for="interfaz in interfazStore.interfazes"
+          v-for="interfaz in interfazStore.reglas"
           :key="interfaz.id"
         >
           <td class="name">

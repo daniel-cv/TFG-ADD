@@ -32,7 +32,7 @@
 
       <tbody>
         <tr
-          v-for="virtualIp in virtualIpStore.virtualIps"
+          v-for="virtualIp in virtualIpStore.virtualips"
           :key="virtualIp.id"
         >
           <td class="name">

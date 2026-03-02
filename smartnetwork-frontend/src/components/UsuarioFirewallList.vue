@@ -32,7 +32,7 @@
 
       <tbody>
         <tr
-          v-for="usuarioFirewall in usuarioFirewallStore.usuarioFirewalls"
+          v-for="usuarioFirewall in usuarioFirewallStore.reglas"
           :key="usuarioFirewall.id"
         >
           <td class="name">
