@@ -1,16 +1,16 @@
 <template>
-  <div class="policy-list">
+  <div class="service-list">
 
     <!-- HEADER -->
     <div class="table-header">
-      <h2>Policies</h2>
+      <h2>Virtual IPs</h2>
 
       <v-btn
         class="add-btn"
         size="small"
         @click="emit('crear')"
       >
-        Añadir Policy
+        Añadir Virtual IP
       </v-btn>
     </div>
 
@@ -21,45 +21,44 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>IP Origen</th>
-          <th>IP Destino</th>
-          <th>Servicio</th>
+          <th>Interfaz</th>
+          <th>Tipo</th>
+          <th>Comentarios</th>
+          <th>Categoría</th>
+          <th>Comentario</th>
         </tr>
       </thead>
 
 
       <tbody>
         <tr
-          v-for="regla in reglaStore.reglas"
-          :key="regla.id"
+          v-for="virtualIp in virtualIpStore.virtualIps"
+          :key="virtualIp.id"
         >
-
           <td class="name">
-            {{ regla.nombre }}
+            {{ virtualIp.nombre }}
           </td>
 
           <td>
-            {{ regla.origen }}
+            {{ virtualIp.interfaz.nombre }}
           </td>
 
           <td>
-            {{ regla.destino }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipOrigen }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipDestino }}
+            {{ virtualIp.type }}
           </td>
 
           <td>
-            <span class="service-badge">
-              {{ regla.servicio }}
+            {{ virtualIp.comments }}
+          </td>
+
+          <td>
+            <span class="category">
+              {{ virtualIp.categoria }}
             </span>
+          </td>
+
+          <td class="comment">
+            {{ virtualIp.comentario }}
           </td>
 
         </tr>
@@ -73,17 +72,17 @@
 
 
 <script setup>
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
+import { useVirtualIpStore } from '@/stores/virtualIpStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
-const reglaStore = useReglaFirewallStore()
+const virtualIpStore = useVirtualIpStore()
 
 onMounted(() => {
-  reglaStore.cargarReglas(dispositivoId)
+  virtualIpStore.cargarVirtualIps(dispositivoId)
 })
 </script>
 
@@ -93,7 +92,7 @@ onMounted(() => {
 
 /* CONTENEDOR */
 
-.policy-list {
+.service-list {
   width: 100%;
 }
 
@@ -173,17 +172,16 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.ip {
-  font-family: monospace;
-  color: #334155;
+.comment {
+  color: #64748b;
 }
 
 
-/* BADGE SERVICIO */
+/* BADGE */
 
-.service-badge {
-  background: #dbeafe;
-  color: #1d4ed8;
+.category {
+  background: #e0f2fe;
+  color: #0369a1;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;

@@ -63,6 +63,16 @@
       Crear VirtualIP
     </v-btn>
 
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="cancelar()"
+    >
+      Cancelar
+    </v-btn>
+
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
 
   </v-form>
@@ -74,7 +84,7 @@ import { useVirtualIpStore } from "@/stores/virtualIpStore";
 import { useInterfazStore } from "@/stores/interfazStore";
 
 const route = useRoute();
-const emit = defineEmits(["creada"]);
+const emit = defineEmits(['creada', 'cancelar'])
 
 const virtualIpStore = useVirtualIpStore();
 const interfazStore = useInterfazStore();
@@ -100,7 +110,7 @@ const handleCrearVirtualIp = async () => {
       externalIp: externalIp.value,
       internalIp: internalIp.value,
       comments: comments.value,
-      interfazId: interfazId.value,   // 🔑 extintf viene de aquí
+      interfazId: interfazId.value,
       dispositivoId: dispositivoId
     };
 
@@ -112,4 +122,8 @@ const handleCrearVirtualIp = async () => {
     mensaje.value = "Error al crear la VirtualIP";
   }
 };
+
+function cancelar() {
+  emit('cancelar')
+}
 </script>

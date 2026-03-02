@@ -1,16 +1,16 @@
 <template>
-  <div class="policy-list">
+  <div class="service-list">
 
     <!-- HEADER -->
     <div class="table-header">
-      <h2>Policies</h2>
+      <h2>Services</h2>
 
       <v-btn
         class="add-btn"
         size="small"
         @click="emit('crear')"
       >
-        Añadir Policy
+        Añadir Service
       </v-btn>
     </div>
 
@@ -21,45 +21,59 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>IP Origen</th>
-          <th>IP Destino</th>
-          <th>Servicio</th>
+          <th>Tipo</th>
+          <th>VlanId</th>
+          <th>Vdom</th>
+          <th>Modo</th>
+          <th>Ip</th>
+          <th>AllowAccess</th>
+          <th>Role</th>
+          <th>Descripción</th>
         </tr>
       </thead>
 
 
       <tbody>
         <tr
-          v-for="regla in reglaStore.reglas"
-          :key="regla.id"
+          v-for="interfaz in interfazStore.interfazes"
+          :key="interfaz.id"
         >
-
           <td class="name">
-            {{ regla.nombre }}
+            {{ interfaz.name }}
           </td>
 
           <td>
-            {{ regla.origen }}
+            {{ interfaz.tipo }}
           </td>
 
           <td>
-            {{ regla.destino }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipOrigen }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipDestino }}
+            {{ interfaz.vlanid }}
           </td>
 
           <td>
-            <span class="service-badge">
-              {{ regla.servicio }}
+            {{ interfaz.vdom }}
+          </td>
+
+          <td>
+            <span>
+              {{ interfaz.mode }}
             </span>
+          </td>
+
+          <td>
+            {{ interfaz.ip }}
+          </td>
+
+          <td>
+            {{ interfaz.allowaccess }}
+          </td>
+
+          <td>
+            {{ interfaz.role }}
+          </td>
+
+          <td class="comment">
+            {{ interfaz.description }}
           </td>
 
         </tr>
@@ -73,17 +87,17 @@
 
 
 <script setup>
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
+import { useInterfazStore } from '@/stores/interfazStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
-const reglaStore = useReglaFirewallStore()
+const interfazStore = useInterfazStore()
 
 onMounted(() => {
-  reglaStore.cargarReglas(dispositivoId)
+  interfazStore.cargarInterfaces(dispositivoId)
 })
 </script>
 
@@ -93,7 +107,7 @@ onMounted(() => {
 
 /* CONTENEDOR */
 
-.policy-list {
+.service-list {
   width: 100%;
 }
 
@@ -173,17 +187,16 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.ip {
-  font-family: monospace;
-  color: #334155;
+.comment {
+  color: #64748b;
 }
 
 
-/* BADGE SERVICIO */
+/* BADGE */
 
-.service-badge {
-  background: #dbeafe;
-  color: #1d4ed8;
+.category {
+  background: #e0f2fe;
+  color: #0369a1;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;

@@ -37,6 +37,16 @@
       Crear Usuario
     </v-btn>
 
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="cancelar()"
+    >
+      Cancelar
+    </v-btn>
+
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
   </v-form>
 </template>
@@ -47,7 +57,7 @@ import { useRoute } from "vue-router";
 import { useUsuarioFirewallStore } from "@/stores/usuarioFirewallStore";
 
 const route = useRoute();
-const emit = defineEmits(['creado'])
+const emit = defineEmits(['creada', 'cancelar'])
 
 const userStore = useUsuarioFirewallStore()
 
@@ -91,4 +101,8 @@ const handleCrearUsuario = async () => {
     mensaje.value = "Error al crear el usuario";
   }
 };
+
+function cancelar() {
+  emit('cancelar')
+}
 </script>

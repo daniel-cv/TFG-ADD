@@ -4,7 +4,7 @@ import { useUserStore } from "@/stores/userStore";
 import {
   obtenerVirtualIpsPorDispositivo,
   crearVirtualIp
-} from '@/services/virtualIpService'
+} from '@/services/VirtualIpService'
 
 export const useVirtualIpStore = defineStore('virtualIp', {
   state: () => ({

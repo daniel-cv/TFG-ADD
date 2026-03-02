@@ -1,7 +1,7 @@
 import api from './api' // tu axios configurado
 
 export function obtenerInterfacesPorDispositivo(dispositivoId) {
-  return api.get('/api/firewall/interfaz/findById/' + dispositivoId)
+  return api.get('/api/firewall/interfaz/dispositivo/' + dispositivoId)
 }
 
 export function crearInterfaz(interfaz) {

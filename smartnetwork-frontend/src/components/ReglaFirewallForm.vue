@@ -19,7 +19,7 @@
       label="NAT"
     />
     <v-btn color="primary" @click="guardar">Guardar</v-btn>
-    <v-btn text @click="cancelar">Cancelar</v-btn>
+    <v-btn text @click="cancelar()">Cancelar</v-btn>
   </v-card>
 </template>
 

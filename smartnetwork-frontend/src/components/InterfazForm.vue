@@ -104,6 +104,16 @@
       Crear Interfaz
     </v-btn>
 
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="cancelar()"
+    >
+      Cancelar
+    </v-btn>
+
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
 
   </v-form>
@@ -115,7 +125,7 @@ import { useRoute } from "vue-router";
 import { useInterfazStore } from "@/stores/interfazStore";
 
 const route = useRoute();
-const emit = defineEmits(["creada"]);
+const emit = defineEmits(['creada', 'cancelar'])
 
 const interfazStore = useInterfazStore();
 
@@ -172,4 +182,8 @@ const handleCrearInterfaz = async () => {
     mensaje.value = "Error al crear la interfaz";
   }
 };
+
+function cancelar() {
+  emit('cancelar')
+}
 </script>

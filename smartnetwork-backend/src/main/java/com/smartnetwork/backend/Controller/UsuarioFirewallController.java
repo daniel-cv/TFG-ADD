@@ -31,12 +31,9 @@ public class UsuarioFirewallController {
     /**
      * Listar todos los UsuarioFirewall de un dispositivo
      */
-    @GetMapping("/dispositivo/{dispositivoId}")
-    public ResponseEntity<List<UsuarioFirewall>> getAllByDispositivo(
-            @PathVariable Long dispositivoId,
-            @RequestParam String username
-    ) {
-        List<UsuarioFirewall> usuarios = usuarioFirewallService.findAllByDispositivo(dispositivoId, username);
+    @GetMapping("/dispositivo/{id}")
+    public ResponseEntity<List<UsuarioFirewall>> getAllByDispositivo(@PathVariable Long id, Authentication auth) {
+        List<UsuarioFirewall> usuarios = usuarioFirewallService.findAllByDispositivo(id, auth.getName());
         return ResponseEntity.ok(usuarios);
     }
 

@@ -129,19 +129,19 @@ import { useDispositivoStore } from "@/stores/dispositivoStore";
 import ReglaFirewallList from "@/components/ReglaFirewallList.vue"
 import ReglaFirewallForm from "@/components/ReglaFirewallForm.vue"
 
-//import AddressList from "@/components/AddressList.vue"
+import AddressList from "@/components/AddressList.vue"
 import AddressForm from "@/components/AddressForm.vue"
 
 import ServiceList from "@/components/ServiceList.vue"
 import ServiceForm from "@/components/ServiceForm.vue"
 
-//import UsuarioFirewallList from "@/components/UsuarioFirewallList.vue"
+import UsuarioFirewallList from "@/components/UsuarioFirewallList.vue"
 import UsuarioFirewallForm from "@/components/UsuarioFirewallForm.vue"
 
-//import VirtualIpList from "@/components/VirtualIpList.vue"
+import VirtualIpList from "@/components/VirtualIpList.vue"
 import VirtualIpForm from "@/components/VirtualIpForm.vue"
 
-//import InterfazList from "@/components/InterfazList.vue"
+import InterfazList from "@/components/InterfazList.vue"
 import InterfazForm from "@/components/InterfazForm.vue"
 
 
@@ -171,7 +171,7 @@ const componentMap: Record<string, any> = {
     create: ReglaFirewallForm
   },
   address: {
-    //list: AddressList,
+    list: AddressList,
     create: AddressForm
   },
   service: {
@@ -179,15 +179,15 @@ const componentMap: Record<string, any> = {
     create: ServiceForm
   },
   user: {
-    //list: UsuarioFirewallList,
+    list: UsuarioFirewallList,
     create: UsuarioFirewallForm
   },
   vip: {
-    //list: VirtualIpList,
+    list: VirtualIpList,
     create: VirtualIpForm
   },
   interface: {
-    //list: InterfazList,
+    list: InterfazList,
     create: InterfazForm
   }
 }

@@ -55,6 +55,16 @@
       Crear Service
     </v-btn>
 
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="emit('cancelar')"
+    >
+      Cancelar
+    </v-btn>
+
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
   </v-form>
 </template>
@@ -65,7 +75,7 @@ import { useRoute } from "vue-router";
 import { useServiceStore } from "@/stores/serviceStore";
 
 const route = useRoute();
-const emit = defineEmits(['creada'])
+const emit = defineEmits(['creada', 'cancelar'])
 
 const serviceStore = useServiceStore()
 

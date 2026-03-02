@@ -8,6 +8,7 @@
       <v-btn
         class="add-btn"
         size="small"
+        @click="emit('crear')"
       >
         Añadir Service
       </v-btn>
@@ -77,7 +78,7 @@ import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
-
+const emit = defineEmits(['crear'])
 const serviceStore = useServiceStore()
 
 onMounted(() => {

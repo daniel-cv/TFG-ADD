@@ -78,18 +78,28 @@
       Crear Address
     </v-btn>
 
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="emit('cancelar')"
+    >
+      Cancelar
+    </v-btn>
+
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
   </v-form>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
 import { useRoute } from "vue-router";
 import { useInterfazStore } from '@/stores/interfazStore'
 
 const route = useRoute();
-const emit = defineEmits(['creada'])
+const emit = defineEmits(['creada', 'cancelar'])
 const props = defineProps({
   dispositivoId: {
     type: Number,

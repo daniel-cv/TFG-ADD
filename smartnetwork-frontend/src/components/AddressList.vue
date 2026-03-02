@@ -1,16 +1,16 @@
 <template>
-  <div class="policy-list">
+  <div class="service-list">
 
     <!-- HEADER -->
     <div class="table-header">
-      <h2>Policies</h2>
+      <h2>Services</h2>
 
       <v-btn
         class="add-btn"
         size="small"
         @click="emit('crear')"
       >
-        Añadir Policy
+        Añadir Service
       </v-btn>
     </div>
 
@@ -21,45 +21,44 @@
       <thead>
         <tr>
           <th>Nombre</th>
-          <th>Origen</th>
-          <th>Destino</th>
-          <th>IP Origen</th>
+          <th>Tipo</th>
+          <th>IP</th>
+          <th>Interfaz</th>
+          <th>Comentario</th>
           <th>IP Destino</th>
-          <th>Servicio</th>
         </tr>
       </thead>
 
 
       <tbody>
         <tr
-          v-for="regla in reglaStore.reglas"
-          :key="regla.id"
+          v-for="address in addressStore.addresses"
+          :key="address.id"
         >
-
           <td class="name">
-            {{ regla.nombre }}
+            {{ address.name }}
           </td>
 
           <td>
-            {{ regla.origen }}
+            {{ address.type }}
           </td>
 
           <td>
-            {{ regla.destino }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipOrigen }}
-          </td>
-
-          <td class="ip">
-            {{ regla.ipDestino }}
+            {{ address.ip }}
           </td>
 
           <td>
-            <span class="service-badge">
-              {{ regla.servicio }}
+            {{ address.interfaz ? address.interfaz.name : 'N/A' }}
+          </td>
+
+          <td>
+            <span class="comment">
+              {{ address.comentario ? address.comentario : 'Sin comentario' }}
             </span>
+          </td>
+
+          <td>
+            {{ address.ipdestino ? address.ipdestino : '' }}
           </td>
 
         </tr>
@@ -73,17 +72,17 @@
 
 
 <script setup>
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
+import { useAddressStore } from '@/stores/addressStores'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
-const reglaStore = useReglaFirewallStore()
+const addressStore = useAddressStore()
 
 onMounted(() => {
-  reglaStore.cargarReglas(dispositivoId)
+  addressStore.cargarAddresses(dispositivoId)
 })
 </script>
 
@@ -93,7 +92,7 @@ onMounted(() => {
 
 /* CONTENEDOR */
 
-.policy-list {
+.service-list {
   width: 100%;
 }
 
@@ -173,17 +172,16 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.ip {
-  font-family: monospace;
-  color: #334155;
+.comment {
+  color: #64748b;
 }
 
 
-/* BADGE SERVICIO */
+/* BADGE */
 
-.service-badge {
-  background: #dbeafe;
-  color: #1d4ed8;
+.category {
+  background: #e0f2fe;
+  color: #0369a1;
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 12px;
