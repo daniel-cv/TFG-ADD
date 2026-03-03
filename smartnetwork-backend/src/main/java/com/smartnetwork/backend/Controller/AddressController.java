@@ -30,4 +30,12 @@ public class AddressController {
     ) {
         return addressService.listarPorDispositivo(id, auth.getName());
     }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        addressService.eliminarAddress(id, auth.getName());
+    }
 }

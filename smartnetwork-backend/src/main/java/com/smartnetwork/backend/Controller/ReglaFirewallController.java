@@ -31,4 +31,10 @@ public class ReglaFirewallController {
 
         return reglaFirewallService.obtenerPorDispositivo(id, authentication.getName());
     }
+
+    // 🔥 NUEVO: eliminar
+    @DeleteMapping("/{reglaId}")
+    public void eliminar(@PathVariable Long reglaId, Authentication auth) {
+        reglaFirewallService.eliminarRegla(reglaId, auth.getName());
+    }
 }

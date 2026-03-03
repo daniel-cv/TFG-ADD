@@ -3,7 +3,8 @@ import { useUserStore } from "@/stores/userStore";
 
 import {
   obtenerAddressesPorDispositivo,
-  crearAddress
+  crearAddress,
+  eliminarAddress as eliminarAddressService
 } from '@/services/addressService'
 
 export const useAddressStore = defineStore('address', {
@@ -40,7 +41,16 @@ export const useAddressStore = defineStore('address', {
         this.mensaje = "Error al crear la address";
         throw error;
       }
-    }
+    },
 
+     async eliminarAddress(id) {
+  try {
+    await eliminarAddressService(id)  // Llamamos al service importado
+    this.addresses = this.addresses.filter(a => a.id !== id) // opcional: actualizar localmente
+  } catch (error) {
+    console.error("Error eliminando address", error)
+    throw error
+  }
+}
   }
 })

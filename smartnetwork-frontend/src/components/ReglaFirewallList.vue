@@ -26,6 +26,7 @@
           <th>IP Origen</th>
           <th>IP Destino</th>
           <th>Servicio</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
@@ -62,6 +63,16 @@
             </span>
           </td>
 
+          <td class="actions">
+                <v-btn
+                    class="rounded-0 px-4"
+                    color="red"
+                    size="small"
+                    @click="eliminarRegla(regla.id)"
+                   >
+                  <span style="color: white; font-weight: bold;">ELIMINAR</span>
+                </v-btn>
+        </td>
         </tr>
       </tbody>
 
@@ -73,10 +84,12 @@
 
 
 <script setup>
+import { useRouter } from 'vue-router'
 import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
+const router = useRouter()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
@@ -85,6 +98,26 @@ const reglaStore = useReglaFirewallStore()
 onMounted(() => {
   reglaStore.cargarReglas(dispositivoId)
 })
+
+function irANuevaRegla() {
+  router.push({
+    name: 'crearpolicy',
+    params: { id: dispositivoId }
+  })
+}
+
+// 🔥 NUEVO MÉTODO PARA ELIMINAR
+async function eliminarRegla(reglaId) {
+  const ok = confirm('¿Seguro que quieres eliminar esta regla de firewall?')
+  if (!ok) return
+
+  try {
+    await reglaStore.eliminarRegla(reglaId) // ✅ solo reglaId
+    await reglaStore.cargarReglas(dispositivoId) // esto sí necesitas para recargar la lista
+  } catch (e) {
+    alert('Error eliminando la regla')
+  }
+}
 </script>
 
 
