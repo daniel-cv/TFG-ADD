@@ -8,7 +8,7 @@ import {
 
 export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
   state: () => ({
-    reglas: [],
+    usuarios: [],
     cargando: false,
     mensaje: "",
   }),
