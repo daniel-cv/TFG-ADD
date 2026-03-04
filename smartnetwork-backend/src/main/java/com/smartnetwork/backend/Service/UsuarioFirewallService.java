@@ -8,7 +8,7 @@ import com.smartnetwork.backend.domain.dtos.usuarioFirewall.CreaUsuarioFirewallD
 import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
+import org.springframework.http.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -109,16 +109,46 @@ public class UsuarioFirewallService {
     /**
      * Eliminar un UsuarioFirewall
      */
-    public void delete(UsuarioFirewall usuarioFirewall, String username, Long dispositivoId) {
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+    public void eliminar(Long usuarioFirewallId, String username) {
+
+        UsuarioFirewall usuarioFirewall = usuarioFirewallRepository.findById(usuarioFirewallId)
+                .orElseThrow(() -> new RuntimeException("UsuarioFirewall no existe"));
+
+        Dispositivo dispositivo = usuarioFirewall.getDispositivo();
 
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
-        usuarioFirewallRepository.delete(usuarioFirewall);
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/user/local/"
+                + usuarioFirewall.getNombre()
+                + "?vdom=root";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(dispositivo.getToken());
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
+
+        try {
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                usuarioFirewallRepository.delete(usuarioFirewall);
+            } else {
+                throw new RuntimeException("FortiGate error: " + response.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando usuario en FortiGate", e);
+        }
     }
 }
 

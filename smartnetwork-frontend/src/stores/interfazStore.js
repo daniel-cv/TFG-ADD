@@ -3,7 +3,8 @@ import { useUserStore } from "@/stores/userStore";
 
 import {
   obtenerInterfacesPorDispositivo,
-  crearInterfaz
+  crearInterfaz,
+  eliminarInterfaz as apiEliminarInterfaz
 } from '@/services/interfazService'
 
 export const useInterfazStore = defineStore('interfaz', {
@@ -40,7 +41,15 @@ export const useInterfazStore = defineStore('interfaz', {
         this.mensaje = "Error al crear la interfaz";
         throw error;
       }
-    }
+    },
 
+
+    async eliminarInterfaz(id) {
+       try {
+        await interfazStore.eliminarInterfaz(id)
+      } catch (error) {
+        console.error(error)
+      }
+  }
   }
 })

@@ -9,3 +9,7 @@ export function crearInterfaz(interfaz) {
     ...interfaz
   })
 }
+
+export function eliminarInterfaz(id) {
+  return api.delete('/api/firewall/interfaz/' + id)
+}

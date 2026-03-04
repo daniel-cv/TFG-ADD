@@ -22,10 +22,10 @@
         <tr>
           <th>Nombre</th>
           <th>Tipo</th>
-          <th>IP</th>
+          <th>IP/IP inicio</th>
           <th>Interfaz</th>
           <th>Comentario</th>
-          <th>IP Destino</th>
+          <th>Máscara/IP Final</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -84,26 +84,26 @@
 
 
 <script setup>
-import { useAddressStore } from '@/stores/addressStores'
+import { useInterfazStore } from '@/stores/interfazStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
-const addressStore = useAddressStore()
-const eliminarAddress = async (id) => {
+const interfazStore = useInterfazStore()
+
+const eliminarInterfaz = async (id) => {
   try {
-    // Llamamos al store para eliminar
-    await addressStore.eliminarAddress(id)
-    // Recargamos la lista
-    await addressStore.cargarAddresses(dispositivoId)
+    await interfazStore.eliminarInterfaz(id)
+    await interfazStore.cargarInterfaces(dispositivoId)
   } catch (error) {
-    console.error("Error eliminando address", error)
+    console.error("Error eliminando interfaz", error)
   }
 }
+
 onMounted(() => {
-  addressStore.cargarAddresses(dispositivoId)
+  interfazStore.cargarInterfaces(dispositivoId)
 })
 </script>
 

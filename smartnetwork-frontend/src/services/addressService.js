@@ -11,5 +11,5 @@ export function crearAddress(address) {
 }
 
 export function eliminarAddress(id) {
-  return api.delete('/api/firewalls/address/' + id)
+  return api.delete('/api/firewalls/addresses/' + id)
 }

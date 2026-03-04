@@ -3,7 +3,8 @@ import { useUserStore } from "@/stores/userStore";
 
 import {
   obtenerUsuarioFirewallPorDispositivo,
-  crearUsuarioFirewall
+  crearUsuarioFirewall,
+  eliminarUsuarioFirewall as apiEliminarUsuarioFirewall
 } from '@/services/usuarioFirewallService'
 
 export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
@@ -14,10 +15,11 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
   }),
 
   actions: {
+
     async cargarUsuarioFirewall(dispositivoId) {
       this.cargando = true
       const res = await obtenerUsuarioFirewallPorDispositivo(dispositivoId)
-      this.reglas = res.data
+      this.usuarios = res.data
       this.cargando = false
     },
 
@@ -31,7 +33,6 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
         }
 
         const res = await crearUsuarioFirewall(usuarioFirewall);
-
         this.mensaje = "Usuario Firewall creado correctamente";
         return res.data;
 
@@ -40,7 +41,16 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
         this.mensaje = "Error al crear el usuario firewall";
         throw error;
       }
-    }
+    },
 
+    async eliminarUsuarioFirewall(id) {
+      try {
+        await apiEliminarUsuarioFirewall(id)
+        this.usuarios = this.usuarios.filter(u => u.id !== id)
+      } catch (error) {
+        console.error("Error eliminando usuario firewall:", error)
+        this.mensaje = "Error eliminando usuario firewall"
+      }
+    }
   }
 })
