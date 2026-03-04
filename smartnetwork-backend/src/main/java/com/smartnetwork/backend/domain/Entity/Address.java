@@ -32,7 +32,7 @@ public class Address {
 
     private String comentario;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private String ipdestino;
 
     @ManyToOne

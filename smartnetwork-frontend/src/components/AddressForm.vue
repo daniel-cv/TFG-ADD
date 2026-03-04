@@ -31,6 +31,7 @@
       class="mb-3"
       required
     />
+    
     <!-- IP DESTINO (solo iprange) -->
     <v-text-field
       v-if="type === 'iprange'"
@@ -41,9 +42,9 @@
       class="mb-3"
       required
     />
-    <!-- MASCARA SI IPMASK -->
+    <!-- MASCARA SI IPMASK O SUBNET -->
     <v-text-field
-        v-if="type === 'ipmask'"
+        v-if="type === 'ipmask' || type === 'subnet'"
         v-model="ipdestino"
         label="Máscara"
         prepend-inner-icon="mdi-ip"
@@ -128,8 +129,9 @@ const handleCrearAddress = async () => {
       name: name.value,
       ip: ip.value,
       type: type.value,
+      // Enviamos ipdestino si es iprange, ipmask o subnet
       ipdestino:
-        type.value === 'iprange' || type.value === 'ipmask'
+        type.value === 'iprange' || type.value === 'ipmask' || type.value === 'subnet'
         ? ipdestino.value
         : null,
       interfazId: interfazId.value || null,
@@ -140,7 +142,6 @@ const handleCrearAddress = async () => {
     await addressStore.crearAddress(payload);
 
     mensaje.value = "Address creada correctamente";
-
     emit("creada");
   } catch (error) {
     mensaje.value = "Error al crear la address";
