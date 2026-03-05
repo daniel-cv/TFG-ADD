@@ -103,13 +103,12 @@ const fabricante = ref("");
 const tipo = ref("");
 const ip = ref("");
 const puerto = ref("");
+const tooken = ref("");
 
 // ENUMS (deben coincidir EXACTAMENTE con el backend)
 const fabricantes = ["FORTINET", "CISCO", "ARISTA"];
 const tipos = ["FIREWALL", "SWITCH"];
-const token = [
-  v => !!v || "El token es obligatorio"
-];
+
 const ipRules = [
   v => !!v || "La IP es obligatoria",
   v =>
@@ -130,7 +129,7 @@ const handleSubmit = async () => {
       ip: ip.value,
       puerto: Number(puerto.value),
       estado: "ONLINE",
-      token: "aaaaaaaa"
+      token: tooken.value,
     });
     router.push("/devices");
      } catch (error) {

@@ -43,6 +43,9 @@ export const useUserStore = defineStore("user", {
 
         const token = response.data.token;
 
+        localStorage.setItem("token", token);
+        localStorage.setItem("username", username);
+
         this.usuarioActual = { username, token };
         this.autenticado = true;
 
@@ -58,10 +61,25 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    cargarSesion() {
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        if (token) {
+          this.usuarioActual = { username, token };
+          this.autenticado = true;
+        
+          api.defaults.headers.common["Authorization"] =
+            "Bearer " + token;
+        }
+    },
+
     logout() {
-      this.usuarioActual = null;
-      this.autenticado = false;
-      this.mensaje = "";
+      localStorage.removeItem("token")
+      localStorage.removeItem("username")
+
+      this.usuarioActual = null
+      this.autenticado = false
 
       delete api.defaults.headers.common["Authorization"];
     }

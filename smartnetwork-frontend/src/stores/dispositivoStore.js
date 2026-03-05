@@ -43,6 +43,7 @@ export const useDispositivoStore = defineStore("dispositivo", {
           puerto: dispositivo.puerto,
           fabricante: dispositivo.fabricante,
           estado: "ONLINE",
+          token: dispositivo.token,
         });
 
         this.dispositivos.push(response.data);
@@ -54,6 +55,24 @@ export const useDispositivoStore = defineStore("dispositivo", {
         console.error(error);
         this.mensaje = "Error al crear el dispositivo";
         throw error;
+      }
+    },
+    async getDispositivo(id) {
+      try {
+        const userStore = useUserStore();
+
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return null;
+        }
+
+        const response = await api.get(`/api/dispositivos/${id}`);
+        return response.data;
+
+      } catch (error) {
+        console.error(error);
+        this.mensaje = "Error al obtener el dispositivo";
+        return null;
       }
     },
     },

@@ -1,8 +1,9 @@
 package com.smartnetwork.backend.Controller;
 
-import com.smartnetwork.backend.Repository.ReglaFirewallRepository;
 import com.smartnetwork.backend.Service.ReglaFirewallService;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
+import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,22 +13,27 @@ import java.util.List;
 @RequestMapping("/api/firewalls/reglas")
 public class ReglaFirewallController {
 
-    private final ReglaFirewallService service;
+    private final ReglaFirewallService reglaFirewallService;
 
-    public ReglaFirewallController(ReglaFirewallService service) {
-        this.service = service;
+    public ReglaFirewallController(ReglaFirewallService reglaFirewallService) {
+        this.reglaFirewallService = reglaFirewallService;
     }
 
     @PostMapping
-    public ReglaFirewall crear(@RequestBody ReglaFirewall regla, Authentication authentication) {
-        String name = authentication.getName();
-        return service.crearRegla(regla, name);
+    public ReglaFirewallDTO crear(@RequestBody CrearReglaFirewallDTO dto, Authentication auth) {
+        return reglaFirewallService.crearRegla(dto, auth.getName());
     }
 
     @GetMapping("/dispositivo/{id}")
-    public List<ReglaFirewall> listar(@PathVariable Long id,
-                                      Authentication authentication) {
-        String name = authentication.getName();
-        return service.obtenerPorDispositivo(id, name);
+    public List<ReglaFirewall> listar(
+            @PathVariable Long id,
+            Authentication authentication) {
+
+        return reglaFirewallService.obtenerPorDispositivo(id, authentication.getName());
+    }
+
+    @DeleteMapping("/{reglaId}")
+    public void eliminar(@PathVariable Long reglaId, Authentication auth) {
+        reglaFirewallService.eliminarRegla(reglaId, auth.getName());
     }
 }
