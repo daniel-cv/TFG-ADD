@@ -10,7 +10,7 @@
         size="small"
         @click="emit('crear')"
       >
-        Añadir Service
+        Añadir Interfaz
       </v-btn>
     </div>
 
@@ -29,6 +29,7 @@
           <th>AllowAccess</th>
           <th>Role</th>
           <th>Descripción</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
@@ -72,8 +73,19 @@
             {{ interfaz.role }}
           </td>
 
-          <td class="comment">
+          <td>
             {{ interfaz.description }}
+          </td>
+          
+          <td>
+            <v-btn
+                    class="rounded-0 px-4"
+                    color="red"
+                    size="small"
+                    @click="eliminarInterfaz(interfaz.id)"
+                   >
+                  <span style="color: white; font-weight: bold;">ELIMINAR</span>
+                </v-btn>
           </td>
 
         </tr>

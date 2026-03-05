@@ -6,8 +6,12 @@ import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import java.util.List;
 import java.util.Map;
 
@@ -92,5 +96,64 @@ public class ReglaFirewallService {
         dto.setHabilitada(regla.isHabilitada());
         dto.setDispositivoId(regla.getDispositivo().getId());
         return dto;
+    }
+
+    public void eliminarRegla(Long reglaId, String username) {
+        // 1️⃣ Obtener la regla de la base de datos
+        ReglaFirewall reglaFirewall = reglaRepo.findById(reglaId)
+                .orElseThrow(() -> new RuntimeException("Regla no existe"));
+
+        // 2️⃣ Validar que el usuario es propietario
+        if (!reglaFirewall.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        Dispositivo dispositivo = reglaFirewall.getDispositivo();
+        String policyName = reglaFirewall.getNombre(); // nombre de la regla en FortiGate
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(dispositivo.getToken());
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
+
+        try {
+            // 3️⃣ Obtener todas las políticas de FortiGate
+            String getUrl = "http://" + dispositivo.getIp() + "/api/v2/cmdb/firewall/policy?vdom=root";
+            ResponseEntity<Map> response = restTemplate.exchange(getUrl, HttpMethod.GET, requestEntity, Map.class);
+
+            if (response.getStatusCode() != HttpStatus.OK || !response.hasBody()) {
+                throw new RuntimeException("No se pudieron obtener las políticas de FortiGate");
+            }
+
+            // 4️⃣ Buscar la policyId correspondiente al nombre
+            List<Map<String, Object>> policies = (List<Map<String, Object>>) response.getBody().get("results");
+            Integer policyId = null;
+
+            for (Map<String, Object> policy : policies) {
+                if (policyName.equals(policy.get("name"))) {
+                    policyId = (Integer) policy.get("policyid");
+                    break;
+                }
+            }
+
+            if (policyId == null) {
+                throw new RuntimeException("No se encontró la regla en FortiGate con nombre: " + policyName);
+            }
+
+            // 5️⃣ Eliminar la política en FortiGate usando policyId
+            String deleteUrl = "http://" + dispositivo.getIp() + "/api/v2/cmdb/firewall/policy/" + policyId + "?vdom=root";
+            ResponseEntity<String> deleteResponse = restTemplate.exchange(deleteUrl, HttpMethod.DELETE, requestEntity, String.class);
+
+            if (deleteResponse.getStatusCode() == HttpStatus.OK) {
+                // ✅ Eliminación exitosa → borrar de BBDD
+                reglaRepo.delete(reglaFirewall);
+            } else {
+                throw new RuntimeException("FortiGate respondió con estado: " + deleteResponse.getStatusCode());
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Error eliminando regla en FortiGate (nombre=" + policyName + ")", e);
+        }
     }
 }

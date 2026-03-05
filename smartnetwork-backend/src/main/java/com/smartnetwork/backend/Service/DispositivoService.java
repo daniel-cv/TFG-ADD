@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import tools.jackson.databind.ObjectMapper;
+
 
 import java.net.http.HttpResponse;
 import java.util.HashMap;

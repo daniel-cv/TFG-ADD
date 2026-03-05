@@ -9,3 +9,7 @@ export function crearAddress(address) {
     ...address
   })
 }
+
+export function eliminarAddress(id) {
+  return api.delete('/api/firewalls/addresses/' + id)
+}

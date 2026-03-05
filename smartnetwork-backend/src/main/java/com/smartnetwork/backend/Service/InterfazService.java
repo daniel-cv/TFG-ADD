@@ -1,12 +1,14 @@
 package com.smartnetwork.backend.Service;
-
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.InterfazRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Interfaz;
 import com.smartnetwork.backend.domain.dtos.interfaz.CrearInterfazDTO;
 import com.smartnetwork.backend.domain.dtos.interfaz.InterfazDTO;
-import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 import java.util.Map;
@@ -111,5 +113,60 @@ public class InterfazService {
         dto.setDispositivoId(interfaz.getDispositivo().getId());
 
         return dto;
+    }
+
+    public void eliminar(Long interfazId, String username) {
+
+        // 1️⃣ Obtener la interfaz de la BBDD
+        Interfaz interfaz = interfazRepo.findById(interfazId)
+                .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+
+        // 2️⃣ Validar que el usuario es propietario del dispositivo
+        if (!interfaz.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        Dispositivo dispositivo = interfaz.getDispositivo();
+        String interfazName = interfaz.getName();
+
+        // 3️⃣ Preparar llamada a FortiGate
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/system/interface/"
+                + interfazName
+                + "?vdom=root";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(dispositivo.getToken());
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+
+                // ✅ Primero FortiGate OK → luego BBDD
+                interfazRepo.delete(interfaz);
+
+            } else {
+
+                throw new RuntimeException(
+                        "FortiGate respondió con estado: " + response.getStatusCode()
+                );
+            }
+
+        } catch (Exception e) {
+
+            // ❌ No tocar BBDD si falla FortiGate
+            throw new RuntimeException(
+                    "Error eliminando Interfaz en FortiGate (Interfaz=" + interfazName + ")", e
+            );
+        }
     }
 }

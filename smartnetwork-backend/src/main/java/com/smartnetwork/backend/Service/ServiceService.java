@@ -121,6 +121,5 @@ public class ServiceService {
             throw new RuntimeException("No autorizado");
         }
 
-        serviceRepository.delete(service);
     }
 }

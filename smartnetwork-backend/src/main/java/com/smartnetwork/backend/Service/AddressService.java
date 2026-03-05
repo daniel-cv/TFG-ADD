@@ -7,9 +7,12 @@ import com.smartnetwork.backend.Service.FortiGateService;
 import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Interfaz;
+import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
 import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
 import java.util.Map;
@@ -107,6 +110,56 @@ public class AddressService {
             dto.setInterfazId(address.getInterfaz().getId());
         }
         return dto;
+    }
+
+    public void eliminarAddress(Long addressId, String username) {
+        // 1️⃣ Obtener la address de la BBDD
+        Address address = addressRepo.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address no existe"));
+
+        // 2️⃣ Validar que el usuario es propietario del dispositivo
+        if (!address.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        Dispositivo dispositivo = address.getDispositivo();
+        String addressName = address.getName();
+
+        // 3️⃣ Preparar llamada a FortiGate
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/firewall/address/"
+                + addressName
+                + "?vdom=root";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(dispositivo.getToken());
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // ✅ Primero FortiGate OK → luego BBDD
+                addressRepo.delete(address);
+            } else {
+                throw new RuntimeException(
+                        "FortiGate respondió con estado: " + response.getStatusCode()
+                );
+            }
+
+        } catch (Exception e) {
+            // ❌ No tocar BBDD si falla FortiGate
+            throw new RuntimeException(
+                    "Error eliminando Address en FortiGate (Address=" + addressName + ")", e
+            );
+        }
     }
 
 }

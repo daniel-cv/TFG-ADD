@@ -66,17 +66,16 @@ public class UsuarioFirewallController {
         return ResponseEntity.ok(updated);
     }
 
+
     /**
      * Eliminar un UsuarioFirewall
      */
-    @DeleteMapping("/{usuarioFirewallId}/dispositivo/{dispositivoId}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable Long usuarioFirewallId,
-            @PathVariable Long dispositivoId,
-            @RequestParam String username,
-            @RequestBody UsuarioFirewall usuarioFirewall
+            @PathVariable Long id,
+            Authentication auth
     ) {
-        usuarioFirewallService.delete(usuarioFirewall, username, dispositivoId);
+        usuarioFirewallService.eliminar(id, auth.getName());
         return ResponseEntity.noContent().build();
     }
 }

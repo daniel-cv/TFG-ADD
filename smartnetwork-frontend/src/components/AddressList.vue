@@ -10,7 +10,7 @@
         size="small"
         @click="emit('crear')"
       >
-        Añadir Service
+        Añadir Address
       </v-btn>
     </div>
 
@@ -22,10 +22,11 @@
         <tr>
           <th>Nombre</th>
           <th>Tipo</th>
-          <th>IP</th>
+          <th>IP/IP inicio</th>
           <th>Interfaz</th>
           <th>Comentario</th>
-          <th>IP Destino</th>
+          <th>Máscara/IP Final</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
@@ -61,6 +62,17 @@
             {{ address.ipdestino ? address.ipdestino : '' }}
           </td>
 
+          <td>
+            <v-btn
+                    class="rounded-0 px-4"
+                    color="red"
+                    size="small"
+                    @click="eliminarAddress(address.id)"
+                   >
+                  <span style="color: white; font-weight: bold;">ELIMINAR</span>
+                </v-btn>
+          </td>
+
         </tr>
       </tbody>
 
@@ -80,6 +92,15 @@ const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const addressStore = useAddressStore()
+
+const eliminarAddress = async (id) => {
+  try {
+    await addressStore.eliminarAddress(id)
+    await addressStore.cargarAddresses(dispositivoId)
+  } catch (error) {
+    console.error("Error eliminando address", error)
+  }
+}
 
 onMounted(() => {
   addressStore.cargarAddresses(dispositivoId)
@@ -133,7 +154,7 @@ onMounted(() => {
 .professional-table {
   background: white;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 
