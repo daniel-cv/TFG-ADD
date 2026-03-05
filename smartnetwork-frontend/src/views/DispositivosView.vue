@@ -61,14 +61,7 @@
             >
               Configurar
             </v-btn>
-
-            <v-btn
-              variant="text"
-              class="action-btn-secondary"
-              @click.stop="crearInterfaz(d.id)"
-            >
-              Interfaces
-            </v-btn>
+            
           </div>
         </v-card>
       </v-col>
