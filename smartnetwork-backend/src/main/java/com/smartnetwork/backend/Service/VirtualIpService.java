@@ -38,7 +38,8 @@ public class VirtualIpService {
 
     public VirtualIpDTO crear(CrearVirtualIpDTO dto, String username) {
 
-        if (dto.getDispositivoId() == null) throw new RuntimeException("dispositivoId obligatorio");
+        if (dto.getDispositivoId() == null)
+            throw new RuntimeException("dispositivoId obligatorio");
 
         Dispositivo dispositivo = dispositivoRepo.findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
@@ -46,33 +47,32 @@ public class VirtualIpService {
         if (!dispositivo.getUsuario().getUsername().equals(username))
             throw new RuntimeException("No autorizado");
 
-
-
+        // Crear VirtualIp en memoria (no guardado aún)
         VirtualIp vip = new VirtualIp();
         vip.setName(dto.getName());
         vip.setComments(dto.getComments());
-        if(dto.getInterfazId()!=null) {
+        if (dto.getInterfazId() != null) {
             Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
                     .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
             vip.setInterfaz(interfaz);
         }
-
         vip.setType(dto.getType());
         vip.setExternal_ip(dto.getExternalIp());
         vip.setInternal_ip(dto.getInternalIp());
         vip.setDispositivo(dispositivo);
 
-        VirtualIp saved = virtualIpRepo.save(vip);
-
-        Map<String, Object> result = fortiGateService.crearVirtualIp(dispositivo, saved);
+        // 🔹 PUSH AL FORTIGATE ANTES DE GUARDAR
+        Map<String, Object> result = fortiGateService.crearVirtualIp(dispositivo, vip);
 
         if (!(Boolean) result.get("success")) {
             throw new RuntimeException("Error creando VirtualIP en FortiGate: " + result);
         }
 
+        // 🔹 Guardamos solo si FortiGate tuvo éxito
+        VirtualIp saved = virtualIpRepo.save(vip);
+
         return toDTO(saved);
     }
-
     public List<VirtualIpDTO> listarPorDispositivo(Long dispositivoId, String username) {
 
         Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)

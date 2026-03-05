@@ -60,9 +60,7 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
     this.mensaje = "Regla eliminada correctamente"
 
   } catch (error) {
-    console.error(error)
-    this.mensaje = "Error al eliminar la regla"
-    throw error
+    console.error("Error al eliminar la regla",error)
   }
 }
 

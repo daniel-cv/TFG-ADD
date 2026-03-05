@@ -89,7 +89,7 @@ const handleCrearUsuario = async () => {
 
     mensaje.value = "Usuario creado correctamente";
 
-    emit("creado");
+    emit("creada");
 
     // Reset
     name.value = "";

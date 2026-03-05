@@ -53,6 +53,7 @@ public class InterfazService {
             }
         }
 
+        // Crear objeto Interfaz en memoria (no guardado aún)
         Interfaz interfaz = new Interfaz();
         interfaz.setName(dto.getName());
         interfaz.setTipo(dto.getTipo());
@@ -66,16 +67,18 @@ public class InterfazService {
         interfaz.setDescription(dto.getDescription());
         interfaz.setDispositivo(dispositivo);
 
-        Interfaz saved = interfazRepo.save(interfaz);
-
+        // 🔹 Llamamos a FortiGate antes de guardar
         Map<String, Object> resultado =
-                fortiGateService.crearInterfaz(saved.getDispositivo(), saved);
+                fortiGateService.crearInterfaz(dispositivo, interfaz);
 
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
                     "Error creando interfaz en FortiGate: " + resultado
             );
         }
+
+        // 🔹 Guardamos solo si FortiGate tuvo éxito
+        Interfaz saved = interfazRepo.save(interfaz);
 
         return toDTO(saved);
     }

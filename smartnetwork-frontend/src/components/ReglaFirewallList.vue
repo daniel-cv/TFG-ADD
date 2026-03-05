@@ -50,11 +50,11 @@
           </td>
 
           <td class="ip">
-            {{ regla.ipOrigen }}
+            {{ regla.iporigen }}
           </td>
 
           <td class="ip">
-            {{ regla.ipDestino }}
+            {{ regla.ipdestino }}
           </td>
 
           <td>
@@ -106,11 +106,7 @@ function irANuevaRegla() {
   })
 }
 
-// 🔥 NUEVO MÉTODO PARA ELIMINAR
 async function eliminarRegla(reglaId) {
-  const ok = confirm('¿Seguro que quieres eliminar esta regla de firewall?')
-  if (!ok) return
-
   try {
     await reglaStore.eliminarRegla(reglaId) // ✅ solo reglaId
     await reglaStore.cargarReglas(dispositivoId) // esto sí necesitas para recargar la lista

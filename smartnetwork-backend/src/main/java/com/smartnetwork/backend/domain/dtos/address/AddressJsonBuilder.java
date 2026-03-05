@@ -69,7 +69,7 @@ public class AddressJsonBuilder {
         """.formatted(
                 address.getName(),
                 address.getIp(),
-                address.getIp() + " " + address.getIpdestino(),
+                address.getIp(),
                 sanitize(address.getComentario())
         );
     }

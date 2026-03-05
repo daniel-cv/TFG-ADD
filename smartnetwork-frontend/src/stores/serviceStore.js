@@ -49,7 +49,7 @@ export const useServiceStore = defineStore('service', {
             this.services = this.services.filter(a => a.id !== id) // opcional: actualizar localmente
           } catch (error) {
             console.error("Error eliminando service", error)
-            throw error
+            this.mensaje = "Error eliminando service"
           }
         }
 

@@ -52,35 +52,38 @@ public class AddressService {
             throw new RuntimeException("No autorizado");
         }
 
+        // Crear objeto Address en memoria (no guardado aún)
         Address address = new Address();
         address.setName(dto.getName());
         address.setType(dto.getType());
         address.setIp(dto.getIp());
         String ipDestino = dto.getIpdestino();
         if(ipDestino != null && !ipDestino.isBlank()){
-            address.setIpdestino(ipDestino.trim()); // eliminar espacios
+            address.setIpdestino(ipDestino.trim());
         } else {
-            address.setIpdestino(null); // evita string vacío
+            address.setIpdestino(null);
         }
         address.setComentario(dto.getComentario());
         address.setDispositivo(dispositivo);
 
-        // Interfaz (opcional)
+        // Interfaz opcional
         if (dto.getInterfazId() != null) {
             Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
                     .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
             address.setInterfaz(interfaz);
         }
 
-        Address saved = addressRepo.save(address);
-        Map<String, Object> resultado =
-        fortiGateService.crearAddress(saved.getDispositivo(), saved);
+        // 🔹 Llamamos a FortiGate antes de guardar
+        Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
 
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
                     "Error creando policy en FortiGate: " + resultado
             );
         }
+
+        // 🔹 Guardamos solo si FortiGate tuvo éxito
+        Address saved = addressRepo.save(address);
         return toDTO(saved);
     }
 

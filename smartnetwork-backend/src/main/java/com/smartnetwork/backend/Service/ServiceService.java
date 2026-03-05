@@ -38,7 +38,9 @@ public class ServiceService {
             throw new RuntimeException("No autorizado");
         }
 
-        com.smartnetwork.backend.domain.Entity.Service service = new com.smartnetwork.backend.domain.Entity.Service();
+        // Crear objeto Service en memoria (no guardado todavía)
+        com.smartnetwork.backend.domain.Entity.Service service =
+                new com.smartnetwork.backend.domain.Entity.Service();
         service.setNombre(dto.getNombre());
         service.setDispositivo(dispositivo);
         service.setTipoProtocolo(dto.getTipoProtocolo());
@@ -46,16 +48,17 @@ public class ServiceService {
         service.setIp(dto.getIp());
         service.setComentario(dto.getComentario());
 
-        serviceRepository.save(service);
-
-        Map<String, Object> resultado =
-                fortiGateService.crearServicio(dispositivo, service);
+        // 🔹 PUSH AL FORTIGATE ANTES DE GUARDAR
+        Map<String, Object> resultado = fortiGateService.crearServicio(dispositivo, service);
 
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
                     "Error creando service en FortiGate: " + resultado
             );
         }
+
+        // 🔹 Guardamos solo si FortiGate tuvo éxito
+        serviceRepository.save(service);
 
         return service;
     }

@@ -33,6 +33,7 @@ public class UsuarioFirewallService {
      * Crear un UsuarioFirewall asociado a un dispositivo
      */
     public UsuarioFirewall create(CreaUsuarioFirewallDTO dto, String username) {
+
         Dispositivo dispositivo = dispositivoRepo
                 .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
@@ -41,22 +42,24 @@ public class UsuarioFirewallService {
             throw new RuntimeException("No autorizado");
         }
 
-        UsuarioFirewall usuarioFirewall =  new UsuarioFirewall();
+        // Crear objeto en memoria (no guardado aún)
+        UsuarioFirewall usuarioFirewall = new UsuarioFirewall();
         usuarioFirewall.setDispositivo(dispositivo);
         usuarioFirewall.setNombre(dto.getName());
         usuarioFirewall.setTipo(dto.getType());
         usuarioFirewall.setPassword(dto.getPassword());
-
-        usuarioFirewallRepository.save(usuarioFirewall);
 
         Map<String, Object> resultado =
                 fortiGateService.crearUsuarioFirewall(dispositivo, usuarioFirewall);
 
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
-                    "Error creando service en FortiGate: " + resultado
+                    "Error creando usuario en FortiGate: " + resultado
             );
         }
+
+        // 🔹 Guardamos solo si FortiGate tuvo éxito
+        usuarioFirewallRepository.save(usuarioFirewall);
 
         return usuarioFirewall;
     }

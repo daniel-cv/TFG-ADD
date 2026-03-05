@@ -30,8 +30,7 @@ public class ReglaFirewallService {
         this.fortiGateService = fortiGateService;
     }
 
-    public ReglaFirewallDTO crearRegla(CrearReglaFirewallDTO dto,
-                                       String username) {
+    public ReglaFirewallDTO crearRegla(CrearReglaFirewallDTO dto, String username) {
 
         if (dto.getDispositivoId() == null) {
             throw new RuntimeException("dispositivoId obligatorio");
@@ -45,6 +44,7 @@ public class ReglaFirewallService {
             throw new RuntimeException("No autorizado");
         }
 
+        // Crear objeto Regla en memoria (no guardada aún)
         ReglaFirewall regla = new ReglaFirewall();
         regla.setNombre(dto.getNombre());
         regla.setOrigen(dto.getOrigen());
@@ -55,17 +55,17 @@ public class ReglaFirewallService {
         regla.setDispositivo(dispositivo);
         regla.setHabilitada(true);
 
-        reglaRepo.save(regla);
-
-        // 🔥 PUSH AL FORTIGATE
-        Map<String, Object> resultado =
-                fortiGateService.crearPolicy(dispositivo, regla);
+        // 🔹 PUSH AL FORTIGATE ANTES DE GUARDAR
+        Map<String, Object> resultado = fortiGateService.crearPolicy(dispositivo, regla);
 
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
                     "Error creando policy en FortiGate: " + resultado
             );
         }
+
+        // 🔹 Solo guardamos si FortiGate tuvo éxito
+        reglaRepo.save(regla);
 
         return toDTO(regla);
     }
