@@ -115,11 +115,9 @@ public class AddressService {
     }
 
     public void eliminarAddress(Long addressId, String username) {
-        // 1️⃣ Obtener la address de la BBDD
         Address address = addressRepo.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address no existe"));
 
-        // 2️⃣ Validar que el usuario es propietario del dispositivo
         if (!address.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -127,7 +125,6 @@ public class AddressService {
         Dispositivo dispositivo = address.getDispositivo();
         String addressName = address.getName();
 
-        // 3️⃣ Preparar llamada a FortiGate
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall/address/"
                 +  URLEncoder.encode(addressName, StandardCharsets.UTF_8)

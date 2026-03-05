@@ -99,7 +99,7 @@ const interfazId = ref(null);
 const interfaces = ref([]);
 const mensaje = ref("");
 
-const dispositivoId = Number(route.params.id);
+const dispositivoId = Number(route.params.id); 
 
 
 const handleCrearVirtualIp = async () => {

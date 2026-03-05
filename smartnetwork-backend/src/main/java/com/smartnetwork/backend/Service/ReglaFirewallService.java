@@ -99,11 +99,9 @@ public class ReglaFirewallService {
     }
 
     public void eliminarRegla(Long reglaId, String username) {
-        // 1️⃣ Obtener la regla de la base de datos
         ReglaFirewall reglaFirewall = reglaRepo.findById(reglaId)
                 .orElseThrow(() -> new RuntimeException("Regla no existe"));
 
-        // 2️⃣ Validar que el usuario es propietario
         if (!reglaFirewall.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -118,7 +116,6 @@ public class ReglaFirewallService {
         HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
 
         try {
-            // 3️⃣ Obtener todas las políticas de FortiGate
             String getUrl = "http://" + dispositivo.getIp() + "/api/v2/cmdb/firewall/policy?vdom=root";
             ResponseEntity<Map> response = restTemplate.exchange(getUrl, HttpMethod.GET, requestEntity, Map.class);
 
@@ -126,7 +123,6 @@ public class ReglaFirewallService {
                 throw new RuntimeException("No se pudieron obtener las políticas de FortiGate");
             }
 
-            // 4️⃣ Buscar la policyId correspondiente al nombre
             List<Map<String, Object>> policies = (List<Map<String, Object>>) response.getBody().get("results");
             Integer policyId = null;
 
@@ -141,12 +137,10 @@ public class ReglaFirewallService {
                 throw new RuntimeException("No se encontró la regla en FortiGate con nombre: " + policyName);
             }
 
-            // 5️⃣ Eliminar la política en FortiGate usando policyId
             String deleteUrl = "http://" + dispositivo.getIp() + "/api/v2/cmdb/firewall/policy/" + policyId + "?vdom=root";
             ResponseEntity<String> deleteResponse = restTemplate.exchange(deleteUrl, HttpMethod.DELETE, requestEntity, String.class);
 
             if (deleteResponse.getStatusCode() == HttpStatus.OK) {
-                // ✅ Eliminación exitosa → borrar de BBDD
                 reglaRepo.delete(reglaFirewall);
             } else {
                 throw new RuntimeException("FortiGate respondió con estado: " + deleteResponse.getStatusCode());

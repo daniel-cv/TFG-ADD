@@ -21,13 +21,11 @@ public class ServiceController {
         this.dispositivoService = dispositivoService;
     }
 
-    // 🔹 CREAR service
     @PostMapping("/create")
     public Service crear(@RequestBody CrearServiceDTO dto, Authentication auth) {
         return serviceService.create(dto, auth.getName());
     }
 
-    // 🔹 LISTAR services de un dispositivo
     @GetMapping("/dispositivo/{dispositivoId}")
     public List<Service> listar(
             @PathVariable Long dispositivoId,
@@ -37,7 +35,6 @@ public class ServiceController {
         return serviceService.findAllByDispositivo(dispositivoId, username);
     }
 
-    // 🔹 OBTENER un service
     @GetMapping("/get/{serviceId}")
     public Service obtener(
             @PathVariable Long dispositivoId,
@@ -51,7 +48,6 @@ public class ServiceController {
                 .orElseThrow(() -> new RuntimeException("Service no encontrado"));
     }
 
-    // 🔹 ACTUALIZAR
     @PutMapping("/update/{serviceId}")
     public Service actualizar(
             @PathVariable Long dispositivoId,
@@ -67,7 +63,6 @@ public class ServiceController {
         return serviceService.update(service, username, dispositivoId);
     }
 
-    // 🔹 ELIMINAR
     @DeleteMapping("/delete/{serviceId}")
     public void eliminar(
             @PathVariable Long serviceId,
