@@ -66,7 +66,6 @@ public class InterfazService {
 
         Interfaz saved = interfazRepo.save(interfaz);
 
-        // 🔥 Crear interfaz en FortiGate
         Map<String, Object> resultado =
                 fortiGateService.crearInterfaz(saved.getDispositivo(), saved);
 
@@ -109,7 +108,6 @@ public class InterfazService {
         dto.setRole(interfaz.getRole());
         dto.setDescription(interfaz.getDescription());
 
-        // 🔑 siempre ID
         dto.setDispositivoId(interfaz.getDispositivo().getId());
 
         return dto;
@@ -117,11 +115,9 @@ public class InterfazService {
 
     public void eliminar(Long interfazId, String username) {
 
-        // 1️⃣ Obtener la interfaz de la BBDD
         Interfaz interfaz = interfazRepo.findById(interfazId)
                 .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
 
-        // 2️⃣ Validar que el usuario es propietario del dispositivo
         if (!interfaz.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -129,7 +125,6 @@ public class InterfazService {
         Dispositivo dispositivo = interfaz.getDispositivo();
         String interfazName = interfaz.getName();
 
-        // 3️⃣ Preparar llamada a FortiGate
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/system/interface/"
                 + interfazName
@@ -150,20 +145,13 @@ public class InterfazService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-
-                // ✅ Primero FortiGate OK → luego BBDD
                 interfazRepo.delete(interfaz);
-
             } else {
-
                 throw new RuntimeException(
                         "FortiGate respondió con estado: " + response.getStatusCode()
                 );
             }
-
         } catch (Exception e) {
-
-            // ❌ No tocar BBDD si falla FortiGate
             throw new RuntimeException(
                     "Error eliminando Interfaz en FortiGate (Interfaz=" + interfazName + ")", e
             );

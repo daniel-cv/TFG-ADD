@@ -34,7 +34,6 @@ public class UsuarioFirewallService {
                 .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad: comprobar propietario del dispositivo
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -67,7 +66,6 @@ public class UsuarioFirewallService {
                 .findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad: comprobar propietario
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }

@@ -30,7 +30,6 @@ public class ServiceService {
                 .findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad: comprobar propietario
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -66,7 +65,6 @@ public class ServiceService {
                 .findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -82,7 +80,6 @@ public class ServiceService {
                 .findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -99,7 +96,6 @@ public class ServiceService {
                 .findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -116,7 +112,6 @@ public class ServiceService {
                 .findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        // 🔐 Seguridad
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
