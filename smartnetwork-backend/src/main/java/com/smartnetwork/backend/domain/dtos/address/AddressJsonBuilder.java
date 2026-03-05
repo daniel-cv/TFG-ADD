@@ -28,7 +28,7 @@ public class AddressJsonBuilder {
         }
         """.formatted(
                 address.getName(),
-                address.getIp(),               // ej: "192.168.1.0 255.255.255.0"
+                address.getIp() + " " + address.getIpdestino(),
                 sanitize(address.getComentario())
         );
     }

@@ -9,3 +9,7 @@ export function crearUsuarioFirewall(usuarioFirewall) {
     ...usuarioFirewall
   })
 }
+
+export function eliminarUsuarioFirewall(id) {
+  return api.delete('/api/firewalls/usuarioFirewall/' + id)
+}

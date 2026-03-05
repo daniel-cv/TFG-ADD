@@ -33,4 +33,12 @@ public class InterfazController {
     ) {
         return interfazService.listarPorDispositivo(id, auth.getName());
     }
+
+    @DeleteMapping("/{id}")
+    public void eliminar(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        interfazService.eliminar(id, auth.getName());
+    }
 }

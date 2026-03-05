@@ -22,10 +22,10 @@
         <tr>
           <th>Nombre</th>
           <th>Tipo</th>
-          <th>IP</th>
+          <th>IP/IP inicio</th>
           <th>Interfaz</th>
           <th>Comentario</th>
-          <th>IP Destino</th>
+          <th>Máscara/IP Final</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -92,16 +92,16 @@ const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const addressStore = useAddressStore()
+
 const eliminarAddress = async (id) => {
   try {
-    // Llamamos al store para eliminar
     await addressStore.eliminarAddress(id)
-    // Recargamos la lista
     await addressStore.cargarAddresses(dispositivoId)
   } catch (error) {
     console.error("Error eliminando address", error)
   }
 }
+
 onMounted(() => {
   addressStore.cargarAddresses(dispositivoId)
 })

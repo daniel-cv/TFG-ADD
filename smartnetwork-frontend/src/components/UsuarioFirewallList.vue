@@ -23,17 +23,18 @@
           <th>Nombre</th>
           <th>Email</th>
           <th>Rol</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
 
       <tbody>
         <tr
-          v-for="usuarioFirewall in usuarioFirewallStore.reglas"
+          v-for="usuarioFirewall in usuarioFirewallStore.usuarios"
           :key="usuarioFirewall.id"
         >
           <td class="name">
-            {{ usuarioFirewall.username }}
+            {{ usuarioFirewall.nombre }}
           </td>
 
           <td>
@@ -41,8 +42,19 @@
           </td>
 
           <td>
-            {{ usuarioFirewall.role }}
+            {{ usuarioFirewall.tipo }}
           </td>
+
+          <td>
+            <v-btn
+              color="red"
+              size="small"
+              @click="eliminarUsuario(usuarioFirewall.id)"
+            >
+              ELIMINAR
+            </v-btn>
+          </td>
+
         </tr>
       </tbody>
 
@@ -62,7 +74,13 @@ const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const usuarioFirewallStore = useUsuarioFirewallStore()
-
+const eliminarUsuario = async (id) => {
+  try {
+    await usuarioFirewallStore.eliminarUsuarioFirewall(id)
+  } catch (error) {
+    console.error(error)
+  }
+}
 onMounted(() => {
   usuarioFirewallStore.cargarUsuarioFirewall(dispositivoId)
 })
