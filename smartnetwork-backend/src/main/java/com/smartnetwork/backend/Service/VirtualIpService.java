@@ -3,13 +3,18 @@ package com.smartnetwork.backend.Service;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.InterfazRepository;
 import com.smartnetwork.backend.Repository.VirtualIpRepository;
+import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Interfaz;
 import com.smartnetwork.backend.domain.Entity.VirtualIp;
 import com.smartnetwork.backend.domain.dtos.virtualIp.CrearVirtualIpDTO;
 import com.smartnetwork.backend.domain.dtos.virtualIp.VirtualIpDTO;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -94,4 +99,55 @@ public class VirtualIpService {
         dto.setDispositivoId(vip.getDispositivo().getId());
         return dto;
     }
+
+    public void eliminarVirtualIp(Long virtualIpId, String username) {
+        // 1️⃣ Obtener la address de la BBDD
+        VirtualIp virtualIp = virtualIpRepo.findById(virtualIpId)
+                .orElseThrow(() -> new RuntimeException("VirtualIP no existe"));
+
+        // 2️⃣ Validar que el usuario es propietario del dispositivo
+        if (!virtualIp.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        Dispositivo dispositivo = virtualIp.getDispositivo();
+        String virtualIpName = virtualIp.getName();
+
+        // 3️⃣ Preparar llamada a FortiGate
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/firewall/vip/"
+                + URLEncoder.encode(virtualIpName, StandardCharsets.UTF_8)
+                + "?vdom=root";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(dispositivo.getToken());
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // ✅ Primero FortiGate OK → luego BBDD
+                virtualIpRepo.delete(virtualIp);
+            } else {
+                throw new RuntimeException(
+                        "FortiGate respondió con estado: " + response.getStatusCode()
+                );
+            }
+
+        } catch (Exception e) {
+            // ❌ No tocar BBDD si falla FortiGate
+            throw new RuntimeException(
+                    "Error eliminando Address en FortiGate (Address=" + virtualIpName + ")", e
+            );
+        }
+    }
+
 }

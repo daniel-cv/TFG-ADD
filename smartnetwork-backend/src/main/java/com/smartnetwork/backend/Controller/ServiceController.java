@@ -70,16 +70,9 @@ public class ServiceController {
     // 🔹 ELIMINAR
     @DeleteMapping("/delete/{serviceId}")
     public void eliminar(
-            @PathVariable Long dispositivoId,
-            @PathVariable Long serviceId,
-            Authentication authentication
+            @PathVariable Long id,
+            Authentication auth
     ) {
-        String username = authentication.getName();
-
-        Service service = serviceService
-                .findById(serviceId, dispositivoId, username)
-                .orElseThrow(() -> new RuntimeException("Service no encontrado"));
-
-        serviceService.delete(service, dispositivoId, username);
+        serviceService.eliminarService(id, auth.getName());
     }
 }

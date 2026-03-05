@@ -26,6 +26,7 @@
           <th>Puerto</th>
           <th>Categoría</th>
           <th>Comentario</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
@@ -61,6 +62,17 @@
             {{ service.comentario }}
           </td>
 
+          <td>
+            <v-btn
+                    class="rounded-0 px-4"
+                    color="red"
+                    size="small"
+                    @click="eliminarService(service.id)"
+                   >
+                  <span style="color: white; font-weight: bold;">ELIMINAR</span>
+                </v-btn>
+          </td>
+
         </tr>
       </tbody>
 
@@ -80,6 +92,15 @@ const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const serviceStore = useServiceStore()
+
+const eliminarService = async (id) => {
+  try {
+    await addressStore.eliminarService(id)
+    await addressStore.cargarServices(dispositivoId)
+  } catch (error) {
+    console.error("Error eliminando address", error)
+  }
+}
 
 onMounted(() => {
   serviceStore.cargarServices(dispositivoId)

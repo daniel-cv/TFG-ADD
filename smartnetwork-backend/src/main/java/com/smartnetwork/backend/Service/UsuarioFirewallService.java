@@ -9,6 +9,9 @@ import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.*;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -122,7 +125,7 @@ public class UsuarioFirewallService {
 
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/user/local/"
-                + usuarioFirewall.getNombre()
+                +  URLEncoder.encode(usuarioFirewall.getNombre(), StandardCharsets.UTF_8)
                 + "?vdom=root";
 
         RestTemplate restTemplate = new RestTemplate();

@@ -3,12 +3,13 @@ import { useUserStore } from "@/stores/userStore";
 
 import {
   obtenerServicesPorDispositivo,
-  crearService
+  crearService,
+  eliminarService as eliminarServiceService
 } from '@/services/serviceService'
 
 export const useServiceStore = defineStore('service', {
   state: () => ({
-    reglas: [],
+    services: [],
     cargando: false,
     mensaje: "",
   }),
@@ -17,7 +18,7 @@ export const useServiceStore = defineStore('service', {
     async cargarServices(dispositivoId) {
       this.cargando = true
       const res = await obtenerServicesPorDispositivo(dispositivoId)
-      this.reglas = res.data
+      this.services = res.data
       this.cargando = false
     },
 
@@ -40,7 +41,17 @@ export const useServiceStore = defineStore('service', {
         this.mensaje = "Error al crear el service";
         throw error;
       }
-    }
+    },
+    
+    async eliminarService(id) {
+          try {
+            await eliminarServiceService(id)  // Llamamos al service importado
+            this.services = this.services.filter(a => a.id !== id) // opcional: actualizar localmente
+          } catch (error) {
+            console.error("Error eliminando service", error)
+            throw error
+          }
+        }
 
   }
 })

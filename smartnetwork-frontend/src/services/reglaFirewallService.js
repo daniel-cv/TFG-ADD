@@ -9,7 +9,7 @@ export function crearReglaFirewall(regla) {
     ...regla
   })
 }
-// 🔥 ELIMINAR regla simplificado: solo reglaId
+
 export function eliminarReglaFirewall(reglaId) {
   return api.delete(`/api/firewalls/reglas/${reglaId}`)
 }

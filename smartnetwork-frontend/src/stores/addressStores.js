@@ -44,13 +44,13 @@ export const useAddressStore = defineStore('address', {
     },
 
      async eliminarAddress(id) {
-  try {
-    await eliminarAddressService(id)  // Llamamos al service importado
-    this.addresses = this.addresses.filter(a => a.id !== id) // opcional: actualizar localmente
-  } catch (error) {
-    console.error("Error eliminando address", error)
-    throw error
-  }
-}
+      try {
+        await eliminarAddressService(id)  // Llamamos al service importado
+        this.addresses = this.addresses.filter(a => a.id !== id) // opcional: actualizar localmente
+      } catch (error) {
+        console.error("Error eliminando address", error)
+        throw error
+      }
+    }
   }
 })

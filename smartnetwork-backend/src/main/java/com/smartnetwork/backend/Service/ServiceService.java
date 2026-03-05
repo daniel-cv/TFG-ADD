@@ -2,10 +2,15 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ServiceRepository;
+import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -107,19 +112,53 @@ public class ServiceService {
         return serviceRepository.findByIdAndDispositivoId(serviceId, dispositivoId);
     }
 
-    public void delete(
-            com.smartnetwork.backend.domain.Entity.Service service,
-            Long dispositivoId,
-            String username) {
+    public void eliminarService(Long serviceId, String username) {
+        // 1️⃣ Obtener la address de la BBDD
+        com.smartnetwork.backend.domain.Entity.Service service = serviceRepository.findById(serviceId)
+                .orElseThrow(() -> new RuntimeException("Service no existe"));
 
-        Dispositivo dispositivo = dispositivoRepository
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
-
-        // 🔐 Seguridad
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+        // 2️⃣ Validar que el usuario es propietario del dispositivo
+        if (!service.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
+        Dispositivo dispositivo = service.getDispositivo();
+        String serviceName = service.getNombre();
+
+        // 3️⃣ Preparar llamada a FortiGate
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/firewall/service/"
+                +  URLEncoder.encode(serviceName, StandardCharsets.UTF_8)
+                + "?vdom=root";
+
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(dispositivo.getToken());
+
+        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.DELETE,
+                    requestEntity,
+                    String.class
+            );
+
+            if (response.getStatusCode() == HttpStatus.OK) {
+                // ✅ Primero FortiGate OK → luego BBDD
+                serviceRepository.delete(service);
+            } else {
+                throw new RuntimeException(
+                        "FortiGate respondió con estado: " + response.getStatusCode()
+                );
+            }
+
+        } catch (Exception e) {
+            // ❌ No tocar BBDD si falla FortiGate
+            throw new RuntimeException(
+                    "Error eliminando Address en FortiGate (Service=" + serviceName + ")", e
+            );
+        }
     }
 }

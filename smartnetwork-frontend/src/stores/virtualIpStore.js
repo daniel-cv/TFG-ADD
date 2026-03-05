@@ -3,7 +3,8 @@ import { useUserStore } from "@/stores/userStore";
 
 import {
   obtenerVirtualIpsPorDispositivo,
-  crearVirtualIp
+  crearVirtualIp,
+  eliminarAddress as eliminarVirtualIpService
 } from '@/services/VirtualIpService'
 
 export const useVirtualIpStore = defineStore('virtualIp', {
@@ -40,7 +41,17 @@ export const useVirtualIpStore = defineStore('virtualIp', {
         this.mensaje = "Error al crear la VirtualIP";
         throw error;
       }
-    }
+    },
+
+    async eliminarAddress(id) {
+          try {
+            await eliminarVirtualIpService(id)  // Llamamos al service importado
+            this.virtualips = this.virtualips.filter(a => a.id !== id) // opcional: actualizar localmente
+          } catch (error) {
+            console.error("Error eliminando virtualip", error)
+            throw error
+          }
+        }
 
   }
 })

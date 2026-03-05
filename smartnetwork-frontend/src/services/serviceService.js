@@ -9,3 +9,8 @@ export function crearService(service) {
     ...service
   })
 }
+
+export function eliminarService(id) {
+  return api.delete('/api/firewalls/services/delete/' + id, {
+  })
+}

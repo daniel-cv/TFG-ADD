@@ -10,6 +10,8 @@ import com.smartnetwork.backend.domain.dtos.interfaz.CrearInterfazDTO;
 import com.smartnetwork.backend.domain.dtos.interfaz.InterfazDTO;
 
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -132,7 +134,7 @@ public class InterfazService {
         // 3️⃣ Preparar llamada a FortiGate
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/system/interface/"
-                + interfazName
+                +  URLEncoder.encode(interfazName, StandardCharsets.UTF_8)
                 + "?vdom=root";
 
         RestTemplate restTemplate = new RestTemplate();

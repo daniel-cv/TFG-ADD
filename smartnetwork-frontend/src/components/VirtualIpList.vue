@@ -26,6 +26,7 @@
           <th>Comentarios</th>
           <th>Categoría</th>
           <th>Comentario</th>
+          <th>Acciones</th>
         </tr>
       </thead>
 
@@ -61,6 +62,17 @@
             {{ virtualIp.comentario }}
           </td>
 
+          <td>
+            <v-btn
+                    class="rounded-0 px-4"
+                    color="red"
+                    size="small"
+                    @click="eliminarVirtualIp(virtualIp.id)"
+                   >
+                  <span style="color: white; font-weight: bold;">ELIMINAR</span>
+                </v-btn>
+          </td>
+
         </tr>
       </tbody>
 
@@ -75,11 +87,20 @@
 import { useVirtualIpStore } from '@/stores/virtualIpStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
+import { eliminarVirtualIp } from '@/services/VirtualIpService'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const virtualIpStore = useVirtualIpStore()
+const eliminarVirtualIp = async (id) => {
+  try {
+    await virtualIpStore.eliminarVirtualIp(id)
+    await virtualIpStore.cargarVirtualIps(dispositivoId)
+  } catch (error) {
+    console.error("Error eliminando address", error)
+  }
+}
 
 onMounted(() => {
   virtualIpStore.cargarVirtualIps(dispositivoId)

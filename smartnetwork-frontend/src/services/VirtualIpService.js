@@ -11,3 +11,7 @@ export function crearVirtualIp(virtualIp) {
     ...virtualIp
   })
 }
+
+export function eliminarVirtualIp(id) {
+  return api.delete('/api/firewalls/virtualips/delete' + id)
+}

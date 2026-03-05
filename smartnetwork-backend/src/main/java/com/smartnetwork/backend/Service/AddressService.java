@@ -14,6 +14,8 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -128,7 +130,7 @@ public class AddressService {
         // 3️⃣ Preparar llamada a FortiGate
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall/address/"
-                + addressName
+                +  URLEncoder.encode(addressName, StandardCharsets.UTF_8)
                 + "?vdom=root";
 
         RestTemplate restTemplate = new RestTemplate();
