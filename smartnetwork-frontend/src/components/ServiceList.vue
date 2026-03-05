@@ -51,7 +51,7 @@
           </td>
 
           <td>
-            <span class="category">
+            <span v-if="service.categoria" class="category">
               {{ service.categoria }}
             </span>
           </td>
