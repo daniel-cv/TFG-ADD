@@ -11,6 +11,5 @@ export function crearService(service) {
 }
 
 export function eliminarService(id) {
-  return api.delete('/api/firewalls/services/delete/' + id, {
-  })
+  return api.delete('/api/firewalls/services/delete/' + id)
 }

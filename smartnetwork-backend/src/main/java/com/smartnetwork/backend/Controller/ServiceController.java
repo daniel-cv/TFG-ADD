@@ -70,9 +70,9 @@ public class ServiceController {
     // 🔹 ELIMINAR
     @DeleteMapping("/delete/{serviceId}")
     public void eliminar(
-            @PathVariable Long id,
+            @PathVariable Long serviceId,
             Authentication auth
     ) {
-        serviceService.eliminarService(id, auth.getName());
+        serviceService.eliminarService(serviceId, auth.getName());
     }
 }

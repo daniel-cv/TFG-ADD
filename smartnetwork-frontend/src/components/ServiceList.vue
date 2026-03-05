@@ -1,7 +1,6 @@
 <template>
   <div class="service-list">
 
-    <!-- HEADER -->
     <div class="table-header">
       <h2>Services</h2>
 
@@ -14,8 +13,6 @@
       </v-btn>
     </div>
 
-
-    <!-- TABLA -->
     <v-table class="professional-table">
 
       <thead>
@@ -30,18 +27,19 @@
         </tr>
       </thead>
 
-
       <tbody>
+
         <tr
-          v-for="service in serviceStore.reglas"
+          v-for="service in serviceStore.services"
           :key="service.id"
         >
+
           <td class="name">
             {{ service.nombre }}
           </td>
 
           <td>
-            {{ service.tipo_protocolo }}
+            {{ service.tipoProtocolo }}
           </td>
 
           <td>
@@ -49,7 +47,7 @@
           </td>
 
           <td>
-            {{ service.destination_port }}
+            {{ service.destinationPort }}
           </td>
 
           <td>
@@ -63,17 +61,22 @@
           </td>
 
           <td>
+
             <v-btn
-                    class="rounded-0 px-4"
-                    color="red"
-                    size="small"
-                    @click="eliminarService(service.id)"
-                   >
-                  <span style="color: white; font-weight: bold;">ELIMINAR</span>
-                </v-btn>
+              class="rounded-0 px-4"
+              color="red"
+              size="small"
+              @click="eliminarService(service.id)"
+            >
+              <span style="color: white; font-weight: bold;">
+                ELIMINAR
+              </span>
+            </v-btn>
+
           </td>
 
         </tr>
+
       </tbody>
 
     </v-table>
@@ -81,31 +84,37 @@
   </div>
 </template>
 
-
-
 <script setup>
 import { useServiceStore } from '@/stores/serviceStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
-const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const serviceStore = useServiceStore()
 
+const dispositivoId = computed(() => seleccionadoStore.dispositivo?.id)
+
 const eliminarService = async (id) => {
   try {
-    await addressStore.eliminarService(id)
-    await addressStore.cargarServices(dispositivoId)
+    await serviceStore.eliminarService(id)
+
+    if (dispositivoId.value) {
+      await serviceStore.cargarServices(dispositivoId.value)
+    }
+
   } catch (error) {
-    console.error("Error eliminando address", error)
+    console.error("Error eliminando service", error)
   }
 }
 
 onMounted(() => {
-  serviceStore.cargarServices(dispositivoId)
+  if (dispositivoId.value) {
+    serviceStore.cargarServices(dispositivoId.value)
+  }
 })
 </script>
+
 
 
 

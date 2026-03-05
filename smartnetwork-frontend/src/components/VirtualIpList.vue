@@ -87,7 +87,7 @@
 import { useVirtualIpStore } from '@/stores/virtualIpStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import { onMounted } from 'vue'
-import { eliminarVirtualIp } from '@/services/VirtualIpService'
+
 
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id

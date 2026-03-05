@@ -4,7 +4,7 @@ import { useUserStore } from "@/stores/userStore";
 import {
   obtenerVirtualIpsPorDispositivo,
   crearVirtualIp,
-  eliminarAddress as eliminarVirtualIpService
+  eliminarVirtualIp as eliminarVirtualIpService
 } from '@/services/VirtualIpService'
 
 export const useVirtualIpStore = defineStore('virtualIp', {

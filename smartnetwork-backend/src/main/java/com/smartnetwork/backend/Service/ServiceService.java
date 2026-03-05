@@ -113,11 +113,9 @@ public class ServiceService {
     }
 
     public void eliminarService(Long serviceId, String username) {
-        // 1️⃣ Obtener la address de la BBDD
         com.smartnetwork.backend.domain.Entity.Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new RuntimeException("Service no existe"));
 
-        // 2️⃣ Validar que el usuario es propietario del dispositivo
         if (!service.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -125,10 +123,10 @@ public class ServiceService {
         Dispositivo dispositivo = service.getDispositivo();
         String serviceName = service.getNombre();
 
-        // 3️⃣ Preparar llamada a FortiGate
+        // Apuntar a 'uncategorized' porque se crean así
         String url = "http://" + dispositivo.getIp()
-                + "/api/v2/cmdb/firewall/service/"
-                +  URLEncoder.encode(serviceName, StandardCharsets.UTF_8)
+                + "/api/v2/cmdb/firewall.service/custom/"
+                + URLEncoder.encode(serviceName, StandardCharsets.UTF_8).replace("+", "%20")
                 + "?vdom=root";
 
         RestTemplate restTemplate = new RestTemplate();
@@ -146,7 +144,7 @@ public class ServiceService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                // ✅ Primero FortiGate OK → luego BBDD
+                // Primero eliminar en FortiGate → luego BBDD
                 serviceRepository.delete(service);
             } else {
                 throw new RuntimeException(
@@ -155,9 +153,8 @@ public class ServiceService {
             }
 
         } catch (Exception e) {
-            // ❌ No tocar BBDD si falla FortiGate
             throw new RuntimeException(
-                    "Error eliminando Address en FortiGate (Service=" + serviceName + ")", e
+                    "Error eliminando Service en FortiGate (Service=" + serviceName + ")", e
             );
         }
     }
