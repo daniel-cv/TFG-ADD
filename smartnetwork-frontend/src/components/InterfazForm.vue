@@ -75,9 +75,10 @@
     />
 
     <!-- ALLOW ACCESS -->
-    <v-text-field
+    <v-select
       v-model="allowaccess"
-      label="Allow Access (ping https ssh)"
+      :items="['ping', 'https', 'ssh']"
+      label="Allow Access"
       variant="outlined"
       class="mb-3"
     />

@@ -29,7 +29,7 @@ public class VirtualIpController {
     public List<VirtualIpDTO> listar(@PathVariable Long id, Authentication auth) {
         return virtualIpService.listarPorDispositivo(id, auth.getName());
     }
-
+    //Eliminar  virtualip
     @DeleteMapping("/delete/{id}")
     public void eliminar(
             @PathVariable Long id,

@@ -46,14 +46,12 @@ public class InterfazService {
             throw new RuntimeException("No autorizado");
         }
 
-        // Validaciones básicas
         if ("vlan".equals(dto.getTipo())) {
             if (dto.getVlanid() == null || dto.getInterfacePadre() == null) {
                 throw new RuntimeException("VLAN requiere interfacePadre y vlanid");
             }
         }
 
-        // Crear objeto Interfaz en memoria (no guardado aún)
         Interfaz interfaz = new Interfaz();
         interfaz.setName(dto.getName());
         interfaz.setTipo(dto.getTipo());
@@ -67,7 +65,6 @@ public class InterfazService {
         interfaz.setDescription(dto.getDescription());
         interfaz.setDispositivo(dispositivo);
 
-        // 🔹 Llamamos a FortiGate antes de guardar
         Map<String, Object> resultado =
                 fortiGateService.crearInterfaz(dispositivo, interfaz);
 
@@ -77,7 +74,6 @@ public class InterfazService {
             );
         }
 
-        // 🔹 Guardamos solo si FortiGate tuvo éxito
         Interfaz saved = interfazRepo.save(interfaz);
 
         return toDTO(saved);

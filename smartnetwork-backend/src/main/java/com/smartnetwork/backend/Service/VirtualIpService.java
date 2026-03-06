@@ -47,7 +47,6 @@ public class VirtualIpService {
         if (!dispositivo.getUsuario().getUsername().equals(username))
             throw new RuntimeException("No autorizado");
 
-        // Crear VirtualIp en memoria (no guardado aún)
         VirtualIp vip = new VirtualIp();
         vip.setName(dto.getName());
         vip.setComments(dto.getComments());
@@ -61,14 +60,12 @@ public class VirtualIpService {
         vip.setInternal_ip(dto.getInternalIp());
         vip.setDispositivo(dispositivo);
 
-        // 🔹 PUSH AL FORTIGATE ANTES DE GUARDAR
         Map<String, Object> result = fortiGateService.crearVirtualIp(dispositivo, vip);
 
         if (!(Boolean) result.get("success")) {
             throw new RuntimeException("Error creando VirtualIP en FortiGate: " + result);
         }
 
-        // 🔹 Guardamos solo si FortiGate tuvo éxito
         VirtualIp saved = virtualIpRepo.save(vip);
 
         return toDTO(saved);
@@ -101,11 +98,9 @@ public class VirtualIpService {
     }
 
     public void eliminarVirtualIp(Long virtualIpId, String username) {
-        // 1️⃣ Obtener la address de la BBDD
         VirtualIp virtualIp = virtualIpRepo.findById(virtualIpId)
                 .orElseThrow(() -> new RuntimeException("VirtualIP no existe"));
 
-        // 2️⃣ Validar que el usuario es propietario del dispositivo
         if (!virtualIp.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
@@ -113,7 +108,6 @@ public class VirtualIpService {
         Dispositivo dispositivo = virtualIp.getDispositivo();
         String virtualIpName = virtualIp.getName();
 
-        // 3️⃣ Preparar llamada a FortiGate
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall/vip/"
                 + URLEncoder.encode(virtualIpName, StandardCharsets.UTF_8)
@@ -134,7 +128,6 @@ public class VirtualIpService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                // ✅ Primero FortiGate OK → luego BBDD
                 virtualIpRepo.delete(virtualIp);
             } else {
                 throw new RuntimeException(
@@ -143,9 +136,8 @@ public class VirtualIpService {
             }
 
         } catch (Exception e) {
-            // ❌ No tocar BBDD si falla FortiGate
             throw new RuntimeException(
-                    "Error eliminando Address en FortiGate (Address=" + virtualIpName + ")", e
+                    "Error eliminando VirtualIP en FortiGate (Address=" + virtualIpName + ")", e
             );
         }
     }

@@ -7,7 +7,6 @@ import com.smartnetwork.backend.Service.FortiGateService;
 import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Interfaz;
-import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
 import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
 import org.springframework.http.*;
@@ -52,7 +51,6 @@ public class AddressService {
             throw new RuntimeException("No autorizado");
         }
 
-        // Crear objeto Address en memoria (no guardado aún)
         Address address = new Address();
         address.setName(dto.getName());
         address.setType(dto.getType());
@@ -73,7 +71,6 @@ public class AddressService {
             address.setInterfaz(interfaz);
         }
 
-        // 🔹 Llamamos a FortiGate antes de guardar
         Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
 
         if (!(Boolean) resultado.get("success")) {
@@ -82,7 +79,6 @@ public class AddressService {
             );
         }
 
-        // 🔹 Guardamos solo si FortiGate tuvo éxito
         Address saved = addressRepo.save(address);
         return toDTO(saved);
     }
@@ -148,7 +144,6 @@ public class AddressService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                // ✅ Primero FortiGate OK → luego BBDD
                 addressRepo.delete(address);
             } else {
                 throw new RuntimeException(
@@ -157,7 +152,6 @@ public class AddressService {
             }
 
         } catch (Exception e) {
-            // ❌ No tocar BBDD si falla FortiGate
             throw new RuntimeException(
                     "Error eliminando Address en FortiGate (Address=" + addressName + ")", e
             );

@@ -17,7 +17,7 @@ public class ReglaFirewall {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Asociación al firewall (Dispositivo)
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispositivo_id", nullable = false)
     private Dispositivo dispositivo;
@@ -26,19 +26,19 @@ public class ReglaFirewall {
     private String nombre;
 
     @Column(nullable = false)
-    private String origen;   // IP / red / objeto
+    private String origen;
 
     @Column(nullable = false)
-    private String destino;  // IP / red / objeto
+    private String destino;
 
     @Column(nullable = false)
-    private String iporigen;   // IP / red / objeto
+    private String iporigen;
 
     @Column(nullable = false)
-    private String ipdestino;  // IP / red / objeto
+    private String ipdestino;
 
     @Column(nullable = false)
-    private String servicio; // HTTP, HTTPS, ALL...
+    private String servicio;
 
     private boolean habilitada;
 }

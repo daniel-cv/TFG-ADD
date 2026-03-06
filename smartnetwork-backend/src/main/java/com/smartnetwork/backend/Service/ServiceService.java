@@ -37,8 +37,6 @@ public class ServiceService {
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
-
-        // Crear objeto Service en memoria (no guardado todavía)
         com.smartnetwork.backend.domain.Entity.Service service =
                 new com.smartnetwork.backend.domain.Entity.Service();
         service.setNombre(dto.getNombre());
@@ -47,8 +45,6 @@ public class ServiceService {
         service.setDestinationPort(dto.getDestinationPort());
         service.setIp(dto.getIp());
         service.setComentario(dto.getComentario());
-
-        // 🔹 PUSH AL FORTIGATE ANTES DE GUARDAR
         Map<String, Object> resultado = fortiGateService.crearServicio(dispositivo, service);
 
         if (!(Boolean) resultado.get("success")) {
@@ -57,7 +53,6 @@ public class ServiceService {
             );
         }
 
-        // 🔹 Guardamos solo si FortiGate tuvo éxito
         serviceRepository.save(service);
 
         return service;
@@ -121,7 +116,6 @@ public class ServiceService {
         Dispositivo dispositivo = service.getDispositivo();
         String serviceName = service.getNombre();
 
-        // Apuntar a 'uncategorized' porque se crean así
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall.service/custom/"
                 + URLEncoder.encode(serviceName, StandardCharsets.UTF_8).replace("+", "%20")
@@ -142,7 +136,6 @@ public class ServiceService {
             );
 
             if (response.getStatusCode() == HttpStatus.OK) {
-                // Primero eliminar en FortiGate → luego BBDD
                 serviceRepository.delete(service);
             } else {
                 throw new RuntimeException(

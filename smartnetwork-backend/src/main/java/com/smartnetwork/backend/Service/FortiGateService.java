@@ -29,19 +29,19 @@ public class FortiGateService {
         Map<String, Object> result = new HashMap<>();
 
         String json = """
-{
-    "name": "%s",
-    "srcintf": [{ "name": "%s" }],
-    "dstintf": [{ "name": "%s" }],
-    "srcaddr": [{ "name": "%s" }],
-    "dstaddr": [{ "name": "%s" }],
-    "service": [{ "name": "%s" }],
-    "schedule": "always",
-    "action": "accept",
-    "status": "%s",
-    "nat": "enable"
-}
-""".formatted(
+        {
+            "name": "%s",
+            "srcintf": [{ "name": "%s" }],
+            "dstintf": [{ "name": "%s" }],
+            "srcaddr": [{ "name": "%s" }],
+            "dstaddr": [{ "name": "%s" }],
+            "service": [{ "name": "%s" }],
+            "schedule": "always",
+            "action": "accept",
+            "status": "%s",
+            "nat": "enable"
+        }
+        """.formatted(
                 regla.getNombre(),
                 regla.getOrigen(),
                 regla.getDestino(),
@@ -173,7 +173,6 @@ public class FortiGateService {
 
         Map<String, Object> result = new HashMap<>();
 
-        // Construcción del JSON mínimo
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("{");
 
@@ -182,7 +181,6 @@ public class FortiGateService {
         "vdom": "root"
     """.formatted(interfaz.getName()));
 
-        // VLAN
         if ("vlan".equals(interfaz.getTipo())) {
             jsonBuilder.append("""
             ,
@@ -194,7 +192,6 @@ public class FortiGateService {
             ));
         }
 
-        // IP
         if ("static".equals(interfaz.getMode()) && interfaz.getIp() != null) {
             jsonBuilder.append("""
             ,
@@ -208,7 +205,6 @@ public class FortiGateService {
         """);
         }
 
-        // allowaccess
         if (interfaz.getAllowaccess() != null && !interfaz.getAllowaccess().isBlank()) {
             jsonBuilder.append("""
             ,
@@ -216,7 +212,6 @@ public class FortiGateService {
         """.formatted(interfaz.getAllowaccess()));
         }
 
-        // role
         if (interfaz.getRole() != null) {
             jsonBuilder.append("""
             ,
@@ -224,7 +219,6 @@ public class FortiGateService {
         """.formatted(interfaz.getRole()));
         }
 
-        // description
         if (interfaz.getDescription() != null) {
             jsonBuilder.append("""
             ,
@@ -274,11 +268,9 @@ public class FortiGateService {
 
         Map<String, Object> result = new HashMap<>();
 
-        // Construcción del JSON mínimo
         StringBuilder jsonBuilder = new StringBuilder();
         jsonBuilder.append("{");
 
-        // Campos obligatorios
         jsonBuilder.append("""
         "name": "%s",
         "type": "%s",
@@ -290,7 +282,7 @@ public class FortiGateService {
         }
         ]
         
-    """.formatted(
+        """.formatted(
                 vip.getName(),
                 vip.getType(),
                 vip.getExternal_ip(),
@@ -298,7 +290,6 @@ public class FortiGateService {
 
         ));
 
-        // Interfaz asociada (opcional)
         if (vip.getInterfaz() != null) {
             jsonBuilder.append("""
             ,
@@ -306,7 +297,6 @@ public class FortiGateService {
         """.formatted(vip.getInterfaz().getName()));
         }
 
-        // Comentarios
         if (vip.getComments() != null && !vip.getComments().isBlank()) {
             jsonBuilder.append("""
             ,

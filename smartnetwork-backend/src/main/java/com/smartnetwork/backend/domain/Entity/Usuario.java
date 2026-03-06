@@ -30,7 +30,7 @@ public class Usuario {
     @Column(unique = true)
     private String email;
 
-    private String role; // ROLE_USER, ROLE_ADMIN
+    private String role;
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Dispositivo> dispositivos = new ArrayList<>();

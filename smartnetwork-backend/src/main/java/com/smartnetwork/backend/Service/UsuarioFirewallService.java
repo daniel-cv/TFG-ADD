@@ -42,7 +42,6 @@ public class UsuarioFirewallService {
             throw new RuntimeException("No autorizado");
         }
 
-        // Crear objeto en memoria (no guardado aún)
         UsuarioFirewall usuarioFirewall = new UsuarioFirewall();
         usuarioFirewall.setDispositivo(dispositivo);
         usuarioFirewall.setNombre(dto.getName());
@@ -58,7 +57,6 @@ public class UsuarioFirewallService {
             );
         }
 
-        // 🔹 Guardamos solo si FortiGate tuvo éxito
         usuarioFirewallRepository.save(usuarioFirewall);
 
         return usuarioFirewall;

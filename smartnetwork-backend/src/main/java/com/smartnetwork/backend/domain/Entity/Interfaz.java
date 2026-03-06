@@ -20,22 +20,22 @@ public class Interfaz {
     private String name;
 
     @Column(nullable = false)
-    private String tipo; // fisica | vlan
+    private String tipo;
 
-    private String interfacePadre; // solo si VLAN
+    private String interfacePadre;
 
-    private Integer vlanid; // solo si VLAN
+    private Integer vlanid;
 
     @Column(nullable = false)
-    private String vdom = "root"; // VDOM, por defecto root
+    private String vdom = "root";
 
-    private String mode; // static | dhcp
+    private String mode;
 
-    private String ip; // solo si mode=static
+    private String ip;
 
-    private String allowaccess; // ejemplo: "ping https ssh"
+    private String allowaccess;
 
-    private String role; // lan | wan | dmz
+    private String role;
 
     private String description;
 

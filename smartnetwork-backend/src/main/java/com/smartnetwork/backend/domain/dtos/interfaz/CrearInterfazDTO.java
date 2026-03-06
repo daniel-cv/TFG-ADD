@@ -9,23 +9,23 @@ public class CrearInterfazDTO {
 
     private String name;
 
-    private String tipo; // fisica | vlan
+    private String tipo;
 
-    private String interfacePadre; // solo si VLAN
+    private String interfacePadre;
 
-    private Integer vlanid; // solo si VLAN
+    private Integer vlanid;
 
-    private String vdom = "root"; // default
+    private String vdom = "root";
 
-    private String mode; // static | dhcp
+    private String mode;
 
-    private String ip; // solo si mode=static
+    private String ip;
 
-    private String allowaccess; // "ping https ssh"
+    private String allowaccess;
 
-    private String role; // lan | wan | dmz
+    private String role;
 
     private String description;
 
-    private Long dispositivoId; // Relación con dispositivo
+    private Long dispositivoId;
 }

@@ -83,20 +83,16 @@ const mensaje = ref("");
 const seleccionadoStore = useDispositivoSeleccionadoStore();
 
 const dispositivoStore = useDispositivoStore();
-const userStore = useUserStore();   // ← usuario logado
+const userStore = useUserStore();  
 const router = useRouter();
 
 function configurar(dispositivo) {
   seleccionadoStore.seleccionar(dispositivo);
   router.push(`/device/${dispositivo.id}`);
-   // sin params
 }
 
-
-// Cargar dispositivos al montar
 onMounted(async () => {
   try {
-    // Verificar que hay usuario logado
     if (!userStore.autenticado) {
       mensaje.value = "Debes iniciar sesión para ver tus dispositivos";
       return;
@@ -112,14 +108,10 @@ onMounted(async () => {
   }
 });
 
-// Función para ir al formulario de creación
 const irACrearDispositivo = () => {
   router.push("/newdevice");
 };
-function crearInterfaz(id) {
-  // Redirige a la vista de crear interfaz con el ID del dispositivo
-  router.push({ name: "CrearInterfaz", params: { id } });
-}
+
 </script>
 
 <style scoped>
