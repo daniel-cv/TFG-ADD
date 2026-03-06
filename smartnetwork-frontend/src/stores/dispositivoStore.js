@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { useUserStore } from "@/stores/userStore";
-import api from "@/services/api";   // ← usa la instancia global
+import api from "@/services/api";   
 
 export const useDispositivoStore = defineStore("dispositivo", {
   state: () => ({

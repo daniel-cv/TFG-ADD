@@ -24,7 +24,7 @@
 import AddressForm from "@/components/AddressForm.vue";
 import { ref } from "vue";
 
-const dispositivoId = ref(1); // o el que recibas por props/route
+const dispositivoId = ref(1); 
 
 const recargar = () => {
   console.log("Address creada, recargando lista...");

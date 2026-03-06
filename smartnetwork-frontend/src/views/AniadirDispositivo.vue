@@ -97,7 +97,6 @@ const form = ref(null);
 const mensaje = ref("");
 const router = useRouter();
 
-// Campos del dispositivo
 const nombre = ref("");
 const fabricante = ref("");
 const tipo = ref("");
@@ -105,7 +104,6 @@ const ip = ref("");
 const puerto = ref("");
 const tooken = ref("");
 
-// ENUMS (deben coincidir EXACTAMENTE con el backend)
 const fabricantes = ["FORTINET", "CISCO", "ARISTA"];
 const tipos = ["FIREWALL", "SWITCH"];
 

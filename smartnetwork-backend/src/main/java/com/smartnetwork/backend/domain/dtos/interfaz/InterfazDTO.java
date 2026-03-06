@@ -31,7 +31,7 @@ public class InterfazDTO {
 
     private String description;
 
-    private Long dispositivoId; // solo el id del dispositivo
+    private Long dispositivoId;
 
-    private List<AddressDTO> addresses; // si quieres devolver las addresses de esa interfaz
+    private List<AddressDTO> addresses;
 }

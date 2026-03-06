@@ -45,8 +45,8 @@ export const useVirtualIpStore = defineStore('virtualIp', {
 
     async eliminarAddress(id) {
           try {
-            await eliminarVirtualIpService(id)  // Llamamos al service importado
-            this.virtualips = this.virtualips.filter(a => a.id !== id) // opcional: actualizar localmente
+            await eliminarVirtualIpService(id) 
+            this.virtualips = this.virtualips.filter(a => a.id !== id) 
           } catch (error) {
             console.error("Error eliminando virtualip", error)
             throw error

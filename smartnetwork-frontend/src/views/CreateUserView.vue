@@ -83,7 +83,6 @@ const handleCrearUsuario = async () => {
       password: password.value,
     });
 
-    // Limpiar inputs tras crear usuario
     username.value = "";
     email.value = "";
     password.value = "";

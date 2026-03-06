@@ -125,7 +125,6 @@ import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionad
 import { useRoute } from "vue-router";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
 
-// Formularios
 import ReglaFirewallList from "@/components/ReglaFirewallList.vue"
 import ReglaFirewallForm from "@/components/ReglaFirewallForm.vue"
 

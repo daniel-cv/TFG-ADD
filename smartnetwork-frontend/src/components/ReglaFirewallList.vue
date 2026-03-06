@@ -108,10 +108,10 @@ function irANuevaRegla() {
 
 async function eliminarRegla(reglaId) {
   try {
-    await reglaStore.eliminarRegla(reglaId) // ✅ solo reglaId
-    await reglaStore.cargarReglas(dispositivoId) // esto sí necesitas para recargar la lista
+    await reglaStore.eliminarRegla(reglaId) 
+    await reglaStore.cargarReglas(dispositivoId) 
   } catch (e) {
-    alert('Error eliminando la regla')
+    console.error('Error eliminando la regla')
   }
 }
 </script>

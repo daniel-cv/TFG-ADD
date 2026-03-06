@@ -129,7 +129,6 @@ const handleCrearAddress = async () => {
       name: name.value,
       ip: ip.value,
       type: type.value,
-      // Enviamos ipdestino si es iprange, ipmask o subnet
       ipdestino:
         type.value === 'iprange' || type.value === 'ipmask' || type.value === 'subnet'
         ? ipdestino.value

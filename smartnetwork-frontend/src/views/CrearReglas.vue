@@ -85,7 +85,6 @@ const service = ref("");
 
 const handleSubmit = async () => {
   try {
-    // Validación básica
     const { valid } = await form.value.validate?.();
     if (valid === false) return;
 

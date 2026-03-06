@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import api from "@/services/api";   // ← usa la instancia global
+import api from "@/services/api";  
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -49,7 +49,6 @@ export const useUserStore = defineStore("user", {
         this.usuarioActual = { username, token };
         this.autenticado = true;
 
-        // Añadir token a TODAS las peticiones
         api.defaults.headers.common["Authorization"] = "Bearer " + token;
 
         return this.usuarioActual;

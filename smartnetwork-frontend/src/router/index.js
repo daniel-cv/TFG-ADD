@@ -24,7 +24,7 @@ const routes = [
     component: LoginView,
   },
   {
-    path: "/register", // ruta para crear usuario
+    path: "/register", 
     name: "register",
     component: CreateUserView,
   },

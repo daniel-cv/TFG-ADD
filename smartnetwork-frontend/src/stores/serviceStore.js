@@ -45,8 +45,8 @@ export const useServiceStore = defineStore('service', {
     
     async eliminarService(id) {
           try {
-            await eliminarServiceService(id)  // Llamamos al service importado
-            this.services = this.services.filter(a => a.id !== id) // opcional: actualizar localmente
+            await eliminarServiceService(id)  
+            this.services = this.services.filter(a => a.id !== id) 
           } catch (error) {
             console.error("Error eliminando service", error)
             this.mensaje = "Error eliminando service"

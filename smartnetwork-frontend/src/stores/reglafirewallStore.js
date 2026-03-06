@@ -47,7 +47,6 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
       }
     },
 
-    // 🔥 ELIMINAR regla simplificado
     async eliminarRegla(reglaId) {
   try {
     const userStore = useUserStore()
@@ -56,11 +55,12 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
       return
     }
 
-    await eliminarReglaFirewall(reglaId) // solo reglaId
+    await eliminarReglaFirewall(reglaId)
     this.mensaje = "Regla eliminada correctamente"
 
   } catch (error) {
     console.error("Error al eliminar la regla",error)
+    this.mensaje = "Error eliminando regla"
   }
 }
 

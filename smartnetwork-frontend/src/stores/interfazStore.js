@@ -46,9 +46,10 @@ export const useInterfazStore = defineStore('interfaz', {
 
     async eliminarInterfaz(id) {
        try {
-        await interfazStore.eliminarInterfaz(id)
+        await apiEliminarInterfaz(id)
       } catch (error) {
-        console.error(error)
+        console.error("Error eliminando interfaz",error)
+        this.mensaje = "Error eliminando interfaz"
       }
   }
   }

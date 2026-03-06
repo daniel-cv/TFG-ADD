@@ -108,6 +108,15 @@ const dispositivoId = seleccionadoStore.dispositivo.id
 const emit = defineEmits(['crear'])
 const interfazStore = useInterfazStore()
 
+const eliminarInterfaz = async (id) => {
+  try {
+    await interfazStore.eliminarInterfaz(id)
+    await interfazStore.cargarInterfaces(dispositivoId)
+  } catch (error) {
+    console.error("Error eliminando address", error)
+  }
+}
+
 onMounted(() => {
   interfazStore.cargarInterfaces(dispositivoId)
 })

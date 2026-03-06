@@ -14,7 +14,7 @@
     <!-- TIPO -->
     <v-select
       v-model="tipo"
-      :items="['fisica', 'vlan']"
+      :items="['vlan']"
       label="Tipo"
       variant="outlined"
       class="mb-3"
@@ -25,7 +25,7 @@
     <v-select
       v-if="tipo === 'vlan'"
       v-model="interfacePadre"
-      :items="['port1']"
+      :items="['port1','port2','port3','port4',]"
       item-title="name"
       item-value="name"
       label="Interfaz padre"
@@ -57,7 +57,7 @@
     <!-- MODE -->
     <v-select
       v-model="mode"
-      :items="['static', 'dhcp']"
+      :items="['dhcp']"
       label="Modo IP"
       variant="outlined"
       class="mb-3"
@@ -131,11 +131,11 @@ const emit = defineEmits(['creada', 'cancelar'])
 const interfazStore = useInterfazStore();
 
 const name = ref("");
-const tipo = ref("fisica");
+const tipo = ref("");
 const interfacePadre = ref(null);
 const vlanid = ref(null);
 const vdom = ref("root");
-const mode = ref("dhcp");
+const mode = ref("");
 const ip = ref(null);
 const allowaccess = ref("ping");
 const role = ref("lan");
@@ -146,8 +146,6 @@ const interfaces = ref([]);
 const dispositivoId = Number(route.params.id);
 
 
-
-// Limpiar campos si cambian tipo o modo
 watch(tipo, (t) => {
   if (t !== "vlan") {
     interfacePadre.value = null;

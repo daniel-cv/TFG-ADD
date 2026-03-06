@@ -1,5 +1,4 @@
-import api from './api' // tu axios configurado
-
+import api from './api' 
 export function obtenerServicesPorDispositivo(dispositivoId) {
   return api.get('/api/firewalls/services/dispositivo/' + dispositivoId)
 }
