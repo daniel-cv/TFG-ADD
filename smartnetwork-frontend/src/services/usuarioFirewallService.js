@@ -11,5 +11,12 @@ export function crearUsuarioFirewall(usuarioFirewall) {
 }
 
 export function eliminarUsuarioFirewall(id) {
-  return api.delete('/api/firewalls/usuarioFirewall/' + id)
+  return api.delete('/api/firewalls/usuarioFirewall/delete/' + id)
 }
+
+export function actualizarUsuarioFirewall(id, usuarioFirewall) {
+  return api.put('api/firewalls/usuarioFirewall/edit/' + id, { 
+    ...usuarioFirewall 
+  })
+}
+

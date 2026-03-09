@@ -10,6 +10,8 @@ public class UsuarioFirewallDTO {
     private String nombre;
     private String tipo;
     private String password;
+    private String email;
+    private String factor;
     private Long dispositivoId;
 
 }

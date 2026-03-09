@@ -21,8 +21,14 @@ public class UsuarioFirewall {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String tipo;
+
+    @Column(nullable = false)
+    private String factor;
+
+    @Column(nullable = false)
+    private String email;
 
     @Column(nullable = false)
     private String password;

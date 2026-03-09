@@ -301,13 +301,13 @@ public class FortiGateService {
 
         Map<String, Object> result = new HashMap<>();
         String json = """
-        {
-          "name": "%s",
-          "type": "%s",
-          "passwd": "%s"
-        }
-        """.formatted(usuarioFirewall.getNombre(), usuarioFirewall.getTipo(), usuarioFirewall.getPassword());
-
+            {
+              "name": "%s",
+              "passwd": "%s",
+              "email": "%s",
+              "two_factor": "%s"
+            }
+            """.formatted(usuarioFirewall.getNombre(), usuarioFirewall.getPassword(),usuarioFirewall.getEmail(),usuarioFirewall.getFactor());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(dispositivo.getToken().trim());
@@ -531,5 +531,56 @@ public class FortiGateService {
 
         return result;
     }
+
+    public Map<String, Object> editUsuario(Dispositivo dispositivo, UsuarioFirewall usuario, String oldName) {
+
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/user/local/"
+                + URLEncoder.encode(oldName, StandardCharsets.UTF_8);
+
+        String json = """
+    {
+        "password": "%s",
+        "email": "%s",
+        "two_factor": "%s"
+    }
+    """.formatted(
+                usuario.getPassword(),
+                usuario.getEmail(),
+                usuario.getFactor()
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(dispositivo.getToken().trim());
+
+        HttpEntity<String> entity = new HttpEntity<>(json, headers);
+
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.PUT,
+                    entity,
+                    String.class
+            );
+
+            if (response.getBody() != null && response.getBody().contains("\"status\":\"success\"")) {
+                result.put("success", true);
+            } else {
+                result.put("success", false);
+                result.put("error", response.getBody());
+            }
+
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
+        }
+
+        return result;
+    }
+
 }
 

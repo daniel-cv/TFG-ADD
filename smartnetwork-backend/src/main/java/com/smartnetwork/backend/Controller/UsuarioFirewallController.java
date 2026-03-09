@@ -2,7 +2,10 @@ package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.UsuarioFirewallService;
 import com.smartnetwork.backend.domain.Entity.UsuarioFirewall;
+import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
+import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
 import com.smartnetwork.backend.domain.dtos.usuarioFirewall.CreaUsuarioFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.usuarioFirewall.UsuarioFirewallDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -70,12 +73,21 @@ public class UsuarioFirewallController {
     /**
      * Eliminar un UsuarioFirewall
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id,
             Authentication auth
     ) {
         usuarioFirewallService.eliminar(id, auth.getName());
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/edit/{id}")
+    public UsuarioFirewallDTO editar(
+            @PathVariable Long id,
+            @RequestBody CreaUsuarioFirewallDTO dto,
+            Authentication auth
+    ) {
+        return usuarioFirewallService.editUsuario(id, dto, auth.getName());
     }
 }

@@ -11,5 +11,6 @@ public class CreaUsuarioFirewallDTO {
     private String password;
     private String email;
     private String type;
+    private String twoFactor;
     private Long dispositivoId;
 }

@@ -3,53 +3,30 @@
     <v-row justify="center">
       <v-col cols="12" md="6">
         <v-card>
-          <v-card-title class="text-h5">Usuarios de Firewall</v-card-title>
+          <v-card-title class="text-h5">Crear Usuario</v-card-title>
+          <v-card-subtitle class="mb-4">
+            Completa el formulario para crear un nuevo usuario.
+          </v-card-subtitle>
 
           <v-card-text>
-            <!-- Botón para abrir el form si está oculto -->
-            <v-btn
-              v-if="!formVisible"
-              color="primary"
-              class="mb-4"
-              @click="formVisible = true"
-            >
-              Añadir Usuario
-            </v-btn>
-
-            <!-- Formulario -->
             <UsuarioFirewallForm
-              v-if="formVisible"
               :dispositivo-id="dispositivoId"
-              @creada="cargarUsuarioFirewall"
-              @cancelar="formVisible = false"
+              @creado="recargar"
             />
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
-
-    <!-- Lista de usuarios -->
-    <UsuarioFirewallList />
   </v-container>
 </template>
 
 <script setup>
-import { ref } from "vue";
 import UsuarioFirewallForm from "@/components/UsuarioFirewallForm.vue";
-import UsuarioFirewallList from "@/components/UsuarioFirewallList.vue";
-import { useUsuarioFirewallStore } from "@/stores/usuarioFirewallStore";
+import { ref } from "vue";
 
-const dispositivoId = ref(1);
-const formVisible = ref(true);
+const dispositivoId = ref(1); 
 
-const usuarioStore = useUsuarioFirewallStore();
-
-// 🔹 Manejar evento 'creada'
-const handleCreada = () => {
-  // 1️⃣ Ocultar formulario
-  formVisible.value = false;
-
-  // 2️⃣ Recargar lista de usuarios
-  usuarioStore.cargarUsuarioFirewall(dispositivoId.value);
+const recargar = () => {
+  console.log("Usuario creado, recargando lista...");
 };
 </script>

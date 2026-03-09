@@ -4,7 +4,8 @@ import { useUserStore } from "@/stores/userStore";
 import {
   obtenerUsuarioFirewallPorDispositivo,
   crearUsuarioFirewall,
-  eliminarUsuarioFirewall as apiEliminarUsuarioFirewall
+  eliminarUsuarioFirewall as apiEliminarUsuarioFirewall,
+  actualizarUsuarioFirewall as apiActualizarUsuarioFirewall  // <- nuevo
 } from '@/services/usuarioFirewallService'
 
 export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
@@ -51,6 +52,21 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
         console.error("Error eliminando usuario firewall:", error)
         this.mensaje = "Error eliminando usuario firewall"
       }
+    },
+
+    async actualizarUsuarioFirewall(id, payload) {
+      try {
+        const res = await apiActualizarUsuarioFirewall(id, payload)
+        const index = this.usuarios.findIndex(u => u.id === id)
+        if (index !== -1) this.usuarios[index] = res.data
+        this.mensaje = "Usuario Firewall actualizado correctamente"
+        return res.data
+      } catch (error) {
+        console.error("Error actualizando usuario firewall", error)
+        this.mensaje = "Error al actualizar usuario firewall"
+        throw error
+      }
     }
+
   }
 })

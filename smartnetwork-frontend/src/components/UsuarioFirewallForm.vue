@@ -1,6 +1,6 @@
 <template>
-  <v-form @submit.prevent="handleCrearUsuario">
-    
+  <v-form @submit.prevent="handleSubmitUsuario">
+
     <!-- NOMBRE -->
     <v-text-field
       v-model="name"
@@ -9,6 +9,7 @@
       variant="outlined"
       class="mb-3"
       required
+      :disabled="usuarioEdit" 
     />
 
     <!-- PASSWORD -->
@@ -19,9 +20,17 @@
       type="password"
       variant="outlined"
       class="mb-3"
-      required
+      :required="!usuarioEdit" 
     />
 
+    <!-- EMAIL -->
+    <v-text-field
+      v-model="email"
+      label="Email"
+      prepend-inner-icon="mdi-email"
+      variant="outlined"
+      class="mb-3"
+    />
 
     <!-- TWO FACTOR -->
     <v-select
@@ -34,7 +43,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear Usuario
+      {{ usuarioEdit ? 'Actualizar Usuario' : 'Crear Usuario' }}
     </v-btn>
 
     <v-btn
@@ -52,19 +61,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useUsuarioFirewallStore } from "@/stores/usuarioFirewallStore";
 
-const route = useRoute();
-const emit = defineEmits(['creada', 'cancelar'])
+const props = defineProps({
+  usuarioEdit: { type: Object, default: null },
+  dispositivoId: { type: Number, required: true }
+})
+
+const emit = defineEmits(['creado', 'cancelar'])
 
 const userStore = useUsuarioFirewallStore()
 
 const name = ref("");
 const password = ref("");
 const email = ref("");
-const twoFactor = ref("disable");
+const twoFactor = ref("");
 const mensaje = ref("");
 
 const twoFactorOptions = [
@@ -72,35 +85,46 @@ const twoFactorOptions = [
   { title: "Habilitado", value: "enable" }
 ];
 
-const dispositivoId = Number(route.params.id);
+onMounted(() => {
+  if (props.usuarioEdit) {
+    name.value = props.usuarioEdit.nombre
+    email.value = props.usuarioEdit.email
+    twoFactor.value = props.usuarioEdit.twoFactor || "disable"
+  }
+})
 
-const handleCrearUsuario = async () => {
+const handleSubmitUsuario = async () => {
   try {
-
     const payload = {
       name: name.value,
-      password: password.value,
+      password: password.value || undefined,
       email: email.value || null,
       type: 'password',
-      dispositivoId: dispositivoId
+      twoFactor: twoFactor.value,
+      dispositivoId: props.dispositivoId
     };
 
-    await userStore.crearUsuarioFirewall(payload);
+    if (props.usuarioEdit) {
+      await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id, payload)
+      mensaje.value = "Usuario actualizado correctamente"
+    } else {
+      await userStore.crearUsuarioFirewall(payload)
+      mensaje.value = "Usuario creado correctamente"
+    }
 
-    mensaje.value = "Usuario creado correctamente";
+    emit("creado")
 
-    emit("creada");
-
-    // Reset
-    name.value = "";
-    password.value = "";
-    email.value = "";
-    twoFactor.value = "disable";
+    if (!props.usuarioEdit) {
+      name.value = "";
+      password.value = "";
+      email.value = "";
+      twoFactor.value = "";
+    }
 
   } catch (error) {
-    mensaje.value = "Error al crear el usuario";
+    mensaje.value = props.usuarioEdit ? "Error al actualizar el usuario" : "Error al crear el usuario"
   }
-};
+}
 
 function cancelar() {
   emit('cancelar')
