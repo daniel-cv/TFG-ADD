@@ -1,9 +1,10 @@
 import { defineStore } from 'pinia'
-import { useUserStore } from "@/stores/userStore";
+import { useUserStore } from "@/stores/userStore"
 
 import {
   obtenerInterfacesPorDispositivo,
-  crearInterfaz,
+  crearInterfaz as apiCrearInterfaz,
+  actualizarInterfaz as apiActualizarInterfaz,
   eliminarInterfaz as apiEliminarInterfaz
 } from '@/services/interfazService'
 
@@ -17,40 +18,61 @@ export const useInterfazStore = defineStore('interfaz', {
   actions: {
     async cargarInterfaces(dispositivoId) {
       this.cargando = true
-      const res = await obtenerInterfacesPorDispositivo(dispositivoId)
-      this.reglas = res.data
-      this.cargando = false
+      try {
+        const res = await obtenerInterfacesPorDispositivo(dispositivoId)
+        this.reglas = res.data
+      } catch (error) {
+        console.error("Error cargando interfaces", error)
+        this.mensaje = "Error al cargar interfaces"
+      } finally {
+        this.cargando = false
+      }
     },
 
     async crearInterfaz(interfaz) {
       try {
-        const userStore = useUserStore();
-
+        const userStore = useUserStore()
         if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión";
-          return;
+          this.mensaje = "Debes iniciar sesión"
+          return
         }
 
-        const res = await crearInterfaz(interfaz);
-
-        this.mensaje = "Interfaz creada correctamente";
-        return res.data;
+        const res = await apiCrearInterfaz(interfaz)
+        this.reglas.push(res.data)
+        this.mensaje = "Interfaz creada correctamente"
+        return res.data
 
       } catch (error) {
-        console.error(error);
-        this.mensaje = "Error al crear la interfaz";
-        throw error;
+        console.error(error)
+        this.mensaje = "Error al crear la interfaz"
+        throw error
       }
     },
 
+    async actualizarInterfaz(id, interfaz) {
+      try {
+        const res = await apiActualizarInterfaz(id, interfaz)
+        const index = this.reglas.findIndex(i => i.id === id)
+        if (index !== -1) this.reglas[index] = res.data
+        this.mensaje = "Interfaz actualizada correctamente"
+        return res.data
+      } catch (error) {
+        console.error("Error actualizando interfaz", error)
+        this.mensaje = "Error al actualizar la interfaz"
+        throw error
+      }
+    },
 
     async eliminarInterfaz(id) {
-       try {
+      try {
         await apiEliminarInterfaz(id)
+        this.reglas = this.reglas.filter(i => i.id !== id)
+        this.mensaje = "Interfaz eliminada correctamente"
       } catch (error) {
-        console.error("Error eliminando interfaz",error)
-        this.mensaje = "Error eliminando interfaz"
+        console.error("Error eliminando interfaz", error)
+        this.mensaje = "Error al eliminar la interfaz"
+        throw error
       }
-  }
+    }
   }
 })

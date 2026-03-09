@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="handleCrearInterfaz">
+  <v-form @submit.prevent="handleSubmit">
 
     <!-- NAME -->
     <v-text-field
@@ -8,6 +8,7 @@
       prepend-inner-icon="mdi-lan"
       variant="outlined"
       class="mb-3"
+      :disabled="interfazEdit"
       required
     />
 
@@ -18,23 +19,24 @@
       label="Tipo"
       variant="outlined"
       class="mb-3"
+      clearable
+      :disabled="interfazEdit"  
       required
     />
-
-    <!-- INTERFAZ PADRE (solo VLAN) -->
+<!--VLAN ID-->
     <v-select
       v-if="tipo === 'vlan'"
       v-model="interfacePadre"
-      :items="['port1','port2','port3','port4',]"
+      :items="interfacesDisponibles"
       item-title="name"
       item-value="name"
       label="Interfaz padre"
       variant="outlined"
       class="mb-3"
-      required
+      clearable
+      :disabled="interfazEdit"  
     />
-
-    <!-- VLAN ID (solo VLAN) -->
+<!-- INTERFAZ PADRE -->
     <v-text-field
       v-if="tipo === 'vlan'"
       v-model="vlanid"
@@ -43,9 +45,10 @@
       variant="outlined"
       class="mb-3"
       required
+      :disabled="interfazEdit" 
     />
 
-    <!-- VDOM (fijo) -->
+    <!-- VDOM -->
     <v-text-field
       v-model="vdom"
       label="VDOM"
@@ -64,7 +67,7 @@
       required
     />
 
-    <!-- IP (solo static) -->
+    <!-- IP -->
     <v-text-field
       v-if="mode === 'static'"
       v-model="ip"
@@ -102,7 +105,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear Interfaz
+      {{ interfazEdit ? 'Actualizar Interfaz' : 'Crear Interfaz' }}
     </v-btn>
 
     <v-btn
@@ -110,7 +113,7 @@
       size="large"
       block
       class="mt-2"
-      @click="cancelar()"
+      @click="$emit('cancelar')"
     >
       Cancelar
     </v-btn>
@@ -121,44 +124,57 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
-import { useInterfazStore } from "@/stores/interfazStore";
+import { ref, onMounted, watch } from 'vue'
+import { useInterfazStore } from '@/stores/interfazStore'
 
-const route = useRoute();
+const props = defineProps({
+  dispositivoId: { type: Number, required: true },
+  interfazEdit: { type: Object, default: null }
+})
+
 const emit = defineEmits(['creada', 'cancelar'])
+const interfazStore = useInterfazStore()
 
-const interfazStore = useInterfazStore();
+const name = ref('')
+const tipo = ref('')
+const interfacePadre = ref(null)
+const vlanid = ref(null)
+const vdom = ref('root')
+const mode = ref('')
+const ip = ref('')
+const allowaccess = ref('')
+const role = ref('lan')
+const description = ref('')
+const mensaje = ref('')
 
-const name = ref("");
-const tipo = ref("");
-const interfacePadre = ref(null);
-const vlanid = ref(null);
-const vdom = ref("root");
-const mode = ref("");
-const ip = ref(null);
-const allowaccess = ref("ping");
-const role = ref("lan");
-const description = ref("");
+const interfacesDisponibles = ref(['port1','port2','port3','port4'])
 
-const mensaje = ref("");
-const interfaces = ref([]);
-const dispositivoId = Number(route.params.id);
-
-
-watch(tipo, (t) => {
-  if (t !== "vlan") {
-    interfacePadre.value = null;
-    vlanid.value = null;
+onMounted(() => {
+  if (props.interfazEdit) {
+    name.value = props.interfazEdit.name
+    tipo.value = props.interfazEdit.tipo
+    interfacePadre.value = props.interfazEdit.interfacePadre
+    vlanid.value = props.interfazEdit.vlanid
+    vdom.value = props.interfazEdit.vdom
+    mode.value = props.interfazEdit.mode
+    ip.value = props.interfazEdit.ip
+    allowaccess.value = props.interfazEdit.allowaccess
+    role.value = props.interfazEdit.role
+    description.value = props.interfazEdit.description
   }
-});
-watch(mode, (m) => {
-  if (m !== "static") {
-    ip.value = null;
-  }
-});
+})
 
-const handleCrearInterfaz = async () => {
+watch(tipo, t => {
+  if (t !== 'vlan') {
+    interfacePadre.value = null
+    vlanid.value = null
+  }
+})
+watch(mode, m => {
+  if (m !== 'static') ip.value = null
+})
+
+const handleSubmit = async () => {
   try {
     const payload = {
       name: name.value,
@@ -171,18 +187,20 @@ const handleCrearInterfaz = async () => {
       allowaccess: allowaccess.value,
       role: role.value,
       description: description.value,
-      dispositivoId: dispositivoId
-    };
+      dispositivoId: props.dispositivoId
+    }
 
-    await interfazStore.crearInterfaz(payload);
-    mensaje.value = "Interfaz creada correctamente";
-    emit("creada");
+    if (props.interfazEdit) {
+      await interfazStore.actualizarInterfaz(props.interfazEdit.id, payload)
+      mensaje.value = 'Interfaz actualizada correctamente'
+    } else {
+      await interfazStore.crearInterfaz(payload)
+      mensaje.value = 'Interfaz creada correctamente'
+    }
+
+    emit('creada')
   } catch (error) {
-    mensaje.value = "Error al crear la interfaz";
+    mensaje.value = props.interfazEdit ? 'Error al actualizar interfaz' : 'Error al crear interfaz'
   }
-};
-
-function cancelar() {
-  emit('cancelar')
 }
 </script>

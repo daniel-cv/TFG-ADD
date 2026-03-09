@@ -115,6 +115,23 @@ public class InterfazService {
     }
 
     public void eliminar(Long interfazId, String username) {
+        Interfaz interfaz = interfazRepo.findById(interfazId)
+                .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+
+        if (!interfaz.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        Map<String, Object> resultado = fortiGateService.eliminarInterfaz(interfaz.getDispositivo(), interfaz.getName());
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException("Error eliminando Interfaz en FortiGate: " + resultado);
+        }
+
+        interfazRepo.delete(interfaz);
+    }
+
+    public InterfazDTO actualizar(Long interfazId, CrearInterfazDTO dto, String username) {
 
         Interfaz interfaz = interfazRepo.findById(interfazId)
                 .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
@@ -123,39 +140,29 @@ public class InterfazService {
             throw new RuntimeException("No autorizado");
         }
 
-        Dispositivo dispositivo = interfaz.getDispositivo();
-        String interfazName = interfaz.getName();
+        // Actualizamos campos
+        interfaz.setName(dto.getName());
+        interfaz.setTipo(dto.getTipo());
+        interfaz.setInterfacePadre(dto.getInterfacePadre());
+        interfaz.setVlanid(dto.getVlanid());
+        interfaz.setVdom(dto.getVdom() != null ? dto.getVdom() : "root");
+        interfaz.setMode(dto.getMode());
+        interfaz.setIp(dto.getIp());
+        interfaz.setAllowaccess(dto.getAllowaccess());
+        interfaz.setRole(dto.getRole());
+        interfaz.setDescription(dto.getDescription());
 
-        String url = "http://" + dispositivo.getIp()
-                + "/api/v2/cmdb/system/interface/"
-                +  URLEncoder.encode(interfazName, StandardCharsets.UTF_8)
-                + "?vdom=root";
+        // Llamada a FortiGate para actualizar
+        Map<String, Object> resultado =
+                fortiGateService.editarInterfaz(interfaz.getDispositivo(), interfaz, interfaz.getName());
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(dispositivo.getToken());
-
-        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.DELETE,
-                    requestEntity,
-                    String.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                interfazRepo.delete(interfaz);
-            } else {
-                throw new RuntimeException(
-                        "FortiGate respondió con estado: " + response.getStatusCode()
-                );
-            }
-        } catch (Exception e) {
+        if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException(
-                    "Error eliminando Interfaz en FortiGate (Interfaz=" + interfazName + ")", e
+                    "Error actualizando interfaz en FortiGate: " + resultado
             );
         }
+
+        Interfaz saved = interfazRepo.save(interfaz);
+        return toDTO(saved);
     }
 }

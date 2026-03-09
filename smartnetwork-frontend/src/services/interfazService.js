@@ -13,3 +13,9 @@ export function crearInterfaz(interfaz) {
 export function eliminarInterfaz(id) {
   return api.delete('/api/firewall/interfaz/' + id)
 }
+
+export function actualizarInterfaz(id, interfaz) {
+  return api.put('/api/firewall/interfaz/edit/' + id, {
+     ...interfaz 
+    })
+}

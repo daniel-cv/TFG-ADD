@@ -41,4 +41,12 @@ public class InterfazController {
     ) {
         interfazService.eliminar(id, auth.getName());
     }
+    @PutMapping("/edit/{interfazId}")
+    public InterfazDTO actualizar(
+            @PathVariable Long interfazId,
+            @RequestBody CrearInterfazDTO dto,
+            Authentication auth
+    ) {
+        return interfazService.actualizar(interfazId, dto, auth.getName());
+    }
 }

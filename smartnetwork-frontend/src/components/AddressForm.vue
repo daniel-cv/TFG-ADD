@@ -1,13 +1,15 @@
 <template>
-  <v-form @submit.prevent="handleCrearAddress">
-    
+  <v-form @submit.prevent="handleSubmit">
+
     <!-- NAME -->
+
     <v-text-field
       v-model="name"
       label="Nombre"
       prepend-inner-icon="mdi-label"
       variant="outlined"
       class="mb-3"
+      :disabled="addressEdit"  
       required
     />
 
@@ -31,8 +33,8 @@
       class="mb-3"
       required
     />
-    
-    <!-- IP DESTINO (solo iprange) -->
+
+    <!-- IP DESTINO / MASCARA -->
     <v-text-field
       v-if="type === 'iprange'"
       v-model="ipdestino"
@@ -42,18 +44,17 @@
       class="mb-3"
       required
     />
-    <!-- MASCARA SI IPMASK O SUBNET -->
     <v-text-field
-        v-if="type === 'ipmask' || type === 'subnet'"
-        v-model="ipdestino"
-        label="Máscara"
-        prepend-inner-icon="mdi-ip"
-        variant="outlined"
-        class="mb-3"
-        required
-      />
+      v-if="type === 'ipmask' || type === 'subnet'"
+      v-model="ipdestino"
+      label="Máscara"
+      prepend-inner-icon="mdi-ip"
+      variant="outlined"
+      class="mb-3"
+      required
+    />
 
-    <!-- INTERFAZ (opcional) -->
+    <!-- INTERFAZ -->
     <v-select
       v-model="interfazId"
       :items="interfaces"
@@ -76,7 +77,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear Address
+      {{ addressEdit ? 'Actualizar Address' : 'Crear Address' }}
     </v-btn>
 
     <v-btn
@@ -84,46 +85,55 @@
       size="large"
       block
       class="mt-2"
-      @click="emit('cancelar')"
+      @click="$emit('cancelar')"
     >
       Cancelar
     </v-btn>
 
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
+
   </v-form>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
 import { useRoute } from "vue-router";
 import { useInterfazStore } from '@/stores/interfazStore'
 
-const route = useRoute();
-const emit = defineEmits(['creada', 'cancelar'])
 const props = defineProps({
-  dispositivoId: {
-    type: Number,
-    required: true
-  }
-});
+  dispositivoId: { type: Number, required: true },
+  addressEdit: { type: Object, default: null }
+})
+
+const emit = defineEmits(['creada', 'cancelar'])
 
 const addressStore = useAddressStore()
 const interfazStore = useInterfazStore()
+const route = useRoute()
 
-const name = ref("");
-const type = ref("");
-const ip = ref("");
-const ipdestino = ref("");
-const interfazId = ref(null);
-const comentario = ref("");
+const name = ref("")
+const type = ref("")
+const ip = ref("")
+const ipdestino = ref("")
+const interfazId = ref(null)
+const comentario = ref("")
+const interfaces = ref([])
+const mensaje = ref("")
+const dispositivoId = Number(route.params.id)
 
-const interfaces = ref([]);
-const mensaje = ref("");
-const dispositivoId = Number(route.params.id);
+onMounted(() => {
+  if (props.addressEdit) {
+    name.value = props.addressEdit.name
+    type.value = props.addressEdit.type
+    ip.value = props.addressEdit.ip
+    ipdestino.value = props.addressEdit.ipdestino
+    interfazId.value = props.addressEdit.interfazId
+    comentario.value = props.addressEdit.comentario
+  }
+})
 
-
-const handleCrearAddress = async () => {
+const handleSubmit = async () => {
   try {
     const payload = {
       name: name.value,
@@ -138,12 +148,17 @@ const handleCrearAddress = async () => {
       dispositivoId: dispositivoId
     };
 
-    await addressStore.crearAddress(payload);
+    if (props.addressEdit) {
+      await addressStore.actualizarAddress(props.addressEdit.id, payload)
+      mensaje.value = "Address actualizada correctamente"
+    } else {
+      await addressStore.crearAddress(payload)
+      mensaje.value = "Address creada correctamente"
+    }
 
-    mensaje.value = "Address creada correctamente";
-    emit("creada");
+    emit("creada")
   } catch (error) {
-    mensaje.value = "Error al crear la address";
+    mensaje.value = props.addressEdit ? "Error al actualizar la address" : "Error al crear la address"
   }
-};
+}
 </script>

@@ -113,40 +113,12 @@ public class ServiceService {
             throw new RuntimeException("No autorizado");
         }
 
-        Dispositivo dispositivo = service.getDispositivo();
-        String serviceName = service.getNombre();
+        Map<String, Object> resultado = fortiGateService.eliminarService(service.getDispositivo(), service.getNombre());
 
-        String url = "http://" + dispositivo.getIp()
-                + "/api/v2/cmdb/firewall.service/custom/"
-                + URLEncoder.encode(serviceName, StandardCharsets.UTF_8).replace("+", "%20")
-                + "?vdom=root";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(dispositivo.getToken());
-
-        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.DELETE,
-                    requestEntity,
-                    String.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                serviceRepository.delete(service);
-            } else {
-                throw new RuntimeException(
-                        "FortiGate respondió con estado: " + response.getStatusCode()
-                );
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Error eliminando Service en FortiGate (Service=" + serviceName + ")", e
-            );
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException("Error eliminando Service en FortiGate: " + resultado);
         }
+
+        serviceRepository.delete(service);
     }
 }

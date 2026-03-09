@@ -112,45 +112,23 @@ public class UsuarioFirewallService {
      * Eliminar un UsuarioFirewall
      */
     public void eliminar(Long usuarioFirewallId, String username) {
-
         UsuarioFirewall usuarioFirewall = usuarioFirewallRepository.findById(usuarioFirewallId)
                 .orElseThrow(() -> new RuntimeException("UsuarioFirewall no existe"));
 
-        Dispositivo dispositivo = usuarioFirewall.getDispositivo();
-
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+        if (!usuarioFirewall.getDispositivo().getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
-        String url = "http://" + dispositivo.getIp()
-                + "/api/v2/cmdb/user/local/"
-                +  URLEncoder.encode(usuarioFirewall.getNombre(), StandardCharsets.UTF_8)
-                + "?vdom=root";
+        Map<String, Object> resultado = fortiGateService.eliminarUsuarioFirewall(
+                usuarioFirewall.getDispositivo(),
+                usuarioFirewall.getNombre()
+        );
 
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(dispositivo.getToken());
-
-        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
-
-        try {
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.DELETE,
-                    requestEntity,
-                    String.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                usuarioFirewallRepository.delete(usuarioFirewall);
-            } else {
-                throw new RuntimeException("FortiGate error: " + response.getStatusCode());
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException("Error eliminando usuario en FortiGate", e);
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException("Error eliminando UsuarioFirewall en FortiGate: " + resultado);
         }
+
+        usuarioFirewallRepository.delete(usuarioFirewall);
     }
 }
 

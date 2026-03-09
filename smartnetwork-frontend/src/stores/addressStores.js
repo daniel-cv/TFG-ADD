@@ -4,7 +4,8 @@ import { useUserStore } from "@/stores/userStore";
 import {
   obtenerAddressesPorDispositivo,
   crearAddress,
-  eliminarAddress as eliminarAddressService
+  eliminarAddress as eliminarAddressService,
+  actualizarAddress as actualizarAddressService
 } from '@/services/addressService'
 
 export const useAddressStore = defineStore('address', {
@@ -45,11 +46,24 @@ export const useAddressStore = defineStore('address', {
 
      async eliminarAddress(id) {
       try {
-        await eliminarAddressService(id)  
+        await eliminarAddressService(id) 
         this.addresses = this.addresses.filter(a => a.id !== id) 
       } catch (error) {
         console.error("Error eliminando address", error)
-        this.mensaje = "Error eliminando address"
+        throw error
+      }
+    },
+
+    async actualizarAddress(id, address) {
+      try {
+        const res = await actualizarAddressService(id, address)
+        // actualizar localmente
+        const index = this.addresses.findIndex(a => a.id === id)
+        if (index !== -1) this.addresses[index] = res.data
+        return res.data
+      } catch (error) {
+        console.error("Error actualizando address", error)
+        throw error
       }
     }
   }

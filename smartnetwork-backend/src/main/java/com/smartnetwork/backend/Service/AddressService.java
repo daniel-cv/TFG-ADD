@@ -63,8 +63,6 @@ public class AddressService {
         }
         address.setComentario(dto.getComentario());
         address.setDispositivo(dispositivo);
-
-        // Interfaz opcional
         if (dto.getInterfazId() != null) {
             Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
                     .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
@@ -121,41 +119,52 @@ public class AddressService {
             throw new RuntimeException("No autorizado");
         }
 
-        Dispositivo dispositivo = address.getDispositivo();
-        String addressName = address.getName();
+        Map<String, Object> resultado = fortiGateService.eliminarAddress(address.getDispositivo(), address.getName());
 
-        String url = "http://" + dispositivo.getIp()
-                + "/api/v2/cmdb/firewall/address/"
-                +  URLEncoder.encode(addressName, StandardCharsets.UTF_8)
-                + "?vdom=root";
-
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(dispositivo.getToken());
-
-        HttpEntity<Void> requestEntity = new HttpEntity<>(null, headers);
-
-        try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.DELETE,
-                    requestEntity,
-                    String.class
-            );
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                addressRepo.delete(address);
-            } else {
-                throw new RuntimeException(
-                        "FortiGate respondió con estado: " + response.getStatusCode()
-                );
-            }
-
-        } catch (Exception e) {
-            throw new RuntimeException(
-                    "Error eliminando Address en FortiGate (Address=" + addressName + ")", e
-            );
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException("Error eliminando Address en FortiGate: " + resultado);
         }
+
+        addressRepo.delete(address);
+    }
+
+    public AddressDTO editarAddress(Long addressId, CrearAddressDTO dto, String username) {
+
+        Address address = addressRepo.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address no existe"));
+
+        if (!address.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        Dispositivo dispositivo = address.getDispositivo();
+
+        address.setType(dto.getType());
+        address.setIp(dto.getIp());
+        String ipDestino = dto.getIpdestino();
+        if (ipDestino != null && !ipDestino.isBlank()) {
+            address.setIpdestino(ipDestino.trim());
+        } else {
+            address.setIpdestino(null);
+        }
+        address.setComentario(dto.getComentario());
+
+        if (dto.getInterfazId() != null) {
+            Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
+                    .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+            address.setInterfaz(interfaz);
+        } else {
+            address.setInterfaz(null);
+        }
+
+        Map<String, Object> resultado = fortiGateService.editarAddress(dispositivo, address, address.getName());
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException("Error editando Address en FortiGate: " + resultado);
+        }
+
+        Address saved = addressRepo.save(address);
+        return toDTO(saved);
     }
 
 }
