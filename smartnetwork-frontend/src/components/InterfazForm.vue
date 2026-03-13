@@ -143,7 +143,7 @@ const vdom = ref('root')
 const mode = ref('')
 const ip = ref('')
 const allowaccess = ref('')
-const role = ref('lan')
+const role = ref('')
 const description = ref('')
 const mensaje = ref('')
 

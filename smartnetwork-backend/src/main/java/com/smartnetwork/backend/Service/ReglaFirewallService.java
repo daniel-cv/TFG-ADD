@@ -113,4 +113,43 @@ public class ReglaFirewallService {
 
         reglaRepo.delete(regla);
     }
+
+
+    public ReglaFirewallDTO editarReglaFirewall(Long id ,CrearReglaFirewallDTO dto, String username) {
+
+        if (dto.getDispositivoId() == null) {
+            throw new RuntimeException("dispositivoId obligatorio");
+        }
+
+        Dispositivo dispositivo = dispositivoRepo
+                .findById(dto.getDispositivoId())
+                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+
+        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        ReglaFirewall regla = reglaRepo.findById(id).orElseThrow(() ->
+                new RuntimeException("ReglaFirewall no existe"));
+        regla.setNombre(dto.getNombre());
+        regla.setOrigen(dto.getOrigen());
+        regla.setDestino(dto.getDestino());
+        regla.setIporigen(dto.getIpOrigen());
+        regla.setIpdestino(dto.getIpDestino());
+        regla.setServicio(dto.getServicio());
+        regla.setDispositivo(dispositivo);
+        regla.setHabilitada(true);
+
+        Map<String, Object> resultado = fortiGateService.editarPolicy(dispositivo, regla);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error editando policy en FortiGate: " + resultado
+            );
+        }
+
+        reglaRepo.save(regla);
+
+        return toDTO(regla);
+    }
 }

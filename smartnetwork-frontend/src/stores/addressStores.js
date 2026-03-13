@@ -57,7 +57,6 @@ export const useAddressStore = defineStore('address', {
     async actualizarAddress(id, address) {
       try {
         const res = await actualizarAddressService(id, address)
-        // actualizar localmente
         const index = this.addresses.findIndex(a => a.id === id)
         if (index !== -1) this.addresses[index] = res.data
         return res.data

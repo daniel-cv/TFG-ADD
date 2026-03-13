@@ -4,6 +4,8 @@ import com.smartnetwork.backend.Service.ReglaFirewallService;
 import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
+import com.smartnetwork.backend.domain.dtos.Services.ServiceDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,8 +34,17 @@ public class ReglaFirewallController {
         return reglaFirewallService.obtenerPorDispositivo(id, authentication.getName());
     }
 
-    @DeleteMapping("/{reglaId}")
-    public void eliminar(@PathVariable Long reglaId, Authentication auth) {
-        reglaFirewallService.eliminarRegla(reglaId, auth.getName());
+    @DeleteMapping("/delete/{id}")
+    public void eliminar(@PathVariable Long id, Authentication auth) {
+        reglaFirewallService.eliminarRegla(id, auth.getName());
+    }
+
+    @PutMapping("/edit/{id}")
+    public ReglaFirewallDTO editar(
+            @PathVariable Long id,
+            @RequestBody CrearReglaFirewallDTO dto,
+            Authentication auth
+    ) {
+        return reglaFirewallService.editarReglaFirewall(id, dto, auth.getName());
     }
 }

@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="handleCrearVirtualIp">
+  <v-form @submit.prevent="handleSubmit">
 
     <!-- NAME -->
     <v-text-field
@@ -8,6 +8,7 @@
       prepend-inner-icon="mdi-swap-horizontal"
       variant="outlined"
       class="mb-3"
+      :disabled="virtualIpEdit"
       required
     />
 
@@ -30,6 +31,7 @@
       label="Tipo"
       variant="outlined"
       class="mb-3"
+      :disabled="virtualIpEdit"
       required
     />
 
@@ -60,7 +62,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear VirtualIP
+       {{ virtualIpEdit ? 'Actualizar VirtualIP' : 'Crear VirtualIP' }}
     </v-btn>
 
     <v-btn
@@ -68,7 +70,7 @@
       size="large"
       block
       class="mt-2"
-      @click="cancelar()"
+      @click="$emit('cancelar')"
     >
       Cancelar
     </v-btn>
@@ -83,6 +85,10 @@ import { useRoute } from "vue-router";
 import { useVirtualIpStore } from "@/stores/virtualIpStore";
 import { useInterfazStore } from "@/stores/interfazStore";
 
+const props = defineProps({
+  dispositivoId: { type: Number, required: true },
+  virtualIpEdit: { type: Object, default: null }
+})
 const route = useRoute();
 const emit = defineEmits(['creada', 'cancelar'])
 
@@ -99,10 +105,20 @@ const interfazId = ref(null);
 const interfaces = ref([]);
 const mensaje = ref("");
 
-const dispositivoId = Number(route.params.id); 
 
+onMounted(() => {
+ 
+  if (props.virtualIpEdit) {
+    name.value = props.virtualIpEdit.name;
+    type.value = props.virtualIpEdit.type || "static-nat";
+    externalIp.value = props.virtualIpEdit.externalIp;
+    internalIp.value = props.virtualIpEdit.internalIp;
+    comments.value = props.virtualIpEdit.comments;
+    interfazId.value = props.virtualIpEdit.interfazId;
+  }
+});
 
-const handleCrearVirtualIp = async () => {
+const handleSubmit = async () => {
   try {
     const payload = {
       name: name.value,
@@ -111,19 +127,21 @@ const handleCrearVirtualIp = async () => {
       internalIp: internalIp.value,
       comments: comments.value,
       interfazId: interfazId.value,
-      dispositivoId: dispositivoId
+      dispositivoId: props.dispositivoId
     };
 
-    await virtualIpStore.crearVirtualIp(payload);
+    if (props.virtualIpEdit) {
+      await virtualIpStore.actualizarVirtualIp(props.virtualIpEdit.id, payload)
+      mensaje.value = 'VirtualIP actualizada correctamente'
+    } else {
+      await virtualIpStore.crearVirtualIp(payload)
+      mensaje.value = 'VirtualIP creada correctamente'
+    }
 
-    mensaje.value = "VirtualIP creada correctamente";
-    emit("creada");
+    emit('creada')
   } catch (error) {
-    mensaje.value = "Error al crear la VirtualIP";
+    mensaje.value = props.virtualIpEdit ? 'Error al actualizar VirtualIP' : 'Error al crear VirtualIP'
   }
 };
 
-function cancelar() {
-  emit('cancelar')
-}
 </script>
