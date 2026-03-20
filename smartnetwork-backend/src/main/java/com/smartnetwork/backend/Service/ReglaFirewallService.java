@@ -52,6 +52,8 @@ public class ReglaFirewallService {
         regla.setIpdestino(dto.getIpDestino());
         regla.setServicio(dto.getServicio());
         regla.setDispositivo(dispositivo);
+        regla.setAction(dto.getAction());
+        regla.setNat(dto.getNat());
         regla.setHabilitada(true);
 
         Map<String, Object> resultado = fortiGateService.crearPolicy(dispositivo, regla);
@@ -90,6 +92,8 @@ public class ReglaFirewallService {
         dto.setIpDestino(regla.getIpdestino());
         dto.setServicio(regla.getServicio());
         dto.setHabilitada(regla.isHabilitada());
+        dto.setNat(regla.getNat());
+        dto.setAction(regla.getAction());
         dto.setDispositivoId(regla.getDispositivo().getId());
         return dto;
     }
@@ -138,6 +142,8 @@ public class ReglaFirewallService {
         regla.setIpdestino(dto.getIpDestino());
         regla.setServicio(dto.getServicio());
         regla.setDispositivo(dispositivo);
+        regla.setNat(regla.getNat());
+        regla.setAction(regla.getAction());
         regla.setHabilitada(true);
 
         Map<String, Object> resultado = fortiGateService.editarPolicy(dispositivo, regla);

@@ -40,5 +40,11 @@ public class ReglaFirewall {
     @Column(nullable = false)
     private String servicio;
 
+    @Column(nullable = false)
+    private String nat;
+
+    @Column(nullable = false)
+    private String action;
+
     private boolean habilitada;
 }

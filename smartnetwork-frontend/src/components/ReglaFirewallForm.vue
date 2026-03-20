@@ -58,6 +58,7 @@
       prepend-inner-icon="mdi-network"
       variant="outlined"
       class="mb-3"
+      :disabled="!!props.reglaEdit"
     />
 
     <v-select
@@ -67,6 +68,7 @@
       prepend-inner-icon="mdi-shield-check"
       variant="outlined"
       class="mb-3"
+      :disabled="!!props.reglaEdit"
     />
 
     <v-btn color="primary" size="large" block type="submit">
@@ -108,9 +110,9 @@ const origen = ref('')
 const destino = ref('')
 const ipOrigen = ref('')
 const ipDestino = ref('')
-const servicio = ref('ALL')
-const nat = ref('disable')
-const action = ref('accept')
+const servicio = ref('')
+const nat = ref('')
+const action = ref('')
 const mensaje = ref('')
 
 onMounted(() => {

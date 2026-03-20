@@ -39,9 +39,9 @@ public class FortiGateService {
             "dstaddr": [{ "name": "%s" }],
             "service": [{ "name": "%s" }],
             "schedule": "always",
-            "action": "accept",
+            "action": "%s",
             "status": "%s",
-            "nat": "enable"
+            "nat": "%s"
         }
         """.formatted(
                 regla.getNombre(),
@@ -50,7 +50,9 @@ public class FortiGateService {
                 regla.getIporigen(),
                 regla.getIpdestino(),
                 regla.getServicio(),
-                regla.isHabilitada() ? "enable" : "disable"
+                regla.getAction(),
+                regla.isHabilitada() ? "enable" : "disable",
+                regla.getNat()
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -669,25 +671,25 @@ public class FortiGateService {
 
             String json = """
         {
-            "name": "%s",
             "srcintf": [{ "name": "%s" }],
             "dstintf": [{ "name": "%s" }],
             "srcaddr": [{ "name": "%s" }],
             "dstaddr": [{ "name": "%s" }],
             "service": [{ "name": "%s" }],
             "schedule": "always",
-            "action": "accept",
+            "action": "%s",
             "status": "%s",
-            "nat": "enable"
+            "nat": "%s"
         }
         """.formatted(
-                    regla.getNombre(),
                     regla.getOrigen(),
                     regla.getDestino(),
                     regla.getIporigen(),
                     regla.getIpdestino(),
                     regla.getServicio(),
-                    regla.isHabilitada() ? "enable" : "disable"
+                    regla.getAction(),
+                    regla.isHabilitada() ? "enable" : "disable",
+                    regla.getNat()
             );
 
             HttpEntity<String> putEntity = new HttpEntity<>(json, headers);
