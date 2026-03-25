@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="handleSubmit">
+  <v-form>
 
     <!-- NAME -->
     <v-text-field
@@ -36,8 +36,11 @@
     />
 
     <!-- EXTERNAL IP -->
-    <v-text-field
+    <v-select
       v-model="externalIp"
+      :items="direcciones"
+      item-title="title"
+      item-value="value"
       label="IP Externa (extip)"
       variant="outlined"
       class="mb-3"
@@ -45,8 +48,11 @@
     />
 
     <!-- INTERNAL IP -->
-    <v-text-field
+    <v-select
       v-model="internalIp"
+      :items="direcciones"
+      item-title="title"
+      item-value="value"
       label="IP Interna (mappedip)"
       variant="outlined"
       class="mb-3"
@@ -61,10 +67,17 @@
       class="mb-3"
     />
 
-    <v-btn color="primary" size="large" block type="submit">
+    <!-- BOTÓN CREAR / ACTUALIZAR -->
+    <v-btn
+      color="primary"
+      size="large"
+      block
+      @click="handleSubmit"
+    >
        {{ virtualIpEdit ? 'Actualizar VirtualIP' : 'Crear VirtualIP' }}
     </v-btn>
 
+    <!-- BOTÓN CANCELAR -->
     <v-btn
       variant="outlined"
       size="large"
@@ -79,69 +92,63 @@
 
   </v-form>
 </template>
+
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import { useVirtualIpStore } from "@/stores/virtualIpStore";
 import { useInterfazStore } from "@/stores/interfazStore";
+import { obtenerAddressesPorDispositivo } from '@/services/addressService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
   virtualIpEdit: { type: Object, default: null }
 })
-const route = useRoute();
+
 const emit = defineEmits(['creada', 'cancelar'])
+const virtualIpStore = useVirtualIpStore()
+const interfazStore = useInterfazStore()
 
-const virtualIpStore = useVirtualIpStore();
-const interfazStore = useInterfazStore();
+const name = ref("")
+const type = ref("static-nat")
+const externalIp = ref("")
+const internalIp = ref("")
+const comments = ref("")
+const interfazId = ref(null)
+const interfaces = ref([])
+const mensaje = ref("")
+const direcciones = ref([])
 
-const name = ref("");
-const type = ref("static-nat");
-const externalIp = ref("");
-const internalIp = ref("");
-const comments = ref("");
-const interfazId = ref(null);
-
-const interfaces = ref([]);
-const mensaje = ref("");
-
-
-onMounted(() => {
- 
+onMounted(async () => {
   if (props.virtualIpEdit) {
-    name.value = props.virtualIpEdit.name;
-    type.value = props.virtualIpEdit.type || "static-nat";
-    externalIp.value = props.virtualIpEdit.externalIp;
-    internalIp.value = props.virtualIpEdit.internalIp;
-    comments.value = props.virtualIpEdit.comments;
-    interfazId.value = props.virtualIpEdit.interfazId;
+    name.value = props.virtualIpEdit.name
+    type.value = props.virtualIpEdit.type || "static-nat"
+    externalIp.value = props.virtualIpEdit.externalIp
+    internalIp.value = props.virtualIpEdit.internalIp
+    comments.value = props.virtualIpEdit.comments
+    interfazId.value = props.virtualIpEdit.interfazId
   }
-});
+
+  try {
+    const res = await obtenerAddressesPorDispositivo(props.dispositivoId)
+    direcciones.value = res.data.map(addr => ({
+      title: addr.name,
+      value: addr.ip
+    }))
+  } catch (error) {
+    console.error('Error cargando direcciones', error)
+  }
+})
+
 
 const handleSubmit = async () => {
-  try {
-    const payload = {
-      name: name.value,
-      type: type.value,
-      externalIp: externalIp.value,
-      internalIp: internalIp.value,
-      comments: comments.value,
-      interfazId: interfazId.value,
-      dispositivoId: props.dispositivoId
-    };
-
-    if (props.virtualIpEdit) {
-      await virtualIpStore.actualizarVirtualIp(props.virtualIpEdit.id, payload)
-      mensaje.value = 'VirtualIP actualizada correctamente'
-    } else {
-      await virtualIpStore.crearVirtualIp(payload)
-      mensaje.value = 'VirtualIP creada correctamente'
-    }
-
-    emit('creada')
-  } catch (error) {
-    mensaje.value = props.virtualIpEdit ? 'Error al actualizar VirtualIP' : 'Error al crear VirtualIP'
-  }
-};
-
+  console.log('Formulario enviado', {
+    name: name.value,
+    type: type.value,
+    externalIp: externalIp.value,
+    internalIp: internalIp.value,
+    comments: comments.value,
+    interfazId: interfazId.value
+  })
+  emit('creada')
+}
 </script>
