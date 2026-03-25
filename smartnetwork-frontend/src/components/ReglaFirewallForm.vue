@@ -26,16 +26,18 @@
       class="mb-3"
     />
 
-    <v-text-field
+    <v-select 
       v-model="ipOrigen"
+      :items="direcciones"
       label="Objeto Dirección Origen"
       prepend-inner-icon="mdi-ip-network"
       variant="outlined"
       class="mb-3"
     />
 
-    <v-text-field
+    <v-select
       v-model="ipDestino"
+      :items="direcciones"
       label="Objeto Dirección Destino"
       prepend-inner-icon="mdi-ip-network-outline"
       variant="outlined"
@@ -95,6 +97,7 @@
 import { ref, onMounted } from 'vue'
 import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import { useRoute } from 'vue-router'
+import { obtenerAddressesPorDispositivo } from '@/services/addressService'
 
 const props = defineProps({
   reglaEdit: { type: Object, default: null }
@@ -110,12 +113,14 @@ const origen = ref('')
 const destino = ref('')
 const ipOrigen = ref('')
 const ipDestino = ref('')
-const servicio = ref('')
+const servicio = ref('ALL')
 const nat = ref('')
 const action = ref('')
 const mensaje = ref('')
 
-onMounted(() => {
+const direcciones = ref([])
+
+onMounted(async () => {
   if (props.reglaEdit) {
     nombre.value = props.reglaEdit.nombre
     origen.value = props.reglaEdit.origen
@@ -124,7 +129,19 @@ onMounted(() => {
     ipDestino.value = props.reglaEdit.ipDestino
     servicio.value = props.reglaEdit.servicio
     nat.value = props.reglaEdit.nat
-    action.value = props.reglaEdit.action || 'accept'
+    action.value = props.reglaEdit.action 
+  }
+  try {
+    const res = await obtenerAddressesPorDispositivo(dispositivoId)
+    direcciones.value = [
+      { title: 'ALL', value: 'all' },
+      ...res.data.map(addr => ({
+        title: addr.name,
+        value: addr.name      
+      }))
+    ]
+  } catch (error) {
+    console.error('Error cargando direcciones', error)
   }
 })
 

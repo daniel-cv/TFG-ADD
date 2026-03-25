@@ -26,8 +26,8 @@
             <td class="name">{{ regla.nombre }}</td>
             <td>{{ regla.origen }}</td>
             <td>{{ regla.destino }}</td>
-            <td class="ip">{{ regla.ipOrigen }}</td>
-            <td class="ip">{{ regla.ipDestino }}</td>
+            <td class="ip">{{ regla.iporigen }}</td>
+            <td class="ip">{{ regla.ipdestino }}</td>
             <td>
               <span class="service-badge">{{ regla.servicio }}</span>
             </td>
