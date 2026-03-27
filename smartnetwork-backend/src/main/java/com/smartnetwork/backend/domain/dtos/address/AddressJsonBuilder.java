@@ -24,12 +24,13 @@ public class AddressJsonBuilder {
           "name": "%s",
           "type": "subnet",
           "subnet": "%s",
-          "comment": "%s"
+          "comment": "%s"%s
         }
         """.formatted(
                 address.getName(),
                 address.getIp() + " " + address.getIpdestino(),
-                sanitize(address.getComentario())
+                sanitize(address.getComentario()),
+                buildInterface(address)
         );
     }
 
@@ -43,13 +44,14 @@ public class AddressJsonBuilder {
       "type": "ipmask",
       "ip": "%s",
       "mask": "%s",
-      "comment": "%s"
+      "comment": "%s"%s
     }
     """.formatted(
                 address.getName(),
                 address.getIp(),        // IP
                 address.getIpdestino(), // MÁSCARA
-                sanitize(address.getComentario())
+                sanitize(address.getComentario()),
+                buildInterface(address)
         );
     }
 
@@ -57,24 +59,33 @@ public class AddressJsonBuilder {
     // IP RANGE
     // -----------------------------
     private static String buildIpRange(Address address) {
-        System.out.println(address.getName()+"          "+address.getIp()+"          "+address.getIpdestino()+"          "+ address.getComentario());
+
         return """
         {
           "name": "%s",
           "type": "iprange",
           "start-ip": "%s",
           "end-ip": "%s",
-          "comment": "%s"
+          "comment": "%s"%s
         }
         """.formatted(
                 address.getName(),
                 address.getIp(),
-                address.getIp(),
-                sanitize(address.getComentario())
+                address.getIpdestino(),
+                sanitize(address.getComentario()),
+                buildInterface(address)
         );
     }
 
     private static String sanitize(String value) {
         return value == null ? "" : value.replace("\"", "");
+    }
+
+    private static String buildInterface(Address address) {
+        if (address.getInterfaz() == null) return "";
+        return """
+                ,
+                "associated-interface": "%s"
+                """.formatted(address.getInterfaz().getName());
     }
 }

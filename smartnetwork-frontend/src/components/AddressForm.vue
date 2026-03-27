@@ -58,8 +58,6 @@
     <v-select
       v-model="interfazId"
       :items="interfaces"
-      item-title="name"
-      item-value="id"
       label="Interfaz (opcional)"
       prepend-inner-icon="mdi-lan"
       variant="outlined"
@@ -100,6 +98,7 @@ import { ref, onMounted } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
 import { useRoute } from "vue-router";
 import { useInterfazStore } from '@/stores/interfazStore'
+import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -109,20 +108,19 @@ const props = defineProps({
 const emit = defineEmits(['creada', 'cancelar'])
 
 const addressStore = useAddressStore()
-const interfazStore = useInterfazStore()
 const route = useRoute()
 
 const name = ref("")
 const type = ref("")
 const ip = ref("")
 const ipdestino = ref("")
-const interfazId = ref(null)
+const interfazId = ref("")
 const comentario = ref("")
 const interfaces = ref([])
 const mensaje = ref("")
 const dispositivoId = Number(route.params.id)
 
-onMounted(() => {
+onMounted(async () => {
   if (props.addressEdit) {
     name.value = props.addressEdit.name
     type.value = props.addressEdit.type
@@ -130,6 +128,17 @@ onMounted(() => {
     ipdestino.value = props.addressEdit.ipdestino
     interfazId.value = props.addressEdit.interfazId
     comentario.value = props.addressEdit.comentario
+  }
+  try {
+    const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
+    interfaces.value = [
+      ...res.data.map(inter => ({
+        title: inter.name,
+        value: inter.id      
+      }))
+    ]
+  } catch (error) {
+    console.error('Error cargando interfaces', error)
   }
 })
 

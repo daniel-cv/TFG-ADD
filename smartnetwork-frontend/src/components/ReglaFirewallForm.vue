@@ -10,16 +10,18 @@
       required
     />
 
-    <v-text-field
+    <v-select 
       v-model="origen"
+      :items="interfaces"
       label="Interfaz Origen"
       prepend-inner-icon="mdi-login-variant"
       variant="outlined"
       class="mb-3"
     />
 
-    <v-text-field
+    <v-select 
       v-model="destino"
+      :items="interfaces"
       label="Interfaz Destino"
       prepend-inner-icon="mdi-logout-variant"
       variant="outlined"
@@ -98,6 +100,7 @@ import { ref, onMounted } from 'vue'
 import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import { useRoute } from 'vue-router'
 import { obtenerAddressesPorDispositivo } from '@/services/addressService'
+import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   reglaEdit: { type: Object, default: null }
@@ -119,6 +122,7 @@ const action = ref('')
 const mensaje = ref('')
 
 const direcciones = ref([])
+const interfaces = ref([])
 
 onMounted(async () => {
   if (props.reglaEdit) {
@@ -142,6 +146,21 @@ onMounted(async () => {
     ]
   } catch (error) {
     console.error('Error cargando direcciones', error)
+  }
+  try {
+    const res = await obtenerInterfacesPorDispositivo(dispositivoId)
+    interfaces.value = [
+      { title: 'Port1', value: 'port1' },
+      { title: 'Port2', value: 'port2' },
+      { title: 'Port3', value: 'port3' },
+      { title: 'Port4', value: 'port4' },
+      ...res.data.map(inter => ({
+        title: inter.name,
+        value: inter.name      
+      }))
+    ]
+  } catch (error) {
+    console.error('Error cargando interfaces', error)
   }
 })
 

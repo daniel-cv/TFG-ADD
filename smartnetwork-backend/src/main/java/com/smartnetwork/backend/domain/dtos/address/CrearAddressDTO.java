@@ -16,5 +16,4 @@ public class CrearAddressDTO {
     private Long interfazId;
     private String comentario;
     private Long dispositivoId;
-
 }

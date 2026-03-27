@@ -16,8 +16,6 @@
     <v-select
       v-model="interfazId"
       :items="interfaces"
-      item-title="name"
-      item-value="id"
       label="Interfaz externa"
       variant="outlined"
       class="mb-3"
@@ -98,6 +96,7 @@ import { ref, onMounted } from "vue";
 import { useVirtualIpStore } from "@/stores/virtualIpStore";
 import { useInterfazStore } from "@/stores/interfazStore";
 import { obtenerAddressesPorDispositivo } from '@/services/addressService'
+import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -113,7 +112,7 @@ const type = ref("static-nat")
 const externalIp = ref("")
 const internalIp = ref("")
 const comments = ref("")
-const interfazId = ref(null)
+const interfazId = ref("")
 const interfaces = ref([])
 const mensaje = ref("")
 const direcciones = ref([])
@@ -136,6 +135,21 @@ onMounted(async () => {
     }))
   } catch (error) {
     console.error('Error cargando direcciones', error)
+  }
+  try {
+    const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
+    interfaces.value = [
+      { title: 'Port1', value: 'port1' },
+      { title: 'Port2', value: 'port2' },
+      { title: 'Port3', value: 'port3' },
+      { title: 'Port4', value: 'port4' },
+      ...res.data.map(inter => ({
+        title: inter.name,
+        value: inter.name      
+      }))
+    ]
+  } catch (error) {
+    console.error('Error cargando interfaces', error)
   }
 })
 

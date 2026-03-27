@@ -25,6 +25,7 @@ public class AddressService {
     private final InterfazRepository interfazRepo;
     private final DispositivoRepository dispositivoRepo;
     private final FortiGateService fortiGateService;
+    private final String auxiliar = null;
 
     public AddressService(
             AddressRepository addressRepo,

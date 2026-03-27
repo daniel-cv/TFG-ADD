@@ -95,7 +95,6 @@ public class FortiGateService {
         Map<String, Object> result = new HashMap<>();
 
         String json = AddressJsonBuilder.build(address);
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(dispositivo.getToken().trim());
