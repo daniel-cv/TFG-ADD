@@ -145,6 +145,10 @@ onMounted(async () => {
   const idsProcesados = puertosBase.map(p => p.value);
 
   interfaces.value = [
+  {
+    title: 'Vacío',
+    value: null
+  },
     ...puertosBase,
     ...apiData
       .filter(inter => {

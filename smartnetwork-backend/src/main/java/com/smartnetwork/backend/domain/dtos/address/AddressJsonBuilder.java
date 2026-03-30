@@ -82,7 +82,10 @@ public class AddressJsonBuilder {
     }
 
     private static String buildInterface(Address address) {
-        if (address.getInterfaz() == null) return "";
+        if (address.getInterfaz() == null) return """
+                ,
+                "associated-interface": ""
+                """;
         return """
                 ,
                 "associated-interface": "%s"

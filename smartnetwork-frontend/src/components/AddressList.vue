@@ -35,11 +35,11 @@
             v-for="address in addressStore.addresses"
             :key="address.id"
           >
-            <td class="name">{{ address.name }}</td>
+            <td class="name">{{ address.name}}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
-            <td>{{ address.interfaz_id }}</td>
-            <td>{{ address.ipdestino || '' }}</td>
+            <td>{{ obtenerNombreInterfaz(address.interfazId)}}</td>
+            <td>{{ address.ipdestino}}</td>
             <td><span class="comment">{{ address.comentario || 'Sin comentario' }}</span></td>
             <td>
               <v-btn
@@ -87,7 +87,7 @@ import { useInterfazStore } from '@/stores/interfazStore'
 const addressStore = useAddressStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
-const interfazStore = useInterfazStore() // <--- 2. DEFINIDO
+const interfazStore = useInterfazStore()
 
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
@@ -122,17 +122,17 @@ const cerrarFormulario = () => {
 
 onMounted(async() => {
   await addressStore.cargarAddresses(dispositivoId)
-  await interfazStore.cargarInterfaces(dispositivoId) // <--- 3. CARGADO
+  await interfazStore.cargarInterfaces(dispositivoId)
 })
 const obtenerNombreInterfaz = (interfazId) => {
-  if (!interfazId) return 'N/A';
+  if (interfazId == null) return 'N/A';
 
-  const interfaz = interfazStore.interfaces.find(
+  const interfaz = interfazStore.reglas.find(
     i => Number(i.id) === Number(interfazId)
   );
 
-  return interfaz ? interfaz.name : 'N/A';
-}
+  return interfaz?.name ?? 'N/A';
+};
 </script>
 
 <style scoped>
