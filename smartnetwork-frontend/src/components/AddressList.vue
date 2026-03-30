@@ -25,8 +25,8 @@
             <th>Tipo</th>
             <th>IP/IP inicio</th>
             <th>Interfaz</th>
-            <th>Comentario</th>
             <th>Máscara/IP Final</th>
+            <th>Comentario</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -38,9 +38,9 @@
             <td class="name">{{ address.name }}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
-            <td>{{ address.interfaz ? address.interfaz.name : 'N/A' }}</td>
-            <td><span class="comment">{{ address.comentario || 'Sin comentario' }}</span></td>
+            <td>{{ address.interfaz_id }}</td>
             <td>{{ address.ipdestino || '' }}</td>
+            <td><span class="comment">{{ address.comentario || 'Sin comentario' }}</span></td>
             <td>
               <v-btn
                 class="rounded-0 px-4 me-2"
@@ -82,10 +82,12 @@ import { ref, onMounted } from 'vue'
 import { useAddressStore } from '@/stores/addressStores'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import AddressForm from '@/components/AddressForm.vue'
+import { useInterfazStore } from '@/stores/interfazStore'
 
 const addressStore = useAddressStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
+const interfazStore = useInterfazStore() // <--- 2. DEFINIDO
 
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
@@ -118,9 +120,19 @@ const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
 
-onMounted(() => {
-  addressStore.cargarAddresses(dispositivoId)
+onMounted(async() => {
+  await addressStore.cargarAddresses(dispositivoId)
+  await interfazStore.cargarInterfaces(dispositivoId) // <--- 3. CARGADO
 })
+const obtenerNombreInterfaz = (interfazId) => {
+  if (!interfazId) return 'N/A';
+
+  const interfaz = interfazStore.interfaces.find(
+    i => Number(i.id) === Number(interfazId)
+  );
+
+  return interfaz ? interfaz.name : 'N/A';
+}
 </script>
 
 <style scoped>

@@ -128,25 +128,39 @@ onMounted(async () => {
   }
 
   try {
-    const res = await obtenerAddressesPorDispositivo(props.dispositivoId)
-    direcciones.value = res.data.map(addr => ({
+    const resAddr = await obtenerAddressesPorDispositivo(props.dispositivoId)
+    direcciones.value = resAddr.data.map(addr => ({
       title: addr.name,
-      value: addr.ip
+      value: addr.ip 
     }))
   } catch (error) {
     console.error('Error cargando direcciones', error)
   }
+
   try {
-    const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
+    const resInt = await obtenerInterfacesPorDispositivo(props.dispositivoId)
+    const apiData = resInt.data
+
+    const puertosBase = [1, 2, 3, 4].map(num => {
+      const nombreBuscado = `port${num}`
+      const coincidencia = apiData.find(inter => inter.name.toLowerCase() === nombreBuscado)
+      
+      return {
+        title: `Port${num}`,
+        value: coincidencia ? coincidencia.id : nombreBuscado
+      }
+    })
+
+    const nombresBase = new Set(['port1', 'port2', 'port3', 'port4'])
+
     interfaces.value = [
-      { title: 'Port1', value: 'port1' },
-      { title: 'Port2', value: 'port2' },
-      { title: 'Port3', value: 'port3' },
-      { title: 'Port4', value: 'port4' },
-      ...res.data.map(inter => ({
-        title: inter.name,
-        value: inter.name      
-      }))
+      ...puertosBase,
+      ...apiData
+        .filter(inter => !nombresBase.has(inter.name.toLowerCase()))
+        .map(inter => ({
+          title: inter.name,
+          value: inter.id      
+        }))
     ]
   } catch (error) {
     console.error('Error cargando interfaces', error)

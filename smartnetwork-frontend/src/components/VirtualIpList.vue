@@ -103,7 +103,7 @@ onMounted(() => {
 .service-list { width: 100%; }
 .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
 .table-header h2 { font-size: 18px; font-weight: 600; color: #0f172a; }
-.add-btn { background: #3b82f6 !important; color: white !important; border-radius: 8px; text-transform: none; }
+.add-btn { background: #3b82f6 !important; color: white !important; border-radius: 8px; text-transform: none !important; }
 .professional-table { background: white; border-radius: 12px; overflow: hidden; border: 1px solid #f1f5f9; }
 .professional-table thead { background: #f8fafc; }
 .professional-table th { color: #64748b; font-size: 13px; font-weight: 600; padding: 14px; text-align: left; }

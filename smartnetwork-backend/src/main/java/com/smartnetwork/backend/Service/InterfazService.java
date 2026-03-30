@@ -165,4 +165,16 @@ public class InterfazService {
         Interfaz saved = interfazRepo.save(interfaz);
         return toDTO(saved);
     }
+
+    public Interfaz findByNameAndDispositivoId(String name, Long dispositivoId, String username) {
+        Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
+                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+
+        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        return interfazRepo.findByNameAndDispositivoId(name, dispositivoId)
+                .orElseThrow(() -> new RuntimeException("Interfaz '" + name + "' no encontrada en este dispositivo"));
+    }
 }

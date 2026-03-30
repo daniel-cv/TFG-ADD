@@ -125,6 +125,7 @@ const direcciones = ref([])
 const interfaces = ref([])
 
 onMounted(async () => {
+  // 1. Cargar datos de edición
   if (props.reglaEdit) {
     nombre.value = props.reglaEdit.nombre
     origen.value = props.reglaEdit.origen
@@ -135,29 +136,46 @@ onMounted(async () => {
     nat.value = props.reglaEdit.nat
     action.value = props.reglaEdit.action 
   }
+
+  // 2. Cargar Direcciones (evitando duplicar 'all')
   try {
-    const res = await obtenerAddressesPorDispositivo(dispositivoId)
+    const resAddr = await obtenerAddressesPorDispositivo(dispositivoId)
+    const baseAddresses = [{ title: 'ALL', value: 'all' }]
+    
     direcciones.value = [
-      { title: 'ALL', value: 'all' },
-      ...res.data.map(addr => ({
-        title: addr.name,
-        value: addr.name      
-      }))
+      ...baseAddresses,
+      ...resAddr.data
+        .filter(addr => addr.name.toLowerCase() !== 'all')
+        .map(addr => ({
+          title: addr.name,
+          value: addr.name      
+        }))
     ]
   } catch (error) {
     console.error('Error cargando direcciones', error)
   }
+
+  // 3. Cargar Interfaces (evitando duplicar port1-4)
   try {
-    const res = await obtenerInterfacesPorDispositivo(dispositivoId)
-    interfaces.value = [
+    const resInt = await obtenerInterfacesPorDispositivo(dispositivoId)
+    
+    const puertosBase = [
       { title: 'Port1', value: 'port1' },
       { title: 'Port2', value: 'port2' },
       { title: 'Port3', value: 'port3' },
-      { title: 'Port4', value: 'port4' },
-      ...res.data.map(inter => ({
-        title: inter.name,
-        value: inter.name      
-      }))
+      { title: 'Port4', value: 'port4' }
+    ]
+
+    const nombresBase = new Set(puertosBase.map(p => p.value.toLowerCase()))
+
+    interfaces.value = [
+      ...puertosBase,
+      ...resInt.data
+        .filter(inter => !nombresBase.has(inter.name.toLowerCase()))
+        .map(inter => ({
+          title: inter.name,
+          value: inter.name      
+        }))
     ]
   } catch (error) {
     console.error('Error cargando interfaces', error)

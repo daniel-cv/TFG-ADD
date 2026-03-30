@@ -39,47 +39,59 @@ public class AddressService {
     }
 
     public AddressDTO crear(CrearAddressDTO dto, String username) {
+        if (dto.getDispositivoId() == null) throw new RuntimeException("dispositivoId obligatorio");
 
-        if (dto.getDispositivoId() == null) {
-            throw new RuntimeException("dispositivoId obligatorio");
-        }
-
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dto.getDispositivoId())
+        Dispositivo dispositivo = dispositivoRepo.findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
-        }
+        if (!dispositivo.getUsuario().getUsername().equals(username)) throw new RuntimeException("No autorizado");
 
         Address address = new Address();
         address.setName(dto.getName());
         address.setType(dto.getType());
         address.setIp(dto.getIp());
-        String ipDestino = dto.getIpdestino();
-        if(ipDestino != null && !ipDestino.isBlank()){
-            address.setIpdestino(ipDestino.trim());
-        } else {
-            address.setIpdestino(null);
-        }
+        address.setIpdestino(dto.getIpdestino() != null ? dto.getIpdestino().trim() : null);
         address.setComentario(dto.getComentario());
         address.setDispositivo(dispositivo);
+
+        // Lógica de Interfaz: Buscar o Crear antes de asignar
         if (dto.getInterfazId() != null) {
-            Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
-                    .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-            address.setInterfaz(interfaz);
+            if (dto.getInterfazId() < 0) {
+                String nombrePort = switch (dto.getInterfazId().intValue()) {
+                    case -1 -> "port1";
+                    case -2 -> "port2";
+                    case -3 -> "port3";
+                    case -4 -> "port4";
+                    default -> throw new RuntimeException("Puerto default no soportado");
+                };
+
+                // BUSCAMOS primero. Si no existe, CREAMOS y GUARDAMOS en la DB.
+                Interfaz interfaz = interfazRepo.findByNameAndDispositivoId(nombrePort, dispositivo.getId())
+                        .orElseGet(() -> {
+                            Interfaz nueva = new Interfaz();
+                            nueva.setName(nombrePort);
+                            nueva.setTipo("Default");
+                            nueva.setDispositivo(dispositivo);
+                            return interfazRepo.save(nueva); // <--- ESTO evita el error de Transient
+                        });
+                address.setInterfaz(interfaz);
+            } else {
+                Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
+                        .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+                address.setInterfaz(interfaz);
+            }
+        } else {
+            address.setInterfaz(null);
         }
 
+        // FortiGate
         Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
-
         if (!(Boolean) resultado.get("success")) {
-            throw new RuntimeException(
-                    "Error creando policy en FortiGate: " + resultado
-            );
+            throw new RuntimeException("Error en FortiGate: " + resultado);
         }
 
-        Address saved = addressRepo.save(address);
-        return toDTO(saved);
+        // Guardar Address final
+        return toDTO(addressRepo.save(address));
     }
 
     public List<AddressDTO> listarPorDispositivo(Long dispositivoId, String username) {
@@ -130,7 +142,6 @@ public class AddressService {
     }
 
     public AddressDTO editarAddress(Long addressId, CrearAddressDTO dto, String username) {
-
         Address address = addressRepo.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address no existe"));
 
@@ -140,32 +151,50 @@ public class AddressService {
 
         Dispositivo dispositivo = address.getDispositivo();
 
+        // Actualización de campos básicos
         address.setType(dto.getType());
         address.setIp(dto.getIp());
-        String ipDestino = dto.getIpdestino();
-        if (ipDestino != null && !ipDestino.isBlank()) {
-            address.setIpdestino(ipDestino.trim());
-        } else {
-            address.setIpdestino(null);
-        }
+        address.setIpdestino(dto.getIpdestino() != null ? dto.getIpdestino().trim() : null);
         address.setComentario(dto.getComentario());
 
+        // Gestión de Interfaz
         if (dto.getInterfazId() != null) {
-            Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
-                    .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-            address.setInterfaz(interfaz);
+            if (dto.getInterfazId() < 0) {
+                // IDs negativos: port1 a port4
+                String nombrePort = switch (dto.getInterfazId().intValue()) {
+                    case -1 -> "port1";
+                    case -2 -> "port2";
+                    case -3 -> "port3";
+                    case -4 -> "port4";
+                    default -> throw new RuntimeException("Puerto default no soportado");
+                };
+
+                // BUSCAR O CREAR (y persistir inmediatamente si es nueva)
+                Interfaz interfaz = interfazRepo.findByNameAndDispositivoId(nombrePort, dispositivo.getId())
+                        .orElseGet(() -> {
+                            Interfaz nueva = new Interfaz();
+                            nueva.setName(nombrePort);
+                            nueva.setTipo("Default");
+                            nueva.setDispositivo(dispositivo);
+                            return interfazRepo.save(nueva); // <--- CRITICO: Guardar antes de asignar
+                        });
+                address.setInterfaz(interfaz);
+            } else {
+                // ID positivo: buscar interfaz existente
+                Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
+                        .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+                address.setInterfaz(interfaz);
+            }
         } else {
             address.setInterfaz(null);
         }
 
+        // Comunicación con FortiGate
         Map<String, Object> resultado = fortiGateService.editarAddress(dispositivo, address, address.getName());
-
         if (!(Boolean) resultado.get("success")) {
             throw new RuntimeException("Error editando Address en FortiGate: " + resultado);
         }
 
-        Address saved = addressRepo.save(address);
-        return toDTO(saved);
+        return toDTO(addressRepo.save(address));
     }
-
 }

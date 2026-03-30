@@ -129,17 +129,36 @@ onMounted(async () => {
     interfazId.value = props.addressEdit.interfazId
     comentario.value = props.addressEdit.comentario
   }
-  try {
-    const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
-    interfaces.value = [
-      ...res.data.map(inter => ({
+ try {
+  const res = await obtenerInterfacesPorDispositivo(props.dispositivoId);
+  const apiData = res.data;
+  const puertosBase = [1, 2, 3, 4].map(num => {
+    const nombreBuscado = `port${num}`;
+    const coincidencia = apiData.find(inter => inter.name.toLowerCase() === nombreBuscado);
+    
+    return {
+      title: `Port${num}`,
+      value: coincidencia ? coincidencia.id : -num 
+    };
+  });
+
+  const idsProcesados = puertosBase.map(p => p.value);
+
+  interfaces.value = [
+    ...puertosBase,
+    ...apiData
+      .filter(inter => {
+        const name = inter.name.toLowerCase();
+        return !['port1', 'port2', 'port3', 'port4'].includes(name);
+      })
+      .map(inter => ({
         title: inter.name,
-        value: inter.id      
+        value: inter.id
       }))
-    ]
-  } catch (error) {
-    console.error('Error cargando interfaces', error)
-  }
+  ];
+} catch (error) {
+  console.error('Error cargando interfaces', error);
+}
 })
 
 const handleSubmit = async () => {
