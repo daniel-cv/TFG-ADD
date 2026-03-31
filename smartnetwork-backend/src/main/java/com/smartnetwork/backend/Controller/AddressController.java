@@ -20,9 +20,17 @@ public class AddressController {
         this.addressService = addressService;
     }
 
+    @PostMapping("/aplicar")
+    public void aplicarAddress(
+            @RequestBody CrearAddressDTO dto,
+            @RequestParam Long addressId,
+            Authentication auth) {
+        addressService.crear(dto, auth.getName());
+    }
+
     @PostMapping("/create")
-    public AddressDTO crear(@RequestBody CrearAddressDTO dto, Authentication auth) {
-        return addressService.crear(dto, auth.getName());
+    public void crear(@RequestBody CrearAddressDTO dto, Authentication auth) {
+        addressService.crearAddress(dto, auth.getName());
     }
 
     @GetMapping("/dispositivo/{id}")
@@ -31,6 +39,13 @@ public class AddressController {
             Authentication auth
     ) {
         return addressService.listarPorDispositivo(id, auth.getName());
+    }
+
+    @GetMapping("/usuario/")
+    public List<AddressDTO> listarPorUsuario(
+            Authentication auth
+    ) {
+        return addressService.listarPorUsuario(auth.getName());
     }
 
     @DeleteMapping("/delete/{id}")

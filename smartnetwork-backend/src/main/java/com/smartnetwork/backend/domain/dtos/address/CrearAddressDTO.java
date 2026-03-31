@@ -5,6 +5,8 @@ import com.smartnetwork.backend.domain.Entity.Interfaz;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class CrearAddressDTO {
@@ -15,6 +17,6 @@ public class CrearAddressDTO {
     private String ipdestino;
     private Long interfazId;
     private String comentario;
-    private Long dispositivoId;
+    private List<Long> dispositivosIds;
 
 }

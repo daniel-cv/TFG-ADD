@@ -145,7 +145,7 @@ const handleSubmit = async () => {
         : null,
       interfazId: interfazId.value || null,
       comentario: comentario.value,
-      dispositivoId: dispositivoId
+      dispositivosIds: [dispositivoId]
     };
 
     if (props.addressEdit) {

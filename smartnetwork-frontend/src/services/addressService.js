@@ -19,3 +19,11 @@ export function actualizarAddress(id, address) {
     ...address 
   })
 }
+
+export function obtenerAddressPorId() {
+  return api.get('/api/firewalls/addresses/usuario/')
+}
+
+export function aplicarAddressToDispositivos(addressId, dispositivosId) {
+  return api.post(`/api/firewalls/addresses/${addressId}/aplicar/${dispositivosId}`)
+}

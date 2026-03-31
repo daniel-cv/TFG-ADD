@@ -3,7 +3,9 @@ import { useUserStore } from "@/stores/userStore";
 
 import {
   obtenerAddressesPorDispositivo,
+  obtenerAddressPorId,
   crearAddress,
+  aplicarAddressToDispositivos,
   eliminarAddress as eliminarAddressService,
   actualizarAddress as actualizarAddressService
 } from '@/services/addressService'
@@ -65,6 +67,41 @@ export const useAddressStore = defineStore('address', {
         console.error("Error actualizando address", error)
         throw error
       }
-    }
+    },
+
+    async obtenerMisAddresses() {
+      try {
+        const userStore = useUserStore();
+        
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+
+        const res = await obtenerAddressPorId()
+        this.addresses = res.data
+        this.cargando = false
+      } catch (error) {
+        console.error("Error obteniendo address por ID", error)
+        throw error
+      }
+    },
+
+    async aplicarAddressToDispositivos(addressId, dispositivoIds) {
+      try {
+        const userStore = useUserStore();
+        
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+
+        const res = await aplicarAddressToDispositivos(addressId, dispositivoIds)
+      } catch (error) {
+        console.error("Error aplicando address a dispositivos", error)
+        this.mensaje = "Error al aplicar la address a los dispositivos";
+        throw error
+      }
+    },
   }
 })

@@ -9,5 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface AddressRepository extends JpaRepository<Address,Long> {
-    List<Address> findByDispositivoId(Long dispositivoId);
+    List<Address> findByUsuarioId(Integer id);
 }
