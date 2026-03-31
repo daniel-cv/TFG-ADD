@@ -7,6 +7,7 @@ import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Interfaz;
 import com.smartnetwork.backend.domain.Entity.VirtualIp;
+import com.smartnetwork.backend.domain.dtos.interfaz.CrearInterfazDTO;
 import com.smartnetwork.backend.domain.dtos.virtualIp.CrearVirtualIpDTO;
 import com.smartnetwork.backend.domain.dtos.virtualIp.VirtualIpDTO;
 import org.springframework.http.*;
@@ -140,6 +141,34 @@ public class VirtualIpService {
                     "Error eliminando VirtualIP en FortiGate (Address=" + virtualIpName + ")", e
             );
         }
+    }
+
+    public VirtualIpDTO actualizar(Long virtualIpId, CrearVirtualIpDTO dto, String username) {
+
+        VirtualIp virtualIp = virtualIpRepo.findById(virtualIpId)
+                .orElseThrow(() -> new RuntimeException("VirtualIP no existe"));
+
+        if (!virtualIp.getDispositivo().getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        virtualIp.setInterfaz(interfazRepo.findById(dto.getInterfazId()).orElseThrow(() ->
+                new RuntimeException("Interfaz no existe")));
+        virtualIp.setExternal_ip(dto.getExternalIp());
+        virtualIp.setInternal_ip(dto.getInternalIp());
+        virtualIp.setComments(dto.getComments());
+
+        Map<String, Object> resultado =
+                fortiGateService.editarVirtualIp(virtualIp.getDispositivo(), virtualIp, virtualIp.getName());
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error actualizando VirtualIP en FortiGate: " + resultado
+            );
+        }
+
+        VirtualIp saved = virtualIpRepo.save(virtualIp);
+        return toDTO(saved);
     }
 
 }

@@ -52,6 +52,8 @@ public class ReglaFirewallService {
         regla.setIpdestino(dto.getIpDestino());
         regla.setServicio(dto.getServicio());
         regla.setDispositivo(dispositivo);
+        regla.setAction(dto.getAction());
+        regla.setNat(dto.getNat());
         regla.setHabilitada(true);
 
         Map<String, Object> resultado = fortiGateService.crearPolicy(dispositivo, regla);
@@ -90,6 +92,8 @@ public class ReglaFirewallService {
         dto.setIpDestino(regla.getIpdestino());
         dto.setServicio(regla.getServicio());
         dto.setHabilitada(regla.isHabilitada());
+        dto.setNat(regla.getNat());
+        dto.setAction(regla.getAction());
         dto.setDispositivoId(regla.getDispositivo().getId());
         return dto;
     }
@@ -112,5 +116,46 @@ public class ReglaFirewallService {
         }
 
         reglaRepo.delete(regla);
+    }
+
+
+    public ReglaFirewallDTO editarReglaFirewall(Long id ,CrearReglaFirewallDTO dto, String username) {
+
+        if (dto.getDispositivoId() == null) {
+            throw new RuntimeException("dispositivoId obligatorio");
+        }
+
+        Dispositivo dispositivo = dispositivoRepo
+                .findById(dto.getDispositivoId())
+                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+
+        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        ReglaFirewall regla = reglaRepo.findById(id).orElseThrow(() ->
+                new RuntimeException("ReglaFirewall no existe"));
+        regla.setNombre(dto.getNombre());
+        regla.setOrigen(dto.getOrigen());
+        regla.setDestino(dto.getDestino());
+        regla.setIporigen(dto.getIpOrigen());
+        regla.setIpdestino(dto.getIpDestino());
+        regla.setServicio(dto.getServicio());
+        regla.setDispositivo(dispositivo);
+        regla.setNat(regla.getNat());
+        regla.setAction(regla.getAction());
+        regla.setHabilitada(true);
+
+        Map<String, Object> resultado = fortiGateService.editarPolicy(dispositivo, regla);
+
+        if (!(Boolean) resultado.get("success")) {
+            throw new RuntimeException(
+                    "Error editando policy en FortiGate: " + resultado
+            );
+        }
+
+        reglaRepo.save(regla);
+
+        return toDTO(regla);
     }
 }

@@ -10,6 +10,12 @@ export function crearReglaFirewall(regla) {
   })
 }
 
-export function eliminarReglaFirewall(reglaId) {
-  return api.delete(`/api/firewalls/reglas/${reglaId}`)
+export function eliminarReglaFirewall(id) {
+  return api.delete('/api/firewalls/reglas/delete/' + id)
+}
+
+export function actualizarReglaFirewall(id, regla) {
+  return api.put('api/firewalls/reglas/edit/' + id, { 
+    ...regla
+  })
 }

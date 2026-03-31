@@ -58,8 +58,6 @@
     <v-select
       v-model="interfazId"
       :items="interfaces"
-      item-title="name"
-      item-value="id"
       label="Interfaz (opcional)"
       prepend-inner-icon="mdi-lan"
       variant="outlined"
@@ -100,6 +98,7 @@ import { ref, onMounted } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
 import { useRoute } from "vue-router";
 import { useInterfazStore } from '@/stores/interfazStore'
+import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -109,20 +108,19 @@ const props = defineProps({
 const emit = defineEmits(['creada', 'cancelar'])
 
 const addressStore = useAddressStore()
-const interfazStore = useInterfazStore()
 const route = useRoute()
 
 const name = ref("")
 const type = ref("")
 const ip = ref("")
 const ipdestino = ref("")
-const interfazId = ref(null)
+const interfazId = ref("")
 const comentario = ref("")
 const interfaces = ref([])
 const mensaje = ref("")
 const dispositivoId = Number(route.params.id)
 
-onMounted(() => {
+onMounted(async () => {
   if (props.addressEdit) {
     name.value = props.addressEdit.name
     type.value = props.addressEdit.type
@@ -131,6 +129,40 @@ onMounted(() => {
     interfazId.value = props.addressEdit.interfazId
     comentario.value = props.addressEdit.comentario
   }
+ try {
+  const res = await obtenerInterfacesPorDispositivo(props.dispositivoId);
+  const apiData = res.data;
+  const puertosBase = [1, 2, 3, 4].map(num => {
+    const nombreBuscado = `port${num}`;
+    const coincidencia = apiData.find(inter => inter.name.toLowerCase() === nombreBuscado);
+    
+    return {
+      title: `Port${num}`,
+      value: coincidencia ? coincidencia.id : -num 
+    };
+  });
+
+  const idsProcesados = puertosBase.map(p => p.value);
+
+  interfaces.value = [
+  {
+    title: 'Vacío',
+    value: null
+  },
+    ...puertosBase,
+    ...apiData
+      .filter(inter => {
+        const name = inter.name.toLowerCase();
+        return !['port1', 'port2', 'port3', 'port4'].includes(name);
+      })
+      .map(inter => ({
+        title: inter.name,
+        value: inter.id
+      }))
+  ];
+} catch (error) {
+  console.error('Error cargando interfaces', error);
+}
 })
 
 const handleSubmit = async () => {

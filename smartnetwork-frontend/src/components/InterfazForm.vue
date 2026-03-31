@@ -23,20 +23,18 @@
       :disabled="interfazEdit"  
       required
     />
-<!--VLAN ID-->
+<!-- INTERFAZ PADRE -->
     <v-select
       v-if="tipo === 'vlan'"
       v-model="interfacePadre"
       :items="interfacesDisponibles"
-      item-title="name"
-      item-value="name"
       label="Interfaz padre"
       variant="outlined"
       class="mb-3"
       clearable
       :disabled="interfazEdit"  
     />
-<!-- INTERFAZ PADRE -->
+<!--VLAN ID-->
     <v-text-field
       v-if="tipo === 'vlan'"
       v-model="vlanid"
@@ -126,6 +124,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useInterfazStore } from '@/stores/interfazStore'
+import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -143,13 +142,14 @@ const vdom = ref('root')
 const mode = ref('')
 const ip = ref('')
 const allowaccess = ref('')
-const role = ref('lan')
+const role = ref('')
 const description = ref('')
 const mensaje = ref('')
 
-const interfacesDisponibles = ref(['port1','port2','port3','port4'])
+const interfacesDisponibles = ref([])
 
-onMounted(() => {
+onMounted(async () => {
+  // 1. Cargar datos de edición primero
   if (props.interfazEdit) {
     name.value = props.interfazEdit.name
     tipo.value = props.interfazEdit.tipo
@@ -161,6 +161,34 @@ onMounted(() => {
     allowaccess.value = props.interfazEdit.allowaccess
     role.value = props.interfazEdit.role
     description.value = props.interfazEdit.description
+  }
+
+  // 2. Cargar y filtrar interfaces para el selector "Interfaz padre"
+  try {
+    const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
+    
+    // Definimos los puertos base que SIEMPRE queremos mostrar con este formato
+    const puertosBase = [
+      { title: 'Port1', value: 'port1' },
+      { title: 'Port2', value: 'port2' },
+      { title: 'Port3', value: 'port3' },
+      { title: 'Port4', value: 'port4' }
+    ]
+
+    // Creamos un Set de los nombres que ya incluimos para filtrar la respuesta de la API
+    const nombresBase = new Set(puertosBase.map(p => p.value.toLowerCase()))
+
+    interfacesDisponibles.value = [
+      ...puertosBase,
+      ...res.data
+        .filter(inter => !nombresBase.has(inter.name.toLowerCase())) // Evita duplicar port1-4
+        .map(inter => ({
+          title: inter.name,
+          value: inter.name // Usamos el nombre como valor para que coincida con tu lógica de VLANs
+        }))
+    ]
+  } catch (error) {
+    console.error('Error cargando interfaces', error)
   }
 })
 

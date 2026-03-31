@@ -4,7 +4,8 @@ import { useUserStore } from "@/stores/userStore";
 import {
   obtenerReglasPorDispositivo,
   crearReglaFirewall,
-  eliminarReglaFirewall
+  eliminarReglaFirewall,
+  actualizarReglaFirewall
 } from '@/services/reglaFirewallService'
 
 export const useReglaFirewallStore = defineStore('reglaFirewall', {
@@ -62,7 +63,18 @@ export const useReglaFirewallStore = defineStore('reglaFirewall', {
     console.error("Error al eliminar la regla",error)
     this.mensaje = "Error eliminando regla"
   }
-}
+},
 
+async actualizarRegla(id, regla) {
+      try {
+        const res = await actualizarReglaFirewall(id, regla)
+        const index = this.reglas.findIndex(a => a.id === id)
+        if (index !== -1) this.reglas[index] = res.data
+        return res.data
+      } catch (error) {
+        console.error("Error actualizando regla", error)
+        throw error
+      }
+    }
   }
 })

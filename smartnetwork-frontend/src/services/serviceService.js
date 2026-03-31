@@ -12,3 +12,9 @@ export function crearService(service) {
 export function eliminarService(id) {
   return api.delete('/api/firewalls/services/delete/' + id)
 }
+
+export function actualizarService(id, service) {
+  return api.put('/api/firewalls/services/edit/' + id, { 
+    ...service 
+  })
+}

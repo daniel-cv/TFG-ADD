@@ -13,4 +13,6 @@ public interface InterfazRepository extends JpaRepository<Interfaz, Long> {
     List<Interfaz> findByDispositivoId(Long dispositivoId);
 
     Optional<Interfaz> findByIdAndDispositivoId(Long id, Long dispositivoId);
+
+    Optional<Interfaz> findByNameAndDispositivoId(String name, Long dispositivoId);
 }

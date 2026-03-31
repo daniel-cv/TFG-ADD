@@ -1,6 +1,9 @@
 package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.VirtualIpService;
+import com.smartnetwork.backend.domain.Entity.VirtualIp;
+import com.smartnetwork.backend.domain.dtos.interfaz.CrearInterfazDTO;
+import com.smartnetwork.backend.domain.dtos.interfaz.InterfazDTO;
 import com.smartnetwork.backend.domain.dtos.virtualIp.CrearVirtualIpDTO;
 import com.smartnetwork.backend.domain.dtos.virtualIp.VirtualIpDTO;
 import org.springframework.security.core.Authentication;
@@ -18,18 +21,16 @@ public class VirtualIpController {
         this.virtualIpService = virtualIpService;
     }
 
-    // Crear VirtualIP
     @PostMapping("/create")
     public VirtualIpDTO crear(@RequestBody CrearVirtualIpDTO dto, Authentication auth) {
         return virtualIpService.crear(dto, auth.getName());
     }
 
-    // Listar VirtualIPs por dispositivo
     @GetMapping("/dispositivo/{id}")
     public List<VirtualIpDTO> listar(@PathVariable Long id, Authentication auth) {
         return virtualIpService.listarPorDispositivo(id, auth.getName());
     }
-    //Eliminar  virtualip
+
     @DeleteMapping("/delete/{id}")
     public void eliminar(
             @PathVariable Long id,
@@ -37,4 +38,17 @@ public class VirtualIpController {
     ) {
         virtualIpService.eliminarVirtualIp(id, auth.getName());
     }
+
+    @PutMapping("/edit/{id}")
+    public VirtualIpDTO actualizar(
+            @PathVariable Long virtualIpId,
+            @RequestBody CrearVirtualIpDTO dto,
+            Authentication auth
+    ) {
+        return virtualIpService.actualizar(virtualIpId, dto, auth.getName());
+    }
+
+
 }
+
+

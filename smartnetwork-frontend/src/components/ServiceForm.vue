@@ -1,5 +1,6 @@
+```vue
 <template>
-  <v-form @submit.prevent="handleCrearService">
+  <v-form @submit.prevent="handleSubmitService">
     
     <!-- NAME -->
     <v-text-field
@@ -8,6 +9,7 @@
       prepend-inner-icon="mdi-label"
       variant="outlined"
       class="mb-3"
+      :disabled="serviceEdit"
       required
     />
 
@@ -22,24 +24,25 @@
       required
     />
 
-    <v-text-field
+    <v-select
       v-if="protocol === 'TCP' || protocol === 'UDP'"
       v-model="address"
+      :items="direcciones"
       label="Dirección IP (ej: 192.168.1.1)"  
       prepend-inner-icon="mdi-lan-connect"
       variant="outlined"
       class="mb-3"
     />
 
-    <!-- UDP PORT RANGE -->
+    <!-- PORT RANGE -->
     <v-text-field
-        v-if="protocol === 'TCP' || protocol === 'UDP'"
-        v-model="portRange"
-        label="Rango de Puertos (ej: 53 o 1000-2000)"
-        prepend-inner-icon="mdi-lan-connect"
-        variant="outlined"
-        class="mb-3"
-        required
+      v-if="protocol === 'TCP' || protocol === 'UDP'"
+      v-model="portRange"
+      label="Rango de Puertos (ej: 53 o 1000-2000)"
+      prepend-inner-icon="mdi-lan-connect"
+      variant="outlined"
+      class="mb-3"
+      required
     />
 
     <!-- COMENTARIO -->
@@ -52,7 +55,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear Service
+      {{ serviceEdit ? 'Actualizar Service' : 'Crear Service' }}
     </v-btn>
 
     <v-btn
@@ -70,51 +73,78 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { useServiceStore } from "@/stores/serviceStore";
+import { obtenerAddressesPorDispositivo } from '@/services/addressService'
 
-const route = useRoute();
+const props = defineProps({
+  serviceEdit: { type: Object, default: null }
+})
+
 const emit = defineEmits(['creada', 'cancelar'])
-
 const serviceStore = useServiceStore()
+const route = useRoute()
+const dispositivoId = Number(route.params.id)
 
-const name = ref("");
-const protocol = ref("");
-const address = ref("");
-const portRange = ref("");
-const comentario = ref("");
-const mensaje = ref("");
+const name = ref("")
+const protocol = ref("")
+const address = ref("")
+const portRange = ref("")
+const comentario = ref("")
+const mensaje = ref("")
+const protocolos = ["TCP", "UDP", "ICMP"]
+const direcciones = ref([])
 
-const protocolos = ["TCP", "UDP", "ICMP"];
-
-const dispositivoId = Number(route.params.id);
-
-const handleCrearService = async () => {
+const handleSubmitService = async () => {
   try {
-    const payload = {
-    nombre: name.value,
-    tipoProtocolo: protocol.value,
-    ip: protocol.value === "ICMP" ? "0.0.0.0" : address.value,
-    destinationPort: protocol.value === "ICMP" ? null : portRange.value,
-    comentario: comentario.value,
-    dispositivoId: dispositivoId
-  };
+    if (props.serviceEdit) {
+      await serviceStore.updateService({
+        id: props.serviceEdit.id,
+        nombre: name.value,
+        tipoProtocolo: protocol.value,
+        ip: address.value,
+        destinationPort: portRange.value,
+        comentario: comentario.value
+      })
+    } else {
+      await serviceStore.crearService({
+        nombre: name.value,
+        tipoProtocolo: protocol.value,
+        ip: address.value,
+        destinationPort: portRange.value,
+        comentario: comentario.value,
+        dispositivoId: dispositivoId
+      })
+    }
 
-    await serviceStore.crearService(payload);
-
-    mensaje.value = "Service creado correctamente";
-
-    emit("creada");
-
-    name.value = "";
-    protocol.value = "";
-    portRange.value = "";
-    comentario.value = "";
-
+    mensaje.value = "Service creado correctamente"
+    emit('creada')
 
   } catch (error) {
-    mensaje.value = "Error al crear el service";
+    console.error("Error al crear el service:", error)
+    mensaje.value = "Error al crearel service"
   }
-};
+}
+
+onMounted(async () => {
+  if (props.serviceEdit) {
+    name.value = props.serviceEdit.nombre
+    protocol.value = props.serviceEdit.tipoProtocolo
+    address.value = props.serviceEdit.ip
+    portRange.value = props.serviceEdit.destinationPort
+    comentario.value = props.serviceEdit.comentario
+  }
+
+  try {
+    const res = await obtenerAddressesPorDispositivo(dispositivoId)
+    direcciones.value = res.data.map(addr => ({
+      title: addr.name,
+      value: addr.ip
+    }))
+  } catch (error) {
+    console.error('Error cargando direcciones', error)
+  }
+})
 </script>
+```

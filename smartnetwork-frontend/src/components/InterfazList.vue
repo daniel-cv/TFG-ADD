@@ -15,7 +15,7 @@
             <th>VlanId</th>
             <th>VDOM</th>
             <th>Modo</th>
-            <th>IP</th>
+            <th>Interfaz Padre</th>
             <th>AllowAccess</th>
             <th>Rol</th>
             <th>Descripción</th>
@@ -29,7 +29,7 @@
             <td>{{ interfaz.vlanid }}</td>
             <td>{{ interfaz.vdom }}</td>
             <td>{{ interfaz.mode }}</td>
-            <td>{{ interfaz.ip }}</td>
+            <td>{{ interfaz.interfacePadre }}</td>
             <td>{{ interfaz.allowaccess }}</td>
             <td>{{ interfaz.role }}</td>
             <td>{{ interfaz.description }}</td>

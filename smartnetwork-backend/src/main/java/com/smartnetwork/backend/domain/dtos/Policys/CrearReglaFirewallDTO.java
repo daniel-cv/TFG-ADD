@@ -14,5 +14,7 @@ public class CrearReglaFirewallDTO {
     private String ipOrigen;
     private String ipDestino;
     private String servicio;
+    private String nat;
+    private String action;
     private Long dispositivoId;
 }

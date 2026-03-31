@@ -25,8 +25,8 @@
             <th>Tipo</th>
             <th>IP/IP inicio</th>
             <th>Interfaz</th>
-            <th>Comentario</th>
             <th>Máscara/IP Final</th>
+            <th>Comentario</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -35,12 +35,12 @@
             v-for="address in addressStore.addresses"
             :key="address.id"
           >
-            <td class="name">{{ address.name }}</td>
+            <td class="name">{{ address.name}}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
-            <td>{{ address.interfaz ? address.interfaz.name : 'N/A' }}</td>
+            <td>{{ obtenerNombreInterfaz(address.interfazId)}}</td>
+            <td>{{ address.ipdestino}}</td>
             <td><span class="comment">{{ address.comentario || 'Sin comentario' }}</span></td>
-            <td>{{ address.ipdestino || '' }}</td>
             <td>
               <v-btn
                 class="rounded-0 px-4 me-2"
@@ -82,10 +82,12 @@ import { ref, onMounted } from 'vue'
 import { useAddressStore } from '@/stores/addressStores'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import AddressForm from '@/components/AddressForm.vue'
+import { useInterfazStore } from '@/stores/interfazStore'
 
 const addressStore = useAddressStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoId = seleccionadoStore.dispositivo.id
+const interfazStore = useInterfazStore()
 
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
@@ -118,9 +120,19 @@ const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
 
-onMounted(() => {
-  addressStore.cargarAddresses(dispositivoId)
+onMounted(async() => {
+  await addressStore.cargarAddresses(dispositivoId)
+  await interfazStore.cargarInterfaces(dispositivoId)
 })
+const obtenerNombreInterfaz = (interfazId) => {
+  if (interfazId == null) return 'N/A';
+
+  const interfaz = interfazStore.reglas.find(
+    i => Number(i.id) === Number(interfazId)
+  );
+
+  return interfaz?.name ?? 'N/A';
+};
 </script>
 
 <style scoped>

@@ -2,7 +2,6 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.domain.Entity.*;
 import com.smartnetwork.backend.domain.dtos.Services.ServiceJsonBuilder;
-import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
 import com.smartnetwork.backend.domain.dtos.address.AddressJsonBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -40,9 +39,9 @@ public class FortiGateService {
             "dstaddr": [{ "name": "%s" }],
             "service": [{ "name": "%s" }],
             "schedule": "always",
-            "action": "accept",
+            "action": "%s",
             "status": "%s",
-            "nat": "enable"
+            "nat": "%s"
         }
         """.formatted(
                 regla.getNombre(),
@@ -51,7 +50,9 @@ public class FortiGateService {
                 regla.getIporigen(),
                 regla.getIpdestino(),
                 regla.getServicio(),
-                regla.isHabilitada() ? "enable" : "disable"
+                regla.getAction(),
+                regla.isHabilitada() ? "enable" : "disable",
+                regla.getNat()
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -94,7 +95,6 @@ public class FortiGateService {
         Map<String, Object> result = new HashMap<>();
 
         String json = AddressJsonBuilder.build(address);
-
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(dispositivo.getToken().trim());
@@ -298,16 +298,17 @@ public class FortiGateService {
     public Map<String, Object> crearUsuarioFirewall(Dispositivo dispositivo, UsuarioFirewall usuarioFirewall) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/user/local";
+        String factor=usuarioFirewall.getFactor();
 
         Map<String, Object> result = new HashMap<>();
         String json = """
             {
               "name": "%s",
+              "type": "password",
               "passwd": "%s",
-              "email": "%s",
-              "two_factor": "%s"
+              "two-factor": "disable"
             }
-            """.formatted(usuarioFirewall.getNombre(), usuarioFirewall.getPassword(),usuarioFirewall.getEmail(),usuarioFirewall.getFactor());
+            """.formatted(usuarioFirewall.getNombre(), usuarioFirewall.getPassword());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(dispositivo.getToken().trim());
@@ -501,10 +502,10 @@ public class FortiGateService {
             "description": "%s"
         }
         """.formatted(
-                        interfaz.getRole(),
-                        interfaz.getAllowaccess(),
-                        interfaz.getDescription()
-                );
+                interfaz.getRole(),
+                interfaz.getAllowaccess(),
+                interfaz.getDescription()
+        );
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -536,18 +537,16 @@ public class FortiGateService {
 
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/user/local/"
-                + URLEncoder.encode(oldName, StandardCharsets.UTF_8);
+                + URLEncoder.encode(oldName, StandardCharsets.UTF_8)
+                + "?vdom=root";
 
         String json = """
     {
-        "password": "%s",
-        "email": "%s",
-        "two_factor": "%s"
+        "type": "password",
+        "passwd": "%s",
     }
     """.formatted(
-                usuario.getPassword(),
-                usuario.getEmail(),
-                usuario.getFactor()
+                usuario.getPassword()
         );
 
         HttpHeaders headers = new HttpHeaders();
@@ -582,5 +581,132 @@ public class FortiGateService {
         return result;
     }
 
-}
 
+    public Map<String, Object> editarVirtualIp(Dispositivo dispositivo,VirtualIp virtualIp, String nombreOriginal) {
+        String url = "http://" + dispositivo.getIp()
+                + "/api/v2/cmdb/firewall/service/custom/"
+                + URLEncoder.encode(nombreOriginal, StandardCharsets.UTF_8)
+                + "?vdom=root";
+
+        Map<String, Object> resultado = new HashMap<>();
+        String json = """
+            {
+                "extintf": "any",
+                "extip": "%s",
+                "mappedip": [
+                    {
+                        "range": "%s"
+                    }
+                ]
+            }
+            """.formatted(
+                virtualIp.getExternal_ip(),
+                virtualIp.getInternal_ip()
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(dispositivo.getToken().trim());
+
+        HttpEntity<String> entity = new HttpEntity<>(json, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(
+                    url, HttpMethod.PUT, entity, String.class
+            );
+
+            if (response.getBody() != null && response.getBody().contains("\"status\":\"success\"")) {
+                resultado.put("success", true);
+            } else {
+                resultado.put("success", false);
+                resultado.put("error", response.getBody());
+            }
+
+            resultado.put("httpStatus", response.getStatusCode());
+
+        } catch (Exception e) {
+            resultado.put("success", false);
+            resultado.put("exception", e.getMessage());
+        }
+
+        return resultado;
+    }
+
+    public Map<String, Object> editarPolicy(Dispositivo dispositivo, ReglaFirewall regla) {
+        Map<String, Object> result = new HashMap<>();
+
+        try {
+            String getUrl = "http://" + dispositivo.getIp() + "/api/v2/cmdb/firewall/policy?vdom=root";
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(dispositivo.getToken().trim());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            HttpEntity<Void> getRequest = new HttpEntity<>(null, headers);
+            ResponseEntity<Map> getResponse = restTemplate.exchange(getUrl, HttpMethod.GET, getRequest, Map.class);
+
+            if (getResponse.getStatusCode() != HttpStatus.OK || getResponse.getBody() == null) {
+                result.put("success", false);
+                result.put("error", "No se pudieron obtener las políticas para buscar el ID");
+                return result;
+            }
+
+            List<Map<String, Object>> policies = (List<Map<String, Object>>) getResponse.getBody().get("results");
+            Integer policyId = null;
+
+            for (Map<String, Object> policy : policies) {
+                if (regla.getNombre().equals(policy.get("name"))) {
+                    policyId = (Integer) policy.get("policyid");
+                    break;
+                }
+            }
+
+            if (policyId == null) {
+                result.put("success", false);
+                result.put("error", "No se encontró la regla en FortiGate con nombre: " + regla.getNombre());
+                return result;
+            }
+
+            String putUrl = "http://" + dispositivo.getIp() + "/api/v2/cmdb/firewall/policy/" + policyId + "?vdom=root";
+
+            String json = """
+        {
+            "srcintf": [{ "name": "%s" }],
+            "dstintf": [{ "name": "%s" }],
+            "srcaddr": [{ "name": "%s" }],
+            "dstaddr": [{ "name": "%s" }],
+            "service": [{ "name": "%s" }],
+            "schedule": "always",
+            "action": "%s",
+            "status": "%s",
+            "nat": "%s"
+        }
+        """.formatted(
+                    regla.getOrigen(),
+                    regla.getDestino(),
+                    regla.getIporigen(),
+                    regla.getIpdestino(),
+                    regla.getServicio(),
+                    regla.getAction(),
+                    regla.isHabilitada() ? "enable" : "disable",
+                    regla.getNat()
+            );
+
+            HttpEntity<String> putEntity = new HttpEntity<>(json, headers);
+            ResponseEntity<String> putResponse = restTemplate.exchange(putUrl, HttpMethod.PUT, putEntity, String.class);
+
+            boolean success = putResponse.getStatusCode() == HttpStatus.OK &&
+                    putResponse.getBody() != null &&
+                    putResponse.getBody().contains("\"status\":\"success\"");
+
+            result.put("success", success);
+            result.put("httpStatus", putResponse.getStatusCode());
+            result.put("error", putResponse.getBody());
+
+        } catch (Exception e) {
+            result.put("success", false);
+            result.put("exception", e.getMessage());
+        }
+        return result;
+    }
+
+}

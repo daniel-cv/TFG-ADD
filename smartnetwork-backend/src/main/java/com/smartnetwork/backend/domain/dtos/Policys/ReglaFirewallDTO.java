@@ -14,6 +14,8 @@ public class ReglaFirewallDTO {
     private String ipOrigen;
     private String ipDestino;
     private String servicio;
+    private String nat;
     private boolean habilitada;
+    private String action;
     private Long dispositivoId;
 }

@@ -4,6 +4,7 @@ import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.ServiceRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
+import com.smartnetwork.backend.domain.dtos.Services.ServiceDTO;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -104,6 +105,17 @@ public class ServiceService {
 
         return serviceRepository.findByIdAndDispositivoId(serviceId, dispositivoId);
     }
+    private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.Service service) {
+        ServiceDTO dto = new ServiceDTO();
+        dto.setId(service.getId());
+        dto.setNombre(service.getNombre());
+        dto.setTipoProtocolo(service.getTipoProtocolo());
+        dto.setIp(service.getIp());
+        dto.setDestinationPort(service.getDestinationPort());
+        dto.setComentario(service.getComentario());
+        dto.setDispositivoId(service.getDispositivo().getId());
+        return dto;
+    }
 
     public void eliminarService(Long serviceId, String username) {
         com.smartnetwork.backend.domain.Entity.Service service = serviceRepository.findById(serviceId)
@@ -121,4 +133,5 @@ public class ServiceService {
 
         serviceRepository.delete(service);
     }
+
 }

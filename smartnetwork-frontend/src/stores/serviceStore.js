@@ -4,7 +4,8 @@ import { useUserStore } from "@/stores/userStore";
 import {
   obtenerServicesPorDispositivo,
   crearService,
-  eliminarService as eliminarServiceService
+  eliminarService as eliminarServiceService,
+  actualizarService as actualizarServiceService
 } from '@/services/serviceService'
 
 export const useServiceStore = defineStore('service', {
@@ -51,7 +52,18 @@ export const useServiceStore = defineStore('service', {
             console.error("Error eliminando service", error)
             this.mensaje = "Error eliminando service"
           }
-        }
+        },
 
+    async actualizarService(id, service) {
+          try {
+            const res = await actualizarServiceService(id, service)
+            const index = this.services.findIndex(a => a.id === id)
+            if (index !== -1) this.services[index] = res.data
+            return res.data
+          } catch (error) {
+            console.error("Error actualizando service", error)
+            throw error
+          }
+        }
   }
 })
