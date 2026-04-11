@@ -1,7 +1,11 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -9,8 +13,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "services")
-@ToString(exclude = "dispositivo")
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+
 public class Service {
 
     @EqualsAndHashCode.Include
@@ -34,9 +37,9 @@ public class Service {
     @Column(nullable = true)
     private String destinationPort;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dispositivo_id", nullable = false)
-    private Dispositivo dispositivo;
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoService> dispositivoServices = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)

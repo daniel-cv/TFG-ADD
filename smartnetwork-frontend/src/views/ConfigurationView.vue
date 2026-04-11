@@ -110,6 +110,7 @@
         <component
           :is="currentComponent"
           :device-id="dispositivoId"
+          :modo="modo"
           @crear="currentMode = 'create'"
           @creada="currentMode = 'list'"
           @cancelar="currentMode = 'list'"
@@ -149,6 +150,8 @@ const route = useRoute();
 const seleccionadoStore = useDispositivoSeleccionadoStore();
 const dispositivoStore = useDispositivoStore();
 const dispositivoId = route.params.id;
+
+const modo ="full";
 
 onMounted(async () => {
   const dispositivo = await dispositivoStore.getDispositivo(dispositivoId);

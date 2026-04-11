@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia'
-import { useUserStore } from "@/stores/userStore";
-
 import {
   obtenerServicesPorDispositivo,
+  obtenerServicesPorUsuario,
   crearService,
-  eliminarService as eliminarServiceService,
-  actualizarService as actualizarServiceService
+  crearServiceCompleto,
+  asignarService,
+  eliminarService as eliminarServiceApi,
+  actualizarService as actualizarServiceApi,
+  obtenerServicePorId
 } from '@/services/serviceService'
 
 export const useServiceStore = defineStore('service', {
@@ -16,54 +18,61 @@ export const useServiceStore = defineStore('service', {
   }),
 
   actions: {
+
+    // 🔥 LISTAR POR DISPOSITIVO
     async cargarServices(dispositivoId) {
       this.cargando = true
-      const res = await obtenerServicesPorDispositivo(dispositivoId)
-      this.services = res.data
-      this.cargando = false
-    },
-
-    async crearService(service) {
       try {
-        const userStore = useUserStore();
-
-        if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión";
-          return;
-        }
-
-        const res = await crearService(service);
-
-        this.mensaje = "Service creado correctamente";
-        return res.data;
-
-      } catch (error) {
-        console.error(error);
-        this.mensaje = "Error al crear el service";
-        throw error;
+        const res = await obtenerServicesPorDispositivo(dispositivoId)
+        this.services = res.data
+      } finally {
+        this.cargando = false
       }
     },
-    
-    async eliminarService(id) {
-          try {
-            await eliminarServiceService(id)  
-            this.services = this.services.filter(a => a.id !== id) 
-          } catch (error) {
-            console.error("Error eliminando service", error)
-            this.mensaje = "Error eliminando service"
-          }
-        },
 
-    async actualizarService(id, service) {
-          try {
-            const res = await actualizarServiceService(id, service)
-            const index = this.services.findIndex(a => a.id === id)
-            if (index !== -1) this.services[index] = res.data
-            return res.data
-          } catch (error) {
-            console.error("Error actualizando service", error)
-            throw error
-          }
-        }
+    // 🔥 LISTAR POR USUARIO
+    async cargarServicesUsuario() {
+      const res = await obtenerServicesPorUsuario()
+      this.services = res.data
+    },
+
+    // 🔥 CREAR SIMPLE
+    async crearService(data) {
+      const res = await crearService(data)
+      return res.data
+    },
+
+    // 🔥 CREAR FULL (crear + asignar)
+    async crearServiceCompleto(data) {
+      const res = await crearServiceCompleto(data)
+      return res.data
+    },
+
+    // 🔥 ASIGNAR SERVICE A DISPOSITIVOS
+    async asignarService(serviceId, dispositivosIds) {
+      await asignarService(serviceId, dispositivosIds)
+    },
+
+    // 🔥 OBTENER SERVICE POR ID + DISPOSITIVO
+    async obtenerService(serviceId, dispositivoId) {
+      const res = await obtenerServicePorId(serviceId, dispositivoId)
+      return res.data
+    },
+
+    // 🔥 ACTUALIZAR SERVICE
+    async actualizarService(serviceId, dispositivoId, data) {
+      const res = await actualizarServiceApi(serviceId, dispositivoId, data)
+
+      const index = this.services.findIndex(s => s.id === serviceId)
+      if (index !== -1) this.services[index] = res.data
+
+      return res.data
+    },
+
+    // 🔥 ELIMINAR SERVICE
+    async eliminarService(id) {
+      await eliminarServiceApi(id)
+      this.services = this.services.filter(s => s.id !== id)
+    }
   }
 })

@@ -6,6 +6,7 @@ import {
   obtenerAddressPorId,
   crearAddress,
   aplicarAddressToDispositivos,
+  crearAddressCompleto,
   eliminarAddress as eliminarAddressService,
   actualizarAddress as actualizarAddressService
 } from '@/services/addressService'
@@ -25,26 +26,32 @@ export const useAddressStore = defineStore('address', {
       this.cargando = false
     },
 
-
+    async cargarAddressesUsuario() {
+      const res = await obtenerAddressesPorUsuario()
+      this.addresses = res.data
+    },
     
-    async crearAddress(address) {
+     async crearAddress(address) {
       try {
-        const userStore = useUserStore();
-
-        if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión";
-          return;
-        }
-
-        const res = await crearAddress(address);
-
-        this.mensaje = "Address creada correctamente";
-        return res.data;
-
+        const res = await crearAddress(address)
+        this.mensaje = "Address creada correctamente"
+        return res.data
       } catch (error) {
-        console.error(error);
-        this.mensaje = "Error al crear la address";
-        throw error;
+        console.error(error)
+        this.mensaje = "Error al crear la address"
+        throw error
+      }
+    },
+
+    async crearAddressCompleto(address) {
+      try {
+        const res = await crearAddressCompleto(address)
+        this.mensaje = "Address creada y asignada"
+        return res.data
+      } catch (error) {
+        console.error(error)
+        this.mensaje = "Error al crear la address"
+        throw error
       }
     },
 
@@ -88,21 +95,21 @@ export const useAddressStore = defineStore('address', {
       }
     },
 
-    async aplicarAddressToDispositivos(addressId, dispositivoIds) {
+    async aplicarAddressToDispositivos(addressId, dispositivosIds) {
       try {
-        const userStore = useUserStore();
-        
-        if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión";
-          return;
+        if (!dispositivosIds.length) {
+          this.mensaje = "Selecciona al menos un dispositivo"
+          return
         }
-
-        const res = await aplicarAddressToDispositivos(addressId, dispositivoIds)
+      
+        await aplicarAddressToDispositivos(addressId, dispositivosIds)
+      
+        this.mensaje = "Address aplicada correctamente"
       } catch (error) {
-        console.error("Error aplicando address a dispositivos", error)
-        this.mensaje = "Error al aplicar la address a los dispositivos";
+        console.error("Error aplicando address", error)
+        this.mensaje = "Error al aplicar la address"
         throw error
       }
-    },
+    }
   }
 })

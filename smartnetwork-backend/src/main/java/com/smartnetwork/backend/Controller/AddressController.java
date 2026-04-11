@@ -19,15 +19,6 @@ public class AddressController {
     public AddressController(AddressService addressService) {
         this.addressService = addressService;
     }
-
-    @PostMapping("/aplicar")
-    public void aplicarAddress(
-            @RequestBody CrearAddressDTO dto,
-            @RequestParam Long addressId,
-            Authentication auth) {
-        addressService.crear(dto, auth.getName());
-    }
-
     @PostMapping("/create")
     public void crear(@RequestBody CrearAddressDTO dto, Authentication auth) {
         addressService.crearAddress(dto, auth.getName());
@@ -39,6 +30,32 @@ public class AddressController {
             Authentication auth
     ) {
         return addressService.listarPorDispositivo(id, auth.getName());
+    }
+
+    @GetMapping("/usuario")
+    public List<AddressDTO> listarAll(
+            @PathVariable Long id,
+            Authentication auth
+    ){
+        return addressService.listarPorDispositivo(id, auth.getName());
+    }
+
+    @PostMapping("/{addressId}/dispositivos")
+    public ResponseEntity<Void> asignarAddress(
+            @PathVariable Long addressId,
+            @RequestBody List<Long> dispositivosIds,
+            Authentication auth
+    ) {
+        addressService.asignarAddressADispositivos(addressId, dispositivosIds, auth.getName());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/full")
+    public AddressDTO crearCompleto(
+            @RequestBody CrearAddressDTO dto,
+            Authentication auth
+    ) {
+        return addressService.crear(dto, auth.getName());
     }
 
     @GetMapping("/usuario/")

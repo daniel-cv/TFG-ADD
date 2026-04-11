@@ -69,6 +69,7 @@
       <AddressForm
         :dispositivo-id="dispositivoId"
         :address-edit="addressSeleccionada"
+        :modo="props.modo" 
         @creada="recargarYCerrar"
         @cancelar="cerrarFormulario"
       />
@@ -91,6 +92,14 @@ const interfazStore = useInterfazStore()
 
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
+
+const props = defineProps({
+  dispositivoId: Number,
+  modo: {
+    type: String,
+    default: 'simple'
+  }
+})
 
 const eliminarAddress = async (id) => {
   try {

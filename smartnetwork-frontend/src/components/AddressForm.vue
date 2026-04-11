@@ -102,8 +102,10 @@ import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
-  addressEdit: { type: Object, default: null }
+  addressEdit: { type: Object, default: null },
+  modo: { type: String, default: 'simple' }
 })
+console.log("MODO:", props.modo)
 
 const emit = defineEmits(['creada', 'cancelar'])
 
@@ -173,24 +175,35 @@ const handleSubmit = async () => {
       type: type.value,
       ipdestino:
         type.value === 'iprange' || type.value === 'ipmask' || type.value === 'subnet'
-        ? ipdestino.value
-        : null,
+          ? ipdestino.value
+          : null,
       interfazId: interfazId.value || null,
-      comentario: comentario.value,
-      dispositivosIds: [dispositivoId]
+      comentario: comentario.value
     };
+
+    // 🔥 MODO FULL (desde dispositivos)
+    if (props.modo === 'full' && props.dispositivoId) {
+      payload.dispositivosIds = [props.dispositivoId]
+    }
 
     if (props.addressEdit) {
       await addressStore.actualizarAddress(props.addressEdit.id, payload)
       mensaje.value = "Address actualizada correctamente"
     } else {
-      await addressStore.crearAddress(payload)
+      if (props.modo === 'full') {
+        await addressStore.crearAddressCompleto(payload)
+      } else {
+        await addressStore.crearAddress(payload)
+      }
       mensaje.value = "Address creada correctamente"
     }
 
     emit("creada")
+
   } catch (error) {
-    mensaje.value = props.addressEdit ? "Error al actualizar la address" : "Error al crear la address"
+    mensaje.value = props.addressEdit
+      ? "Error al actualizar la address"
+      : "Error al crear la address"
   }
 }
 </script>

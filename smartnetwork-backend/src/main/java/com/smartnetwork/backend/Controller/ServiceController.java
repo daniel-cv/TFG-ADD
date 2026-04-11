@@ -1,67 +1,89 @@
 package com.smartnetwork.backend.Controller;
 
-import com.smartnetwork.backend.Service.DispositivoService;
 import com.smartnetwork.backend.Service.ServiceService;
 import com.smartnetwork.backend.domain.Entity.Service;
 import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
 import com.smartnetwork.backend.domain.dtos.Services.ServiceDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import org.springframework.web.bind.annotation.*;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/firewalls/services")
 public class ServiceController {
 
     private final ServiceService serviceService;
-    private final DispositivoService dispositivoService;
 
-    public ServiceController(ServiceService serviceService, DispositivoService dispositivoService) {
+    public ServiceController(ServiceService serviceService) {
         this.serviceService = serviceService;
-        this.dispositivoService = dispositivoService;
     }
 
     @PostMapping("/create")
-    public Service crear(@RequestBody CrearServiceDTO dto, Authentication auth) {
-        return serviceService.create(dto, auth.getName());
+    public ServiceDTO crear(
+            @RequestBody CrearServiceDTO dto,
+            Authentication auth
+    ) {
+        return serviceService.crearService(dto, auth.getName());
+    }
+
+    @PostMapping("/full")
+    public void crearCompleto(
+            @RequestBody CrearServiceDTO dto,
+            Authentication auth
+    ) {
+        serviceService.crearCompleto(dto, auth.getName());
+    }
+
+    @PostMapping("/{serviceId}/dispositivos")
+    public void asignar(
+            @PathVariable Long serviceId,
+            @RequestBody List<Long> dispositivosIds,
+            Authentication auth
+    ) {
+        serviceService.asignarServiceADispositivos(serviceId, dispositivosIds, auth.getName());
     }
 
     @GetMapping("/dispositivo/{dispositivoId}")
-    public List<Service> listar(
+    public List<ServiceDTO> listarPorDispositivo(
             @PathVariable Long dispositivoId,
-            Authentication authentication
+            Authentication auth
     ) {
-        String username = authentication.getName();
-        return serviceService.findAllByDispositivo(dispositivoId, username);
+        return serviceService.listarPorDispositivo(dispositivoId, auth.getName());
     }
 
-    @GetMapping("/get/{serviceId}")
-    public Service obtener(
+    @GetMapping("/usuario")
+    public List<ServiceDTO> listarPorUsuario(Authentication auth) {
+        return serviceService.listarPorUsuario(auth.getName());
+    }
+
+    @GetMapping("/entidad/dispositivo/{dispositivoId}")
+    public List<Service> listarEntidadPorDispositivo(
             @PathVariable Long dispositivoId,
+            Authentication auth
+    ) {
+        return serviceService.findAllByDispositivo(dispositivoId, auth.getName());
+    }
+
+    @GetMapping("/{serviceId}/dispositivo/{dispositivoId}")
+    public Optional<Service> obtenerPorId(
             @PathVariable Long serviceId,
-            Authentication authentication
+            @PathVariable Long dispositivoId,
+            Authentication auth
     ) {
-        String username = authentication.getName();
-
-        return serviceService
-                .findById(serviceId, dispositivoId, username)
-                .orElseThrow(() -> new RuntimeException("Service no encontrado"));
+        return serviceService.findById(serviceId, dispositivoId, auth.getName());
     }
 
-    @PutMapping("/update/{serviceId}")
+    @PutMapping("/{serviceId}/dispositivo/{dispositivoId}")
     public Service actualizar(
-            @PathVariable Long dispositivoId,
             @PathVariable Long serviceId,
+            @PathVariable Long dispositivoId,
             @RequestBody Service service,
-            Authentication authentication
+            Authentication auth
     ) {
-        String username = authentication.getName();
-
         service.setId(serviceId);
-        service.getDispositivo().setId(dispositivoId);
-
-        return serviceService.update(service, username, dispositivoId);
+        return serviceService.update(service, auth.getName(), dispositivoId);
     }
 
     @DeleteMapping("/delete/{serviceId}")
@@ -71,6 +93,5 @@ public class ServiceController {
     ) {
         serviceService.eliminarService(serviceId, auth.getName());
     }
-
 }
 

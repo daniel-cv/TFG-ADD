@@ -83,7 +83,7 @@ public class Dispositivo {
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Service> services = new ArrayList<>();
+    private List<DispositivoService> dispositivoServices = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

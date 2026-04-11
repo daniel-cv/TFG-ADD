@@ -39,73 +39,15 @@ public class AddressService {
     }
 
     @Transactional
-    public void crear(CrearAddressDTO dto, String username) {
+    public AddressDTO crear(CrearAddressDTO dto, String username) {
 
-        Address address = new Address();
-        address.setName(dto.getName());
-        address.setType(dto.getType());
-        address.setIp(dto.getIp());
-        String ipDestino = dto.getIpdestino();
+        AddressDTO address = crearAddress(dto, username);
 
-        if(ipDestino != null && !ipDestino.isBlank()){
-            address.setIpdestino(ipDestino.trim());
-        } else {
-            address.setIpdestino(null);
-        }
-        address.setIpdestino(dto.getIpdestino() != null ? dto.getIpdestino().trim() : null);
-        address.setComentario(dto.getComentario());
-
-        // Lógica de Interfaz: Buscar o Crear antes de asignar
-
-        if (dto.getInterfazId() != null) {
-            if (dto.getInterfazId() < 0) {
-                String nombrePort = switch (dto.getInterfazId().intValue()) {
-                    case -1 -> "port1";
-                    case -2 -> "port2";
-                    case -3 -> "port3";
-                    case -4 -> "port4";
-                    default -> throw new RuntimeException("Puerto default no soportado");
-                };
-
-                // BUSCAMOS primero. Si no existe, CREAMOS y GUARDAMOS en la DB.
-                Interfaz interfaz = interfazRepo.findByNameAndDispositivoId(nombrePort, dispositivo.getId())
-                        .orElseGet(() -> {
-                            Interfaz nueva = new Interfaz();
-                            nueva.setName(nombrePort);
-                            nueva.setTipo("Default");
-                            nueva.setDispositivo(dispositivo);
-                            return interfazRepo.save(nueva); // <--- ESTO evita el error de Transient
-                        });
-                address.setInterfaz(interfaz);
-            } else {
-                Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
-                        .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-                address.setInterfaz(interfaz);
-            }
-        } else {
-            address.setInterfaz(null);
+        if (dto.getDispositivosIds() != null && !dto.getDispositivosIds().isEmpty()) {
+            asignarAddressADispositivos(address.getId(), dto.getDispositivosIds(), username);
         }
 
-        Address saved = addressRepo.save(address);
-
-        for (Long dispositivoId : dto.getDispositivosIds()) {
-
-            Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
-                    .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
-
-            if (!dispositivo.getUsuario().getUsername().equals(username)) {
-                throw new RuntimeException("No autorizado");
-            }
-//          Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
-//
-//          if (!(Boolean) resultado.get("success")) {
-//              throw new RuntimeException(
-//                      "Error creando policy en FortiGate: " + resultado
-//              );
-//          }
-            DispositivoAddress rel = new DispositivoAddress(dispositivo, saved, dto.getComentario());
-            dispositivoAddressRepo.save(rel);
-        }
+        return address;
     }
 
     @Transactional
@@ -124,16 +66,59 @@ public class AddressService {
             address.setIpdestino(dto.getIpdestino().trim());
         }
 
-        if (dto.getInterfazId() != null) {
+        if (dto.getInterfazId() != null && dto.getInterfazId() > 0) {
             Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
                     .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
             address.setInterfaz(interfaz);
         }
 
         address.setUsuario(usuario);
+
         Address saved = addressRepo.save(address);
         return toAddressDTO(saved);
     }
+
+    @Transactional
+    public void asignarAddressADispositivos(Long addressId, List<Long> dispositivosIds, String username) {
+
+        Address address = addressRepo.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address no existe"));
+
+        if (!address.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+
+        for (Long dispositivoId : dispositivosIds) {
+
+            Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
+                    .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+
+            if (!dispositivo.getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
+
+            boolean yaExiste = dispositivoAddressRepo
+                    .existsByDispositivoIdAndAddressId(dispositivoId, addressId);
+
+            if (yaExiste) continue;
+
+
+//            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
+//
+//            if (!(Boolean) resultado.get("success")) {
+//                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
+//            }
+
+
+            DispositivoAddress rel = new DispositivoAddress();
+            rel.setDispositivo(dispositivo);
+            rel.setAddress(address);
+            rel.setComentario(address.getComentario());
+
+            dispositivoAddressRepo.save(rel);
+        }
+    }
+
 
     public List<AddressDTO> listarPorDispositivo(Long dispositivoId, String username) {
 
