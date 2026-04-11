@@ -93,11 +93,11 @@ public class ServiceService {
 
             if (yaExiste) continue;
 
-//            Map<String, Object> resultado = fortiGateService.crearServicio(dispositivo, service);
-//
-//            if (!(Boolean) resultado.get("success")) {
-//                throw new RuntimeException("Error creando service en FortiGate: " + resultado);
-//            }
+            Map<String, Object> resultado = fortiGateService.crearServicio(dispositivo, service);
+
+            if (!(Boolean) resultado.get("success")) {
+                throw new RuntimeException("Error creando service en FortiGate: " + resultado);
+            }
 
             com.smartnetwork.backend.domain.Entity.DispositivoService rel = new DispositivoService(dispositivo, service, service.getComentario());
             dispositivoServiceRepository.save(rel);

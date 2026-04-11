@@ -103,11 +103,11 @@ public class AddressService {
             if (yaExiste) continue;
 
 
-//            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
-//
-//            if (!(Boolean) resultado.get("success")) {
-//                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
-//            }
+            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
+
+            if (!(Boolean) resultado.get("success")) {
+                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
+            }
 
 
             DispositivoAddress rel = new DispositivoAddress();
