@@ -31,8 +31,11 @@ export function obtenerServicePorId(serviceId, dispositivoId) {
 }
 
 // Actualizar service
-export function actualizarService(serviceId, dispositivoId, data) {
-  return api.put(`/api/firewalls/services/${serviceId}/dispositivo/${dispositivoId}`, data)
+export function actualizarService(serviceId, dispositivoIds) {
+  return api.put(
+    `/api/firewalls/services/${serviceId}/dispositivos`,
+    dispositivoIds
+  )
 }
 
 // Eliminar service

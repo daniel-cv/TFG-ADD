@@ -20,6 +20,7 @@
       prepend-inner-icon="mdi-swap-horizontal"
       variant="outlined"
       class="mb-3"
+      :disabled="serviceEdit"
       required
     />
 
@@ -165,6 +166,7 @@ const handleSubmit = async () => {
     }
 
     emit("creada");
+
 
   } catch (error) {
     console.error("Error creando/actualizando service:", error);

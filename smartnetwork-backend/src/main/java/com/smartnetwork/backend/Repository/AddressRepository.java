@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface AddressRepository extends JpaRepository<Address,Long> {
     List<Address> findByUsuarioId(Integer id);
+
 }

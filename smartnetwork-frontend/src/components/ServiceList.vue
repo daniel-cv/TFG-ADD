@@ -46,14 +46,6 @@
             <td class="comment">{{ service.comentario }}</td>
 
             <td>
-              <v-btn
-                class="rounded-0 px-4 me-2"
-                color="green"
-                size="small"
-                @click="editarService(service)"
-              >
-                <span style="color: white; font-weight: bold;">EDITAR</span>
-              </v-btn>
 
               <v-btn
                 class="rounded-0 px-4"
@@ -75,7 +67,7 @@
         :service-edit="serviceSeleccionado"
         :dispositivo-id="dispositivoId"
         :modo="props.modo"
-        @creado="recargarYCerrar"
+        @creada="recargarYCerrar"
         @actualizado="recargarYCerrar"
         @cancelar="cerrarFormulario"
       />

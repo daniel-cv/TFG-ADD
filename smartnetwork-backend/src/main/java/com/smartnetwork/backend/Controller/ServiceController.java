@@ -75,15 +75,16 @@ public class ServiceController {
         return serviceService.findById(serviceId, dispositivoId, auth.getName());
     }
 
-    @PutMapping("/{serviceId}/dispositivo/{dispositivoId}")
+    @PutMapping("/{serviceId}/dispositivos")
     public Service actualizar(
             @PathVariable Long serviceId,
-            @PathVariable Long dispositivoId,
-            @RequestBody Service service,
+            @RequestBody List<Long> dispositivoIds,
             Authentication auth
     ) {
+        Service service = new Service();
         service.setId(serviceId);
-        return serviceService.update(service, auth.getName(), dispositivoId);
+        System.out.println(dispositivoIds);
+        return serviceService.update(service, auth.getName(), dispositivoIds);
     }
 
     @DeleteMapping("/delete/{serviceId}")

@@ -130,19 +130,29 @@ public class ServiceService {
                 .toList();
     }
 
+    @Transactional
     public com.smartnetwork.backend.domain.Entity.Service update(
             com.smartnetwork.backend.domain.Entity.Service service,
             String username,
-            Long dispositivoId) {
+            List<Long> dispositivoIds) {
 
-        Dispositivo dispositivo = dispositivoRepository
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+        // =========================
+        // VALIDACIÓN USUARIO (como el update simple)
+        // =========================
+        for (Long dispositivoId : dispositivoIds) {
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
+            Dispositivo dispositivo = dispositivoRepository
+                    .findById(dispositivoId)
+                    .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+
+            if (!dispositivo.getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
         }
 
+        // =========================
+        // GUARDAR UNA SOLA VEZ
+        // =========================
         return serviceRepository.save(service);
     }
 

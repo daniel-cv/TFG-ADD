@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface DispositivoAddressRepository extends JpaRepository<DispositivoAddress,Long> {
     List<DispositivoAddress> findByDispositivoId(Long dispositivoId);
-
+    List<DispositivoAddress> findAllByAddressId(Long addressId);
     Optional<DispositivoAddress> findByAddressId(Long addressId);
     boolean existsByDispositivoIdAndAddressId(Long dispositivoId, Long addressId);
 }

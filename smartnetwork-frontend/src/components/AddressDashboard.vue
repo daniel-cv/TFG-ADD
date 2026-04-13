@@ -4,20 +4,14 @@
     <!-- LISTA -->
     <div v-if="!mostrandoFormulario">
 
-      <!-- HEADER -->
       <div class="table-header">
         <h2>Addresses</h2>
 
-        <v-btn
-          class="add-btn"
-          size="small"
-          @click="mostrarCrear()"
-        >
+        <v-btn class="add-btn" size="small" @click="mostrarCrear()">
           Añadir Address
         </v-btn>
       </div>
 
-      <!-- TABLA -->
       <v-table class="professional-table">
         <thead>
           <tr>
@@ -32,43 +26,31 @@
         </thead>
 
         <tbody>
-          <tr
-            v-for="address in addresses"
-            :key="address.id"
-          >
-            <td class="name">{{ address.name }}</td>
+          <tr v-for="address in addresses" :key="address.id">
+            <td>{{ address.name }}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
             <td>{{ address.interfaz ? address.interfaz.name : 'N/A' }}</td>
-            <td><span class="comment">{{ address.comentario || 'Sin comentario' }}</span></td>
+            <td>{{ address.comentario || 'Sin comentario' }}</td>
             <td>{{ address.ipdestino || '' }}</td>
 
             <td>
-              <v-btn
-                class="rounded-0 px-4 me-2"
-                color="green"
-                size="small"
-                @click="editarAddress(address)"
-              >
-                <span style="color: white; font-weight: bold;">EDITAR</span>
+              <!-- EDITAR -->
+              <v-btn color="green" size="small"
+                @click="editarAddress(address)">
+                EDITAR
               </v-btn>
 
-              <v-btn
-                class="rounded-0 px-4 me-2"
-                color="red"
-                size="small"
-                @click="eliminarAddress(address.id)"
-              >
-                <span style="color: white; font-weight: bold;">ELIMINAR</span>
+              <!-- ELIMINAR -->
+              <v-btn color="red" size="small"
+                @click="eliminarAddress(address.id)">
+                ELIMINAR
               </v-btn>
 
-              <v-btn
-                class="rounded-0 px-4"
-                color="blue"
-                size="small"
-                @click="aplicarAddressToDispositivos(address)"
-              >
-                <span style="color: white; font-weight: bold;">APLICAR</span>
+              <!-- APLICAR -->
+              <v-btn color="blue" size="small"
+                @click="aplicarAddressToDispositivos(address)">
+                APLICAR
               </v-btn>
             </td>
           </tr>
@@ -80,69 +62,74 @@
     <div v-else class="formulario-inline">
       <AddressForm
         :address-edit="addressSeleccionada"
+        :dispositivo-id="dispositivoId"
+        :interfaces="interfaces"
         modo="simple"
         @creada="recargarYCerrar"
         @cancelar="cerrarFormulario"
       />
     </div>
 
-    <!-- MODAL PARA APLICAR ADDRESS -->
+    <!-- MODAL APLICAR -->
     <v-dialog v-model="dialogAplicar" max-width="650px">
-  <v-card class="apply-card">
 
-    <v-card-title class="apply-title">
-      Aplicar Address
-    </v-card-title>
+      <v-card class="apply-card">
 
-    <v-card-text class="apply-body">
-      <p class="apply-description">
-        Selecciona los dispositivos donde quieres aplicar esta address:
-      </p>
+        <v-card-title class="apply-title">
+          Aplicar Address
+        </v-card-title>
 
-      <div class="device-list">
-        <v-card
-          v-for="d in dispositivos"
-          :key="d.id"
-          class="device-item-modern"
-          :class="{ selected: seleccionados.includes(d.id) }"
-          @click="toggleSeleccion(d.id)"
-        >
-          <div class="device-info">
-            <v-checkbox
-              :model-value="seleccionados.includes(d.id)"
-              hide-details
-              color="primary"
-            />
-            <div>
-              <div class="device-name">{{ d.nombre }}</div>
-              <div class="device-ip">{{ d.ip }}</div>
-            </div>
+        <v-card-text>
+          <p>Selecciona dispositivos:</p>
+
+          <div class="device-list">
+            <v-card
+              v-for="d in dispositivos"
+              :key="d.id"
+              class="device-item-modern"
+              :class="{ selected: seleccionados.includes(d.id) }"
+              @click="toggleSeleccion(d.id)"
+            >
+              <div class="device-info">
+                <v-checkbox
+                  :model-value="seleccionados.includes(d.id)"
+                  hide-details
+                />
+                <div>
+                  <div class="device-name">{{ d.nombre }}</div>
+                  <div class="device-ip">{{ d.ip }}</div>
+                </div>
+              </div>
+            </v-card>
           </div>
-        </v-card>
-      </div>
-    </v-card-text>
 
-    <v-card-actions class="apply-actions">
-      <v-btn variant="text" @click="dialogAplicar = false">
-        Cancelar
-      </v-btn>
+        </v-card-text>
 
-      <v-btn color="primary" class="apply-btn" @click="aplicarAhora">
-        Aplicar ahora
-      </v-btn>
-    </v-card-actions>
+        <v-card-actions>
+          <v-btn variant="text" @click="dialogAplicar = false">
+            Cancelar
+          </v-btn>
 
-  </v-card>
-</v-dialog>
+          <v-btn color="primary" @click="aplicarAhora">
+            Aplicar
+          </v-btn>
+        </v-card-actions>
+
+      </v-card>
+    </v-dialog>
 
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAddressStore } from '@/stores/addressStores'
 import AddressForm from '@/components/AddressForm.vue'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
+
+const route = useRoute()
+const dispositivoId = Number(route.params.id)
 
 const addressStore = useAddressStore()
 const dispositivoStore = useDispositivoStore()
@@ -153,10 +140,16 @@ const dispositivos = ref([])
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
 
+/* ===================== */
+/* APLICAR */
+/* ===================== */
 const dialogAplicar = ref(false)
-const addressAAplicar = ref(null)
+const addressAplicar = ref(null)
 const seleccionados = ref([])
 
+/* ===================== */
+/* LOAD */
+/* ===================== */
 onMounted(async () => {
   await addressStore.obtenerMisAddresses()
   addresses.value = addressStore.addresses
@@ -165,8 +158,29 @@ onMounted(async () => {
   dispositivos.value = dispositivoStore.dispositivos
 })
 
+/* ===================== */
+/* EDITAR */
+/* ===================== */
+const editarAddress = (address) => {
+  addressSeleccionada.value = { ...address }
+  mostrandoFormulario.value = true
+}
+
+/* ===================== */
+/* ELIMINAR (FIX IMPORTANTE) */
+/* ===================== */
+const eliminarAddress = async (id) => {
+  await addressStore.eliminarAddress(id)
+
+  await addressStore.obtenerMisAddresses()
+  addresses.value = addressStore.addresses
+}
+
+/* ===================== */
+/* APLICAR */
+/* ===================== */
 const aplicarAddressToDispositivos = (address) => {
-  addressAAplicar.value = address
+  addressAplicar.value = address
   seleccionados.value = []
   dialogAplicar.value = true
 }
@@ -180,33 +194,17 @@ const toggleSeleccion = (id) => {
 }
 
 const aplicarAhora = async () => {
-  try {
-    await addressStore.aplicarAddressToDispositivos(
-      addressAAplicar.value.id,
-      seleccionados.value
-    )
+  await addressStore.aplicarAddressToDispositivos(
+    addressAplicar.value.id,
+    seleccionados.value
+  )
 
-    dialogAplicar.value = false
-
-    await addressStore.obtenerMisAddresses()
-    addresses.value = addressStore.addresses
-
-  } catch (error) {
-    console.error(error)
-  }
+  dialogAplicar.value = false
 }
 
-const eliminarAddress = async (id) => {
-  await addressStore.eliminarAddress(id)
-  await addressStore.obtenerMisAddresses()
-  addresses.value = addressStore.addresses
-}
-
-const editarAddress = (address) => {
-  addressSeleccionada.value = { ...address }
-  mostrandoFormulario.value = true
-}
-
+/* ===================== */
+/* FORM */
+/* ===================== */
 const mostrarCrear = () => {
   addressSeleccionada.value = null
   mostrandoFormulario.value = true
@@ -222,7 +220,6 @@ const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
 </script>
-
 <style scoped>
 .addresses-wrapper {
   margin-top: 40px;

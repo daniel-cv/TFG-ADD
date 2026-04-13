@@ -182,49 +182,80 @@ public class AddressService {
         return dto;
     }
 
+    @Transactional
     public void eliminarAddress(Long addressId, String username) {
+
         Address address = addressRepo.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address no existe"));
 
-        DispositivoAddress rel = dispositivoAddressRepo
-                .findByAddressId(addressId)
-                .orElseThrow(() -> new RuntimeException("Relación no encontrada"));
+        List<DispositivoAddress> relaciones = dispositivoAddressRepo
+                .findAllByAddressId(addressId);
 
-        Dispositivo dispositivo = rel.getDispositivo();
-
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
+        if (relaciones.isEmpty()) {
+            throw new RuntimeException("Relación no encontrada");
         }
 
-        Map<String, Object> resultado = fortiGateService.eliminarAddress(dispositivo, address.getName());
+        for (DispositivoAddress rel : relaciones) {
 
-        if (!(Boolean) resultado.get("success")) {
-            throw new RuntimeException("Error eliminando Address en FortiGate: " + resultado);
+            Dispositivo dispositivo = rel.getDispositivo();
+
+            if (!dispositivo.getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
+
+            Map<String, Object> resultado = fortiGateService
+                    .eliminarAddress(dispositivo, address.getName());
+
+            if (!(Boolean) resultado.get("success")) {
+                throw new RuntimeException("Error eliminando Address en FortiGate: " + resultado);
+            }
+
+            dispositivoAddressRepo.delete(rel);
         }
-        dispositivoAddressRepo.delete(rel);
+
+        // Eliminar el address solo cuando ya no tenga relaciones
         addressRepo.delete(address);
     }
 
+    @Transactional
     public AddressDTO editarAddress(Long addressId, CrearAddressDTO dto, String username) {
-        DispositivoAddress rel = dispositivoAddressRepo
-                .findByAddressId(addressId)
-                .orElseThrow(() -> new RuntimeException("Relación no encontrada"));
 
-        Dispositivo dispositivo = rel.getDispositivo();
-        Address address = rel.getAddress();
+        List<DispositivoAddress> relaciones = dispositivoAddressRepo
+                .findAllByAddressId(addressId);
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
+        if (relaciones.isEmpty()) {
+            throw new RuntimeException("Relación no encontrada");
         }
 
+        // El address es el mismo para todas las relaciones
+        Address address = relaciones.get(0).getAddress();
+
+        // =========================
+        // VALIDAR USUARIO EN TODOS
+        // =========================
+        for (DispositivoAddress rel : relaciones) {
+            if (!rel.getDispositivo().getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
+        }
+
+        // =========================
+        // ACTUALIZAR DATOS
+        // =========================
         address.setType(dto.getType());
         address.setIp(dto.getIp());
         address.setIpdestino(dto.getIpdestino() != null ? dto.getIpdestino().trim() : null);
         address.setComentario(dto.getComentario());
 
+        // =========================
+        // INTERFAZ (usamos uno como referencia)
+        // =========================
+        Dispositivo dispositivoRef = relaciones.get(0).getDispositivo();
+
         if (dto.getInterfazId() != null) {
+
             if (dto.getInterfazId() < 0) {
-                // IDs negativos: port1 a port4
+
                 String nombrePort = switch (dto.getInterfazId().intValue()) {
                     case -1 -> "port1";
                     case -2 -> "port2";
@@ -233,32 +264,52 @@ public class AddressService {
                     default -> throw new RuntimeException("Puerto default no soportado");
                 };
 
-                // BUSCAR O CREAR (y persistir inmediatamente si es nueva)
-                Interfaz interfaz = interfazRepo.findByNameAndDispositivoId(nombrePort, dispositivo.getId())
+                Interfaz interfaz = interfazRepo
+                        .findByNameAndDispositivoId(nombrePort, dispositivoRef.getId())
                         .orElseGet(() -> {
                             Interfaz nueva = new Interfaz();
                             nueva.setName(nombrePort);
                             nueva.setTipo("Default");
-                            nueva.setDispositivo(dispositivo);
-                            return interfazRepo.save(nueva); // <--- CRITICO: Guardar antes de asignar
+                            nueva.setDispositivo(dispositivoRef);
+                            return interfazRepo.save(nueva);
                         });
+
                 address.setInterfaz(interfaz);
+
             } else {
-                // ID positivo: buscar interfaz existente
+
                 Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
                         .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+
                 address.setInterfaz(interfaz);
             }
+
         } else {
             address.setInterfaz(null);
         }
 
-        Map<String, Object> resultado = fortiGateService.editarAddress(dispositivo, address, address.getName());
-        if (!(Boolean) resultado.get("success")) {
-            throw new RuntimeException("Error editando Address en FortiGate: " + resultado);
+        // =========================
+        // ACTUALIZAR EN FORTIGATE (TODOS LOS DISPOSITIVOS)
+        // =========================
+        for (DispositivoAddress rel : relaciones) {
+
+            Dispositivo dispositivo = rel.getDispositivo();
+
+            Map<String, Object> resultado = fortiGateService
+                    .editarAddress(dispositivo, address, address.getName());
+
+            if (!(Boolean) resultado.get("success")) {
+                throw new RuntimeException(
+                        "Error editando Address en FortiGate (" + dispositivo.getNombre() + "): " + resultado
+                );
+            }
         }
 
+        // =========================
+        // GUARDAR EN BD
+        // =========================
         Address saved = addressRepo.save(address);
-        return toDTO(saved, dispositivo.getId());
+
+        return toDTO(saved, dispositivoRef.getId());
     }
 }

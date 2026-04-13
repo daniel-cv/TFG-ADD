@@ -36,24 +36,24 @@ public class DispositivoService {
 
     public Dispositivo crearDispositivo(Dispositivo dispositivo, String username) {
 
-//        String url = "http://" + dispositivo.getIp() + "/api/v2/monitor/system/status";
-//
-//        try {
-//            HttpHeaders headers = new HttpHeaders();
-//            headers.set("Authorization", "Bearer " + dispositivo.getToken());
-//
-//            HttpEntity<Void> entity = new HttpEntity<>(headers);
-//
-//            restTemplate.exchange(
-//                    url,
-//                    HttpMethod.GET,
-//                    entity,
-//                    String.class
-//            );
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("No se puede conectar con el dispositivo");
-//        }
+        String url = "http://" + dispositivo.getIp() + "/api/v2/monitor/system/status";
+
+        try {
+            HttpHeaders headers = new HttpHeaders();
+           headers.set("Authorization", "Bearer " + dispositivo.getToken());
+
+           HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+           restTemplate.exchange(
+                   url,
+                    HttpMethod.GET,
+                   entity,
+                   String.class
+           );
+
+       } catch (Exception e) {
+            throw new RuntimeException("No se puede conectar con el dispositivo");
+       }
 
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
