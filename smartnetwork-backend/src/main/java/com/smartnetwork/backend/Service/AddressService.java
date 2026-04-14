@@ -103,11 +103,11 @@ public class AddressService {
             if (yaExiste) continue;
 
 
-            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
-
-            if (!(Boolean) resultado.get("success")) {
-                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
-            }
+//            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
+//
+//            if (!(Boolean) resultado.get("success")) {
+//                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
+//            }
 
 
             DispositivoAddress rel = new DispositivoAddress();
@@ -239,17 +239,11 @@ public class AddressService {
             }
         }
 
-        // =========================
-        // ACTUALIZAR DATOS
-        // =========================
         address.setType(dto.getType());
         address.setIp(dto.getIp());
         address.setIpdestino(dto.getIpdestino() != null ? dto.getIpdestino().trim() : null);
         address.setComentario(dto.getComentario());
 
-        // =========================
-        // INTERFAZ (usamos uno como referencia)
-        // =========================
         Dispositivo dispositivoRef = relaciones.get(0).getDispositivo();
 
         if (dto.getInterfazId() != null) {
@@ -265,12 +259,11 @@ public class AddressService {
                 };
 
                 Interfaz interfaz = interfazRepo
-                        .findByNameAndDispositivoId(nombrePort, dispositivoRef.getId())
+                        .findByName(nombrePort)
                         .orElseGet(() -> {
                             Interfaz nueva = new Interfaz();
                             nueva.setName(nombrePort);
                             nueva.setTipo("Default");
-                            nueva.setDispositivo(dispositivoRef);
                             return interfazRepo.save(nueva);
                         });
 

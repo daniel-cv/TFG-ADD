@@ -18,16 +18,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {
-        "usuario",
-        "credencial",
-        "configuraciones",
-        "reglasFirewall",
-        "addresses",
-        "services",
-        "virtualaddress",
-        "usuarioFirewall"
-})
+@ToString(exclude = {"usuario", "credencial", "configuraciones", "reglasFirewall", "virtualaddress", "usuarioFirewall"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Dispositivo {
 
@@ -84,6 +75,10 @@ public class Dispositivo {
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<DispositivoService> dispositivoServices = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoInterfaz>  dispositivoInterfaz = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

@@ -1,7 +1,10 @@
 package com.smartnetwork.backend.domain.dtos.interfaz;
 
+import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -27,5 +30,5 @@ public class CrearInterfazDTO {
 
     private String description;
 
-    private Long dispositivoId;
+    private List<Long> dispositivosId;
 }

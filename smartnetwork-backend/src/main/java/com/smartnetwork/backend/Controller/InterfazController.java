@@ -26,12 +26,34 @@ public class InterfazController {
         return interfazService.crear(dto, auth.getName());
     }
 
+    @PostMapping("/create/basic")
+    public InterfazDTO crearSoloInterfaz(
+            @RequestBody CrearInterfazDTO dto,
+            Authentication auth
+    ) {
+        return interfazService.crearInterfaz(dto, auth.getName());
+    }
+
+    @PostMapping("/{interfazId}/asignar")
+    public void asignarInterfaz(
+            @PathVariable Long interfazId,
+            @RequestBody List<Long> dispositivosId,
+            Authentication auth
+    ) {
+        interfazService.asignarInterfazADispositivos(interfazId, dispositivosId);
+    }
+
     @GetMapping("/dispositivo/{id}")
-    public List<InterfazDTO> listar(
+    public List<InterfazDTO> listarPorDispositivo(
             @PathVariable Long id,
             Authentication auth
     ) {
         return interfazService.listarPorDispositivo(id, auth.getName());
+    }
+
+    @GetMapping("/usuario")
+    public List<InterfazDTO> listarPorUsuario(Authentication auth) {
+        return interfazService.listarPorUsuario(auth.getName());
     }
 
     @DeleteMapping("/{id}")
@@ -39,8 +61,9 @@ public class InterfazController {
             @PathVariable Long id,
             Authentication auth
     ) {
-        interfazService.eliminar(id, auth.getName());
+        interfazService.eliminarInterfaz(id, auth.getName());
     }
+
     @PutMapping("/edit/{interfazId}")
     public InterfazDTO actualizar(
             @PathVariable Long interfazId,

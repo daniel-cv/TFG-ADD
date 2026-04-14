@@ -83,7 +83,7 @@ import { obtenerAddressesPorDispositivo, obtenerAddressesPorUsuario } from "@/se
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
   serviceEdit: { type: Object, default: null },
-  modo: { type: String, default: "simple" } // simple | full
+  modo: { type: String, default: "simple" }
 });
 
 console.log("ServiceForm props:", props.modo);

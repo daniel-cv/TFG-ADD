@@ -20,7 +20,7 @@
       variant="outlined"
       class="mb-3"
       clearable
-      :disabled="interfazEdit"  
+      :disabled="interfazEdit"
       required
     />
 <!-- INTERFAZ PADRE -->
@@ -32,7 +32,7 @@
       variant="outlined"
       class="mb-3"
       clearable
-      :disabled="interfazEdit"  
+      :disabled="interfazEdit"
     />
 <!--VLAN ID-->
     <v-text-field
@@ -43,7 +43,7 @@
       variant="outlined"
       class="mb-3"
       required
-      :disabled="interfazEdit" 
+      :disabled="interfazEdit"
     />
 
     <!-- VDOM -->
@@ -128,9 +128,12 @@ import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
-  interfazEdit: { type: Object, default: null }
+  interfazEdit: { type: Object, default: null },
+  modo: { type: String, default: "simple" }
 })
 
+console.log("Dispositivo ID en InterfazForm:", props.dispositivoId)
+console.log("InterfazForm props:", props.modo)
 const emit = defineEmits(['creada', 'cancelar'])
 const interfazStore = useInterfazStore()
 
@@ -164,6 +167,10 @@ onMounted(async () => {
 
   try {
     const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
+    
+    if(props.modo === "simple") {
+      res = await interfazStore.cargarInterfacesUsuario()
+    }
     const puertosBase = [
       { title: 'Port1', value: 'port1' },
       { title: 'Port2', value: 'port2' },
@@ -209,20 +216,39 @@ const handleSubmit = async () => {
       allowaccess: allowaccess.value,
       role: role.value,
       description: description.value,
-      dispositivoId: props.dispositivoId
     }
 
-    if (props.interfazEdit) {
-      await interfazStore.actualizarInterfaz(props.interfazEdit.id, payload)
-      mensaje.value = 'Interfaz actualizada correctamente'
-    } else {
+    if (props.modo === 'full' && props.dispositivoId) {
+      console.log("Payload antes de enviar (modo full):", payload)
+      payload.dispositivosId = [props.dispositivoId]
+    }
+
+    if (!props.interfazEdit && props.modo === "full") {
+      console.log("Creando interfaz en modo completo con payload:", payload)
       await interfazStore.crearInterfaz(payload)
-      mensaje.value = 'Interfaz creada correctamente'
+      mensaje.value = "Interfaz creada (modo completo)"
+    }
+
+    else if (!props.interfazEdit) {
+      await interfazStore.crearInterfazBasica(payload)
+      mensaje.value = "Interfaz creada (modo básico)"
+    }
+
+    else {
+      await interfazStore.actualizarInterfaz(
+        props.interfazEdit.id,
+        payload
+      )
+      mensaje.value = "Interfaz actualizada correctamente"
     }
 
     emit('creada')
+
   } catch (error) {
-    mensaje.value = props.interfazEdit ? 'Error al actualizar interfaz' : 'Error al crear interfaz'
+    console.error(error)
+    mensaje.value = props.interfazEdit
+      ? "Error al actualizar interfaz"
+      : "Error al crear interfaz"
   }
 }
 </script>

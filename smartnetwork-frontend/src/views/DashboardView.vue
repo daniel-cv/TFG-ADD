@@ -31,10 +31,12 @@
 import { ref, computed } from 'vue'
 import AddressDashboard from '@/components/AddressDashboard.vue'
 import ServiceDashboard from '@/components/ServiceDashboard.vue'
+import InterfazDashboard from '@/components/InterfazDashboard.vue'
 
 const tabs = [
   { key: 'addresses', label: 'Addresses', component: AddressDashboard },
-  { key: 'services', label: 'Services', component: ServiceDashboard }
+  { key: 'services', label: 'Services', component: ServiceDashboard },
+  { key: 'interfaces', label: 'Interfaces', component: InterfazDashboard }
 ]
 
 const selectedTab = ref('addresses')

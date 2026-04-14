@@ -1,7 +1,10 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -39,10 +42,14 @@ public class Interfaz {
 
     private String description;
 
-    @ManyToOne
-    @JoinColumn(name = "dispositivo_id", nullable = false)
-    private Dispositivo dispositivo;
+    @OneToMany(mappedBy = "interfaz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoInterfaz> dispositivoInterfaz = new ArrayList<>();
 
     @OneToMany(mappedBy = "interfaz", cascade = CascadeType.ALL)
     private List<Address> addresses; // Relación con addresses
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 }

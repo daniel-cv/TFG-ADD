@@ -23,7 +23,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="interfaz in interfazStore.reglas" :key="interfaz.id">
+          <tr v-for="interfaz in interfaces" :key="interfaz.id">
             <td>{{ interfaz.name }}</td>
             <td>{{ interfaz.tipo }}</td>
             <td>{{ interfaz.vlanid }}</td>
@@ -47,6 +47,7 @@
       <InterfazForm
         :dispositivo-id="dispositivoId"
         :interfaz-edit="interfazSeleccionada"
+        :modo="props.modo"
         @creada="recargarYCerrar"
         @cancelar="cerrarFormulario"
       />
@@ -61,17 +62,37 @@ import { useInterfazStore } from '@/stores/interfazStore'
 import { useDispositivoSeleccionadoStore } from '@/stores/dispositivoSeleccionadoStore'
 import InterfazForm from '@/components/InterfazForm.vue'
 
+const props = defineProps({
+  dispositivoId: Number,
+  modo: {
+    type: String,
+    default: 'simple'
+  }
+})
+
 const interfazStore = useInterfazStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
+
 const dispositivoId = seleccionadoStore.dispositivo.id
 
 const mostrandoFormulario = ref(false)
 const interfazSeleccionada = ref(null)
 
+const interfaces = ref([])
+
+const cargar = async () => {
+  await interfazStore.cargarInterfaces(dispositivoId)
+  interfaces.value = interfazStore.interfaces
+}
+
+onMounted(() => {
+  cargar()
+})
+
 const eliminarInterfaz = async (id) => {
   try {
     await interfazStore.eliminarInterfaz(id)
-    await interfazStore.cargarInterfaces(dispositivoId)
+    await cargar()
   } catch (error) {
     console.error('Error eliminando interfaz', error)
   }
@@ -87,18 +108,14 @@ const mostrarCrear = () => {
   mostrandoFormulario.value = true
 }
 
-const recargarYCerrar = () => {
+const recargarYCerrar = async () => {
   mostrandoFormulario.value = false
-  interfazStore.cargarInterfaces(dispositivoId)
+  await cargar()
 }
 
 const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
-
-onMounted(() => {
-  interfazStore.cargarInterfaces(dispositivoId)
-})
 </script>
 
 <style scoped>
