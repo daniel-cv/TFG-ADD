@@ -30,7 +30,7 @@
             <td>{{ address.name }}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
-            <td>{{ address.interfaz ? address.interfaz.name : 'N/A' }}</td>
+            <td>{{ obtenerNombreInterfaz(address.interfazId)}}</td>
             <td>{{ address.comentario || 'Sin comentario' }}</td>
             <td>{{ address.ipdestino || '' }}</td>
 
@@ -125,15 +125,19 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAddressStore } from '@/stores/addressStores'
-import AddressForm from '@/components/AddressForm.vue'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
+import { useInterfazStore } from '@/stores/interfazStore' // <--- IMPORTANTE: Importar
+import AddressForm from '@/components/AddressForm.vue'
 
 const route = useRoute()
 const dispositivoId = Number(route.params.id)
 
 const addressStore = useAddressStore()
 const dispositivoStore = useDispositivoStore()
+const interfazStore = useInterfazStore() // <--- IMPORTANTE: Inicializar
 
+// Usamos directamente las propiedades del store si son reactivas (usando refs o getters)
+// O bien, las mantenemos como refs si prefieres el manejo manual actual
 const addresses = ref([])
 const dispositivos = ref([])
 
@@ -148,37 +152,38 @@ const addressAplicar = ref(null)
 const seleccionados = ref([])
 
 /* ===================== */
-/* LOAD */
+/* LOAD DATA */
 /* ===================== */
-onMounted(async () => {
-  await addressStore.obtenerMisAddresses()
+const cargarDatos = async () => {
+  // Cargamos interfaces primero para que obtenerNombreInterfaz funcione bien
+  await Promise.all([
+    addressStore.obtenerMisAddresses(),
+    dispositivoStore.getMisDispositivos(),
+    interfazStore.cargarInterfacesUsuario() // Asegúrate de que este método existe en tu interfazStore
+  ])
+  
   addresses.value = addressStore.addresses
-
-  await dispositivoStore.getMisDispositivos()
   dispositivos.value = dispositivoStore.dispositivos
-})
+}
+
+onMounted(cargarDatos)
 
 /* ===================== */
-/* EDITAR */
+/* ACCIONES */
 /* ===================== */
 const editarAddress = (address) => {
   addressSeleccionada.value = { ...address }
   mostrandoFormulario.value = true
 }
 
-/* ===================== */
-/* ELIMINAR (FIX IMPORTANTE) */
-/* ===================== */
 const eliminarAddress = async (id) => {
-  await addressStore.eliminarAddress(id)
-
-  await addressStore.obtenerMisAddresses()
-  addresses.value = addressStore.addresses
+  if (confirm('¿Estás seguro de eliminar esta dirección?')) {
+    await addressStore.eliminarAddress(id)
+    await addressStore.obtenerMisAddresses()
+    addresses.value = addressStore.addresses
+  }
 }
 
-/* ===================== */
-/* APLICAR */
-/* ===================== */
 const aplicarAddressToDispositivos = (address) => {
   addressAplicar.value = address
   seleccionados.value = []
@@ -186,24 +191,26 @@ const aplicarAddressToDispositivos = (address) => {
 }
 
 const toggleSeleccion = (id) => {
-  if (seleccionados.value.includes(id)) {
-    seleccionados.value = seleccionados.value.filter(x => x !== id)
+  const index = seleccionados.value.indexOf(id)
+  if (index > -1) {
+    seleccionados.value.splice(index, 1)
   } else {
     seleccionados.value.push(id)
   }
 }
 
 const aplicarAhora = async () => {
+  if (seleccionados.value.length === 0) return alert('Selecciona al menos un dispositivo')
+  
   await addressStore.aplicarAddressToDispositivos(
     addressAplicar.value.id,
     seleccionados.value
   )
-
   dialogAplicar.value = false
 }
 
 /* ===================== */
-/* FORM */
+/* FORMULARIO */
 /* ===================== */
 const mostrarCrear = () => {
   addressSeleccionada.value = null
@@ -218,6 +225,14 @@ const recargarYCerrar = async () => {
 
 const cerrarFormulario = () => {
   mostrandoFormulario.value = false
+}
+
+const obtenerNombreInterfaz = (interfazId) => {
+  if (!interfazId) return 'N/A'
+  
+  // Buscamos en el store que ya debe estar cargado
+  const interfaz = interfazStore.interfaces.find(i => Number(i.id) === Number(interfazId))
+  return interfaz ? interfaz.name : 'N/A'
 }
 </script>
 <style scoped>

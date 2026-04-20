@@ -3,6 +3,7 @@ import com.smartnetwork.backend.Repository.DispositivoInterfazRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.domain.Entity.DispositivoInterfaz;
 import com.smartnetwork.backend.domain.Entity.Usuario;
+import jakarta.transaction.Transactional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -98,11 +99,11 @@ public class InterfazService {
 
             if (yaExiste) continue;
 
-//            Map<String, Object> resultado = fortiGateService.crearInterfaz(dispositivo, interfaz);
-//
-//            if (!(Boolean) resultado.get("success")) {
-//                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
-//            }
+            Map<String, Object> resultado = fortiGateService.crearInterfaz(dispositivo, interfaz);
+
+          if (!(Boolean) resultado.get("success")) {
+               throw new RuntimeException("Error creando address en FortiGate: " + resultado);
+           }
 
             DispositivoInterfaz rel = new DispositivoInterfaz();
             rel.setDispositivo(dispositivo);
@@ -192,73 +193,80 @@ public class InterfazService {
                 throw new RuntimeException("No autorizado");
             }
 
-            //        Map<String, Object> resultado = fortiGateService.eliminarInterfaz(dispositivo, interfaz.getName());
-            //
-            //        if (!(Boolean) resultado.get("success")) {
-            //            throw new RuntimeException("Error eliminando Interfaz en FortiGate: " + resultado);
-            //        }
+                    Map<String, Object> resultado = fortiGateService.eliminarInterfaz(dispositivo, interfaz.getName());
+
+                   if (!(Boolean) resultado.get("success")) {
+                       throw new RuntimeException("Error eliminando Interfaz en FortiGate: " + resultado);
+                    }
 
             dispositivoInterfazRepo.delete(dispositivoInterfaz);
         }
         interfazRepo.delete(interfaz);
     }
 
+    @Transactional
     public InterfazDTO actualizar(Long interfazId, CrearInterfazDTO dto, String username) {
-        List<DispositivoInterfaz> rel = dispositivoInterfazRepo
+
+        List<DispositivoInterfaz> relaciones = dispositivoInterfazRepo
                 .findByIdInterfazId(interfazId);
 
-        if (rel.isEmpty()) {
+        if (relaciones.isEmpty()) {
             throw new RuntimeException("Relación no encontrada");
         }
 
-        Interfaz interfaz = rel.get(0).getInterfaz();
+        // Interfaz compartida
+        Interfaz interfaz = relaciones.get(0).getInterfaz();
 
-        for (DispositivoInterfaz dispositivoInterfaz : rel) {
-            if (!dispositivoInterfaz.getDispositivo().getUsuario().getUsername().equals(username)) {
+        // =========================
+        // VALIDAR USUARIO EN TODOS
+        // =========================
+        for (DispositivoInterfaz rel : relaciones) {
+            if (!rel.getDispositivo().getUsuario().getUsername().equals(username)) {
                 throw new RuntimeException("No autorizado");
             }
         }
 
+        // Guardar nombre antiguo (IMPORTANTE)
+        String nombreAnterior = interfaz.getName();
+
+        // =========================
+        // ACTUALIZAR DATOS
+        // =========================
         interfaz.setName(dto.getName());
         interfaz.setTipo(dto.getTipo());
         interfaz.setInterfacePadre(dto.getInterfacePadre());
         interfaz.setVlanid(dto.getVlanid());
-        interfaz.setVdom(dto.getVdom());
+        interfaz.setVdom(dto.getVdom() != null ? dto.getVdom() : "root");
         interfaz.setMode(dto.getMode());
         interfaz.setIp(dto.getIp());
         interfaz.setAllowaccess(dto.getAllowaccess());
         interfaz.setRole(dto.getRole());
         interfaz.setDescription(dto.getDescription());
 
-        Dispositivo dispositivoRef = rel.get(0).getDispositivo();
+        Dispositivo dispositivoRef = relaciones.get(0).getDispositivo();
 
-        for (DispositivoInterfaz dispositivoInterfaz : rel) {
+        // =========================
+        // ACTUALIZAR EN FORTIGATE
+        // =========================
+        for (DispositivoInterfaz rel : relaciones) {
 
-            Dispositivo dispositivo = dispositivoInterfaz.getDispositivo();
+            Dispositivo dispositivo = rel.getDispositivo();
 
             Map<String, Object> resultado =
-                    fortiGateService.editarInterfaz(dispositivo, interfaz, interfaz.getName());
+                    fortiGateService.editarInterfaz(dispositivo, interfaz, nombreAnterior);
 
             if (!(Boolean) resultado.get("success")) {
                 throw new RuntimeException(
-                        "Error actualizando interfaz en FortiGate: " + resultado
+                        "Error editando Interfaz en FortiGate (" + dispositivo.getNombre() + "): " + resultado
                 );
             }
         }
 
-
+        // =========================
+        // GUARDAR EN BD
+        // =========================
         Interfaz saved = interfazRepo.save(interfaz);
+
         return toDTO(saved, dispositivoRef.getId());
     }
-
-//    public Interfaz findByNameAndDispositivoId(String name, Long dispositivoId, String username) {
-//        Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
-//                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
-//
-//        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-//            throw new RuntimeException("No autorizado");
-//        }
-//        return interfazRepo.findByNameAndDispositivoId(name, dispositivoId)
-//                .orElseThrow(() -> new RuntimeException("Interfaz '" + name + "' no encontrada en este dispositivo"));
-//    }
 }

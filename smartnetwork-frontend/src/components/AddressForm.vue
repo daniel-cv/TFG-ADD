@@ -98,7 +98,7 @@ import { ref, onMounted } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
 import { useRoute } from "vue-router";
 import { useInterfazStore } from '@/stores/interfazStore'
-import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
+import { obtenerInterfacesPorDispositivo, obtenerInterfacesUsuario } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -132,7 +132,10 @@ onMounted(async () => {
     comentario.value = props.addressEdit.comentario
   }
  try {
-  const res = await obtenerInterfacesPorDispositivo(props.dispositivoId);
+  var res=null;
+  if(props.modo=="full"){res = await obtenerInterfacesPorDispositivo(props.dispositivoId);}
+  else{res= await obtenerInterfacesUsuario()};
+  console.log(props.modo)
   const apiData = res.data;
   const puertosBase = [1, 2, 3, 4].map(num => {
     const nombreBuscado = `port${num}`;

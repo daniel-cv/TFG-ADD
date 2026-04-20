@@ -1,6 +1,5 @@
 package com.smartnetwork.backend.domain.dtos.address;
 
-import com.smartnetwork.backend.domain.Entity.Interfaz;
 import lombok.Getter;
 import lombok.Setter;
 

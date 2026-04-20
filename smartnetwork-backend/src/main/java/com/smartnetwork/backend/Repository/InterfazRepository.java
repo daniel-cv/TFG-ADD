@@ -10,6 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface InterfazRepository extends JpaRepository<Interfaz, Long> {
-    List<Interfaz> findByUsuarioId(Integer id);
+
+    List<Interfaz> findByUsuarioId(Long usuarioId);
+
     Optional<Interfaz> findByName(String name);
+
 }

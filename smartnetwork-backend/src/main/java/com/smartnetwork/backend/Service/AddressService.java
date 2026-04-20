@@ -14,6 +14,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class AddressService {
@@ -103,11 +104,10 @@ public class AddressService {
             if (yaExiste) continue;
 
 
-//            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
-//
-//            if (!(Boolean) resultado.get("success")) {
-//                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
-//            }
+           Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
+            if (!(Boolean) resultado.get("success")) {
+               throw new RuntimeException("Error creando address en FortiGate: " + resultado);
+            }
 
 
             DispositivoAddress rel = new DispositivoAddress();
@@ -238,6 +238,8 @@ public class AddressService {
                 throw new RuntimeException("No autorizado");
             }
         }
+        Usuario user = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         address.setType(dto.getType());
         address.setIp(dto.getIp());
@@ -264,6 +266,7 @@ public class AddressService {
                             Interfaz nueva = new Interfaz();
                             nueva.setName(nombrePort);
                             nueva.setTipo("Default");
+                            nueva.setUsuario(user);
                             return interfazRepo.save(nueva);
                         });
 

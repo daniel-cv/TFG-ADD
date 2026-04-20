@@ -124,7 +124,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useInterfazStore } from '@/stores/interfazStore'
-import { obtenerInterfacesPorDispositivo } from '@/services/interfazService'
+import { obtenerInterfacesPorDispositivo, obtenerInterfacesUsuario } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -166,11 +166,10 @@ onMounted(async () => {
   }
 
   try {
-    const res = await obtenerInterfacesPorDispositivo(props.dispositivoId)
-    
-    if(props.modo === "simple") {
-      res = await interfazStore.cargarInterfacesUsuario()
-    }
+   var res=null;
+  if(props.modo=="full"){res = await obtenerInterfacesPorDispositivo(props.dispositivoId);}
+  else{res= await obtenerInterfacesUsuario()}
+  
     const puertosBase = [
       { title: 'Port1', value: 'port1' },
       { title: 'Port2', value: 'port2' },

@@ -113,28 +113,46 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useInterfazStore } from '@/stores/interfazStore'
+import { useDispositivoStore } from '@/stores/dispositivoStore' // Importamos el store de dispositivos
 import InterfazForm from '@/components/InterfazForm.vue'
-import { asignarInterfaz } from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: Number
 })
 
 const interfazStore = useInterfazStore()
+const dispositivoStore = useDispositivoStore() // Instanciamos
 
 const interfaces = ref([])
+const dispositivos = ref([]) // Para el modal de aplicar
+
 const mostrandoFormulario = ref(false)
 const interfazSeleccionada = ref(null)
+
+/* ===================== */
+/* APLICAR (Lógica replicada) */
+/* ===================== */
+const dialogAplicar = ref(false)
+const interfazAAplicar = ref(null) // Referencia a la interfaz elegida
+const seleccionados = ref([])
 
 onMounted(async () => {
   await cargar()
 })
 
 const cargar = async () => {
+  // Cargar interfaces
   await interfazStore.cargarInterfacesUsuario()
   interfaces.value = interfazStore.interfaces
+
+  // Cargar dispositivos para el modal (Igual que en Addresses)
+  await dispositivoStore.getMisDispositivos()
+  dispositivos.value = dispositivoStore.dispositivos
 }
 
+/* ===================== */
+/* ACCIONES DE TABLA */
+/* ===================== */
 const crearInterfaz = () => {
   interfazSeleccionada.value = null
   mostrandoFormulario.value = true
@@ -146,10 +164,46 @@ const editarInterfaz = (interfaz) => {
 }
 
 const eliminarInterfaz = async (id) => {
-  await interfazStore.eliminarInterfaz(id)
-  await cargar()
+  if (confirm('¿Estás seguro?')) {
+    await interfazStore.eliminarInterfaz(id)
+    await cargar()
+  }
 }
 
+/* ===================== */
+/* LÓGICA DE APLICAR (Igual a Addresses) */
+/* ===================== */
+const asignarInterfaz = (interfaz) => {
+  interfazAAplicar.value = interfaz // Guardamos cuál vamos a replicar
+  seleccionados.value = []          // Limpiamos selección previa
+  dialogAplicar.value = true        // Abrimos modal
+}
+
+const toggleSeleccion = (id) => {
+  if (seleccionados.value.includes(id)) {
+    seleccionados.value = seleccionados.value.filter(x => x !== id)
+  } else {
+    seleccionados.value.push(id)
+  }
+}
+
+const aplicarInterfaz = async () => {
+  if (seleccionados.value.length === 0) {
+    alert("Selecciona al menos un dispositivo");
+    return;
+  }
+
+  await interfazStore.asignarInterfaz(
+    interfazAAplicar.value.id,
+    seleccionados.value
+  );
+
+  dialogAplicar.value = false;
+};
+
+/* ===================== */
+/* GESTIÓN FORMULARIO */
+/* ===================== */
 const recargarYCerrar = async () => {
   mostrandoFormulario.value = false
   await cargar()
@@ -157,15 +211,6 @@ const recargarYCerrar = async () => {
 
 const cerrarFormulario = () => {
   mostrandoFormulario.value = false
-}
-
-const aplicarInterfaz = async () => {
-  await asignarInterfaz(
-    interfazSeleccionada.value.id, 
-    seleccionados.value
-  )
-
-  dialogAplicar.value = false
 }
 </script>
 <style>

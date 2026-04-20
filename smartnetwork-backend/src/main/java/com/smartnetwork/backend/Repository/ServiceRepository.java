@@ -13,5 +13,5 @@ import java.util.Optional;
 public interface ServiceRepository extends JpaRepository<Service,Long> {
     List<Service> findByDispositivoServices_Dispositivo_Id(Long dispositivoId);
     Optional<Service> findByIdAndDispositivoServices_Dispositivo_Id(Long id, Long dispositivoId);
-    List<Service> findByUsuarioId(Integer usuarioId);
+    List<Service> findByUsuarioId(Long usuarioId);
 }

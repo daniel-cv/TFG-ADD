@@ -131,14 +131,15 @@ const cerrarFormulario = () => {
 
 onMounted(async() => {
   await addressStore.cargarAddresses(dispositivoId)
-  await interfazStore.cargarInterfaces(dispositivoId)
+  await interfazStore.cargarInterfacesUsuario()
 })
 const obtenerNombreInterfaz = (interfazId) => {
+
   if (interfazId == null) return 'N/A';
 
-  const interfaz = interfazStore.reglas.find(
-    i => Number(i.id) === Number(interfazId)
-  );
+  const id = Number(interfazId);
+
+  const interfaz = interfazStore.interfaces.find(i => Number(i.id) === id);
 
   return interfaz?.name ?? 'N/A';
 };

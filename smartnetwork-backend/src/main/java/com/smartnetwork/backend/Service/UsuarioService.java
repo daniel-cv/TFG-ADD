@@ -95,7 +95,7 @@ public class UsuarioService {
      * @param id
      * @return
      */
-    public Usuario findById(int id) {
+    public Usuario findById(long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
@@ -134,7 +134,7 @@ public class UsuarioService {
      * Elimina el usuario con el id solicitado de la bbdd
      * @param id
      */
-    public void  deleteById(int id) {
+    public void  deleteById(long id) {
         usuarioRepository.deleteById(id);
     }
 
