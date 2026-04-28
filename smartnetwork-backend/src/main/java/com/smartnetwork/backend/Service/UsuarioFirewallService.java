@@ -1,11 +1,13 @@
 package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
+import com.smartnetwork.backend.Repository.DispositivoUsuarioFirewallRepository;
 import com.smartnetwork.backend.Repository.UsuarioFirewallRepository;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.UsuarioFirewall;
+import com.smartnetwork.backend.Repository.UsuarioRepository;
+import com.smartnetwork.backend.domain.Entity.*;
 import com.smartnetwork.backend.domain.dtos.usuarioFirewall.CreaUsuarioFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.usuarioFirewall.UsuarioFirewallDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -23,143 +25,190 @@ public class UsuarioFirewallService {
     private final UsuarioFirewallRepository usuarioFirewallRepository;
     private final DispositivoRepository dispositivoRepo;
     private final FortiGateService fortiGateService;
+    private final UsuarioRepository usuarioRepository;
+    private final DispositivoUsuarioFirewallRepository dispositivoUsuarioFirewallRepository;
 
-    public UsuarioFirewallService(UsuarioFirewallRepository usuarioFirewallRepository, DispositivoRepository dispositivoRepo, FortiGateService fortiGateService){
+    public UsuarioFirewallService(UsuarioFirewallRepository usuarioFirewallRepository, DispositivoRepository dispositivoRepo, FortiGateService fortiGateService, UsuarioRepository usuarioRepository, DispositivoUsuarioFirewallRepository dispositivoUsuarioFirewallRepository){
         this.usuarioFirewallRepository = usuarioFirewallRepository;
         this.dispositivoRepo = dispositivoRepo;
         this.fortiGateService = fortiGateService;
+        this.usuarioRepository = usuarioRepository;
+        this.dispositivoUsuarioFirewallRepository = dispositivoUsuarioFirewallRepository;
     }
 
     /**
      * Crear un UsuarioFirewall asociado a un dispositivo
      */
-    public UsuarioFirewall create(CreaUsuarioFirewallDTO dto, String username) {
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dto.getDispositivoId())
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+    @Transactional
+    public UsuarioFirewallDTO crear(CreaUsuarioFirewallDTO creaUsuarioFirewallDTO, String username){
+        UsuarioFirewallDTO usuarioFirewall = crearUsuarioInterfaz(creaUsuarioFirewallDTO, username);
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
+        if(creaUsuarioFirewallDTO.getDispositivosId() != null && !creaUsuarioFirewallDTO.getDispositivosId().isEmpty()){
+            asignarUsuarioFirewallADispositivo(usuarioFirewall.getId(), creaUsuarioFirewallDTO.getDispositivosId(), username);
         }
+
+        return usuarioFirewall;
+    }
+
+    @Transactional
+    public UsuarioFirewallDTO crearUsuarioInterfaz(CreaUsuarioFirewallDTO dto, String username){
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         UsuarioFirewall usuarioFirewall = new UsuarioFirewall();
-        usuarioFirewall.setDispositivo(dispositivo);
         usuarioFirewall.setNombre(dto.getName());
-        usuarioFirewall.setPassword(dto.getPassword());
-        usuarioFirewall.setTipo("User");
         usuarioFirewall.setEmail(dto.getEmail());
+        usuarioFirewall.setPassword(dto.getPassword());
         usuarioFirewall.setFactor(dto.getTwoFactor());
-        Map<String, Object> resultado = fortiGateService.crearUsuarioFirewall(dispositivo, usuarioFirewall);
-        if (!(Boolean) resultado.get("success")) {
-            throw new RuntimeException("Error creando usuario en FortiGate: " + resultado);
-        }
-        return usuarioFirewallRepository.save(usuarioFirewall);
+        usuarioFirewall.setTipo(dto.getType());
+        usuarioFirewall.setUsuario(usuario);
+
+        UsuarioFirewall usuarioSaved = usuarioFirewallRepository.save(usuarioFirewall);
+        return toUsuarioDTO(usuarioSaved);
     }
 
-    /**
-     * Listar todos los UsuarioFirewall de un dispositivo
-     */
-    public List<UsuarioFirewall> findAllByDispositivo(Long dispositivoId, String username) {
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
+    @Transactional
+    public void asignarUsuarioFirewallADispositivo(Long usuarioFirewallId, List<Long> dispositivosId, String username){
+        UsuarioFirewall usuarioFirewall = usuarioFirewallRepository.findById(usuarioFirewallId)
+                .orElseThrow(() -> new RuntimeException("Usuario no existe"));
+
+        if(!usuarioFirewall.getUsuario().getUsername().equals(username)){
+            throw new RuntimeException("No autorizado");
+        }
+
+        for (Long dispositivoId : dispositivosId){
+            Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
+                    .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+
+            if (!dispositivo.getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
+
+            boolean yaExiste = dispositivoUsuarioFirewallRepository
+                    .existsByDispositivoIdAndUsuarioFirewallId(dispositivoId, usuarioFirewallId);
+
+            if (yaExiste) continue;
+
+            //Map<String, Object> resultado = fortiGateService.crearUsuarioFirewall(dispositivo, usuarioFirewall);
+            //if (!(Boolean) resultado.get("success")) {
+            //    throw new RuntimeException("Error creando usuario en FortiGate: " + resultado);
+            //}
+
+            DispositivoUsuarioFirewall rel = new DispositivoUsuarioFirewall();
+            rel.setDispositivo(dispositivo);
+            rel.setUsuarioFirewall(usuarioFirewall);
+            dispositivoUsuarioFirewallRepository.save(rel);
+        }
+    }
+
+    public List<UsuarioFirewallDTO> listarPorDispositivo(Long dispositivoId, String username){
+        Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
 
-        return usuarioFirewallRepository.findByDispositivoId(dispositivoId);
+        return dispositivoUsuarioFirewallRepository.findByDispositivoId(dispositivoId)
+                .stream()
+                .map(rel -> toDTO(rel.getUsuarioFirewall(), dispositivoId))
+                .toList();
     }
 
-    /**
-     * Buscar un UsuarioFirewall por ID y comprobar propietario
-     */
-    public Optional<UsuarioFirewall> findById(String username, Long dispositivoId, Long usuarioFirewallId) {
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+    public List<UsuarioFirewallDTO> listarPorUsuario(String username){
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
+        if(!usuario.getUsername().equals(username)){
             throw new RuntimeException("No autorizado");
         }
 
-        return usuarioFirewallRepository.findByIdAndDispositivoId(usuarioFirewallId, dispositivoId);
+        return usuarioFirewallRepository.findByUsuarioId(usuario.getId())
+                .stream()
+                .map(this::toUsuarioDTO)
+                .toList();
     }
 
     /**
      * Actualizar un UsuarioFirewall
      */
-    public UsuarioFirewall update(UsuarioFirewall usuarioFirewall, String username, Long dispositivoId) {
-        Dispositivo dispositivo = dispositivoRepo
-                .findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+    public UsuarioFirewallDTO actualizar(Long usuarioFirewallId, CreaUsuarioFirewallDTO dto, String username){
+        List<DispositivoUsuarioFirewall> rel = dispositivoUsuarioFirewallRepository
+                .findByDispositivoId(usuarioFirewallId);
 
-        if (!dispositivo.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
+        if (!rel.isEmpty()) {
+            throw new RuntimeException("Relación no encontrada");
         }
 
-        usuarioFirewall.setDispositivo(dispositivo);
-        return usuarioFirewallRepository.save(usuarioFirewall);
+        UsuarioFirewall usuarioFirewall = rel.get(0).getUsuarioFirewall();
+
+        for (DispositivoUsuarioFirewall dispositivo : rel) {
+            if(!dispositivo.getDispositivo().getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
+        }
+
+        String oldName = usuarioFirewall.getNombre();
+
+        usuarioFirewall.setTipo(dto.getType());
+        usuarioFirewall.setFactor(dto.getTwoFactor());
+        usuarioFirewall.setNombre(dto.getName());
+        usuarioFirewall.setEmail(dto.getEmail());
+        usuarioFirewall.setPassword(dto.getPassword());
+
+        Dispositivo dispositivoRef = rel.get(0).getDispositivo();
+
+        for (DispositivoUsuarioFirewall dispositivo : rel) {
+            Dispositivo dispositivo1 = dispositivo.getDispositivo();
+
+            Map<String, Object> resultado = fortiGateService.editUsuario(
+                    dispositivo1,
+                    usuarioFirewall,
+                    oldName
+            );
+
+            if (!(Boolean) resultado.get("success")) {
+                throw new RuntimeException("Error eliminando UsuarioFirewall en FortiGate: " + resultado);
+            }
+        }
+
+        UsuarioFirewall saved = usuarioFirewallRepository.save(usuarioFirewall);
+        return toDTO(saved, dispositivoRef.getId());
     }
 
     /**
      * Eliminar un UsuarioFirewall
      */
-    public void eliminar(Long usuarioFirewallId, String username) {
+    public void eliminarUsuarioFirewall(Long usuarioFirewallId, String username) {
         UsuarioFirewall usuarioFirewall = usuarioFirewallRepository.findById(usuarioFirewallId)
-                .orElseThrow(() -> new RuntimeException("UsuarioFirewall no existe"));
+                .orElseThrow(() -> new RuntimeException("Usuario no existe"));
 
-        if (!usuarioFirewall.getDispositivo().getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
-        }
+        List<DispositivoUsuarioFirewall> rel = dispositivoUsuarioFirewallRepository
+                .findByUsuarioFirewallId(usuarioFirewallId);
 
-        Map<String, Object> resultado = fortiGateService.eliminarUsuarioFirewall(
-                usuarioFirewall.getDispositivo(),
-                usuarioFirewall.getNombre()
-        );
+        for (DispositivoUsuarioFirewall dispositivo : rel) {
+            Dispositivo dispositivo1 = dispositivo.getDispositivo();
 
-        if (!(Boolean) resultado.get("success")) {
-            throw new RuntimeException("Error eliminando UsuarioFirewall en FortiGate: " + resultado);
+            if (dispositivo1.getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
+            }
+
+            Map<String, Object> resultado = fortiGateService.eliminarUsuarioFirewall(
+                    dispositivo1,
+                    usuarioFirewall.getNombre()
+            );
+
+            if (!(Boolean) resultado.get("success")) {
+                throw new RuntimeException("Error eliminando UsuarioFirewall en FortiGate: " + resultado);
+            }
+
+            dispositivoUsuarioFirewallRepository.delete(dispositivo);
         }
 
         usuarioFirewallRepository.delete(usuarioFirewall);
     }
 
-    public UsuarioFirewallDTO editUsuario(Long usuarioFirewallId, CreaUsuarioFirewallDTO dto, String username) {
-
-        UsuarioFirewall usuario = usuarioFirewallRepository.findById(usuarioFirewallId)
-                .orElseThrow(() -> new RuntimeException("UsuarioFirewall no existe"));
-
-        if (!usuario.getDispositivo().getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
-        }
-
-        Dispositivo dispositivo = usuario.getDispositivo();
-
-        String oldName = usuario.getNombre();
-
-        usuario.setNombre(dto.getName());
-        usuario.setPassword(dto.getPassword());
-        usuario.setEmail(dto.getEmail());
-        usuario.setTipo(dto.getType());
-        usuario.setFactor(dto.getTwoFactor());
-
-        Map<String, Object> resultado = fortiGateService.editUsuario(
-                dispositivo,
-                usuario,
-                oldName
-        );
-
-        if (!(Boolean) resultado.get("success")) {
-            throw new RuntimeException("Error editando Usuario en FortiGate: " + resultado);
-        }
-
-        UsuarioFirewall saved = usuarioFirewallRepository.save(usuario);
-
-        return toDTO(saved);
-    }
-
-    private UsuarioFirewallDTO toDTO(UsuarioFirewall usuario) {
+    private UsuarioFirewallDTO toDTO(UsuarioFirewall usuario, Long dispositivoId) {
 
         UsuarioFirewallDTO dto = new UsuarioFirewallDTO();
 
@@ -167,10 +216,18 @@ public class UsuarioFirewallService {
         dto.setTipo(usuario.getTipo());
         dto.setPassword(usuario.getPassword());
         dto.setEmail(usuario.getEmail());
+        dto.setDispositivoId(dispositivoId);
 
-        if (usuario.getDispositivo() != null) {
-            dto.setDispositivoId(usuario.getDispositivo().getId());
-        }
+        return dto;
+    }
+
+    private UsuarioFirewallDTO toUsuarioDTO(UsuarioFirewall usuario) {
+        UsuarioFirewallDTO dto = new UsuarioFirewallDTO();
+        dto.setId(usuario.getId());
+        dto.setNombre(usuario.getNombre());
+        dto.setTipo(usuario.getTipo());
+        dto.setPassword(usuario.getPassword());
+        dto.setEmail(usuario.getEmail());
 
         return dto;
     }

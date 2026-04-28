@@ -9,8 +9,5 @@ import java.util.Optional;
 
 @Repository
 public interface UsuarioFirewallRepository extends JpaRepository<UsuarioFirewall, Long> {
-
-    List<UsuarioFirewall> findByDispositivoId(Long dispositivoId);
-
-    Optional<UsuarioFirewall> findByIdAndDispositivoId(Long id, Long dispositivoId);
+    List<UsuarioFirewall> findByUsuarioId(Integer usuarioId);
 }
