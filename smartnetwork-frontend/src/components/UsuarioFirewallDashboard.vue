@@ -170,7 +170,7 @@ onMounted(async () => {
 const eliminarUsuario = async (id) => {
   try {
     await usuarioFirewallStore.eliminarUsuarioFirewall(id)
-    await usuarioFirewallStore.cargarUsuariosPorDispositivo(props.dispositivoId)
+    await usuarioFirewallStore.cargarUsuariosPorUsuario()
   } catch (error) {
     console.error("Error eliminando usuario", error)
   }
@@ -191,7 +191,7 @@ const mostrarCrear = () => {
 /* ===================== */
 const recargarYCerrar = async () => {
   mostrandoFormulario.value = false
-  await usuarioFirewallStore.cargarUsuariosPorDispositivo(props.dispositivoId)
+  await usuarioFirewallStore.cargarUsuariosPorUsuario()
 }
 
 const cerrarFormulario = () => {

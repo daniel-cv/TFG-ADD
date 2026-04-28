@@ -189,18 +189,18 @@ public class UsuarioFirewallService {
         for (DispositivoUsuarioFirewall dispositivo : rel) {
             Dispositivo dispositivo1 = dispositivo.getDispositivo();
 
-            if (dispositivo1.getUsuario().getUsername().equals(username)) {
+            if (!dispositivo1.getUsuario().getUsername().equals(username)) {
                 throw new RuntimeException("No autorizado");
             }
 
-            Map<String, Object> resultado = fortiGateService.eliminarUsuarioFirewall(
-                    dispositivo1,
-                    usuarioFirewall.getNombre()
-            );
+            //Map<String, Object> resultado = fortiGateService.eliminarUsuarioFirewall(
+            //        dispositivo1,
+            //        usuarioFirewall.getNombre()
+            //);
 
-            if (!(Boolean) resultado.get("success")) {
-                throw new RuntimeException("Error eliminando UsuarioFirewall en FortiGate: " + resultado);
-            }
+            //if (!(Boolean) resultado.get("success")) {
+            //    throw new RuntimeException("Error eliminando UsuarioFirewall en FortiGate: " + resultado);
+            //}
 
             dispositivoUsuarioFirewallRepository.delete(dispositivo);
         }
