@@ -9,7 +9,7 @@
       variant="outlined"
       class="mb-3"
       required
-      :disabled="usuarioEdit" 
+      :disabled="usuarioEdit"
     />
 
     <!-- PASSWORD -->
@@ -20,7 +20,7 @@
       type="password"
       variant="outlined"
       class="mb-3"
-      :required="!usuarioEdit" 
+      :required="!usuarioEdit"
     />
 
     <!-- EMAIL -->
@@ -62,12 +62,12 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { useRoute } from "vue-router";
 import { useUsuarioFirewallStore } from "@/stores/usuarioFirewallStore";
 
 const props = defineProps({
   usuarioEdit: { type: Object, default: null },
-  dispositivoId: { type: Number, required: true }
+  dispositivoId: { type: Number, required: true },
+  modo: { type: String, default: 'simple' }
 })
 
 const emit = defineEmits(['creado', 'cancelar'])
@@ -101,14 +101,23 @@ const handleSubmitUsuario = async () => {
       email: email.value || null,
       type: 'password',
       twoFactor: twoFactor.value,
-      dispositivoId: props.dispositivoId
+      dispositivosId: props.dispositivoId
     };
+
+
+    if (props.modo === 'full' && props.dispositivoId) {
+      payload.dispositivosId = [props.dispositivoId]
+    }
 
     if (props.usuarioEdit) {
       await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id, payload)
       mensaje.value = "Usuario actualizado correctamente"
     } else {
-      await userStore.crearUsuarioFirewall(payload)
+      if (props.modo === 'full' && props.dispositivoId) {
+        await userStore.crearUsuarioFirewallCompleto(payload)
+      }else{
+        await userStore.crearUsuarioFirewall(payload)
+      }
       mensaje.value = "Usuario creado correctamente"
     }
 

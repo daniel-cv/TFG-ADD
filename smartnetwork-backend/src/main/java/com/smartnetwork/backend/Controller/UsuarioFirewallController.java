@@ -26,8 +26,8 @@ public class UsuarioFirewallController {
      * Crear un UsuarioFirewall
      */
     @PostMapping("/create")
-    public ResponseEntity<UsuarioFirewall> create(@RequestBody CreaUsuarioFirewallDTO dto, Authentication auth) {
-        UsuarioFirewall created = usuarioFirewallService.create(dto, auth.getName());
+    public ResponseEntity<UsuarioFirewallDTO> create(@RequestBody CreaUsuarioFirewallDTO dto, Authentication auth) {
+        UsuarioFirewallDTO created = usuarioFirewallService.crear(dto, auth.getName());
         return ResponseEntity.ok(created);
     }
 
@@ -35,51 +35,42 @@ public class UsuarioFirewallController {
      * Listar todos los UsuarioFirewall de un dispositivo
      */
     @GetMapping("/dispositivo/{id}")
-    public ResponseEntity<List<UsuarioFirewall>> getAllByDispositivo(@PathVariable Long id, Authentication auth) {
-        List<UsuarioFirewall> usuarios = usuarioFirewallService.findAllByDispositivo(id, auth.getName());
+    public ResponseEntity<List<UsuarioFirewallDTO>> getAllByDispositivo(@PathVariable Long id, Authentication auth) {
+        List<UsuarioFirewallDTO> usuarios = usuarioFirewallService.listarPorDispositivo(id, auth.getName());
         return ResponseEntity.ok(usuarios);
     }
 
-    /**
-     * Obtener un UsuarioFirewall por ID
-     */
-    @GetMapping("/{usuarioFirewallId}/dispositivo/{dispositivoId}")
-    public ResponseEntity<UsuarioFirewall> getById(
-            @PathVariable Long usuarioFirewallId,
-            @PathVariable Long dispositivoId,
-            @RequestParam String username
-    ) {
-        return usuarioFirewallService.findById(username, dispositivoId, usuarioFirewallId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @GetMapping("/usuario")
+    public List<UsuarioFirewallDTO> listarAll(
+            Authentication auth
+    ){
+        return usuarioFirewallService.listarPorUsuario(auth.getName());
     }
 
-    /**
-     * Actualizar un UsuarioFirewall
-     */
-    @PutMapping("/{usuarioFirewallId}/dispositivo/{dispositivoId}")
-    public ResponseEntity<UsuarioFirewall> update(
-            @PathVariable Long usuarioFirewallId,
-            @PathVariable Long dispositivoId,
-            @RequestParam String username,
-            @RequestBody UsuarioFirewall usuarioFirewall
-    ) {
-        usuarioFirewall.setId(usuarioFirewallId);
-        UsuarioFirewall updated = usuarioFirewallService.update(usuarioFirewall, username, dispositivoId);
-        return ResponseEntity.ok(updated);
+    @PostMapping("/{usuarioId}/dispositivos")
+    public ResponseEntity<Void> asignarUsuarios(
+            @PathVariable Long usuarioId,
+            @RequestBody List<Long> dispositivosIds,
+            Authentication auth
+    ){
+        usuarioFirewallService.asignarUsuarioFirewallADispositivo(usuarioId, dispositivosIds, auth.getName());
+        return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/full")
+    public UsuarioFirewallDTO crearCompleto(
+            @RequestBody CreaUsuarioFirewallDTO dto,
+            Authentication auth
+    ) {
+        return usuarioFirewallService.crear(dto, auth.getName());
+    }
 
-    /**
-     * Eliminar un UsuarioFirewall
-     */
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> delete(
+    public void eliminar(
             @PathVariable Long id,
             Authentication auth
     ) {
-        usuarioFirewallService.eliminar(id, auth.getName());
-        return ResponseEntity.noContent().build();
+        usuarioFirewallService.eliminarUsuarioFirewall(id, auth.getName());
     }
 
     @PutMapping("/edit/{id}")
@@ -88,6 +79,6 @@ public class UsuarioFirewallController {
             @RequestBody CreaUsuarioFirewallDTO dto,
             Authentication auth
     ) {
-        return usuarioFirewallService.editUsuario(id, dto, auth.getName());
+        return usuarioFirewallService.actualizar(id, dto, auth.getName());
     }
 }

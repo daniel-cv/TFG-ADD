@@ -1,7 +1,11 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -33,8 +37,12 @@ public class UsuarioFirewall {
     @Column(nullable = false)
     private String password;
 
+    @OneToMany(mappedBy = "usuarioFirewall", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoUsuarioFirewall> dispositivoUsuarioFirewalls = new ArrayList<>();
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dispositivo_id", nullable = false)
-    private Dispositivo dispositivo;
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
 }
 

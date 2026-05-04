@@ -64,6 +64,7 @@
       <UsuarioFirewallForm
         :dispositivo-id="dispositivoId"
         :usuario-edit="usuarioSeleccionado"
+        :modo="props.modo"
         @creado="recargarYCerrar"
         @cancelar="cerrarFormulario"
       />
@@ -85,10 +86,18 @@ const dispositivoId = seleccionadoStore.dispositivo.id
 const mostrandoFormulario = ref(false)
 const usuarioSeleccionado = ref(null)
 
+const props = defineProps({
+  dispositivoId: Number,
+  modo: {
+    type: String,
+    default: 'simple'
+  }
+})
+
 const eliminarUsuario = async (id) => {
   try {
     await usuarioFirewallStore.eliminarUsuarioFirewall(id)
-    await usuarioFirewallStore.cargarUsuarioFirewall(dispositivoId)
+    await usuarioFirewallStore.cargarUsuariosPorDispositivo(dispositivoId)
   } catch (error) {
     console.error("Error eliminando usuario", error)
   }
@@ -106,7 +115,7 @@ const mostrarCrear = () => {
 
 const recargarYCerrar = () => {
   mostrandoFormulario.value = false
-  usuarioFirewallStore.cargarUsuarioFirewall(dispositivoId)
+  usuarioFirewallStore.cargarUsuariosPorDispositivo(dispositivoId)
 }
 
 const cerrarFormulario = () => {
@@ -114,7 +123,7 @@ const cerrarFormulario = () => {
 }
 
 onMounted(() => {
-  usuarioFirewallStore.cargarUsuarioFirewall(dispositivoId)
+  usuarioFirewallStore.cargarUsuariosPorDispositivo(dispositivoId)
 })
 </script>
 

@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class UsuarioFirewallDTO {
 
+    private Long id;
     private String nombre;
     private String tipo;
     private String password;

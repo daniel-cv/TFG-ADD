@@ -45,6 +45,9 @@ public class Usuario {
     private List<Interfaz> interfaz = new ArrayList<>();
 
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UsuarioFirewall> usuarioFirewalls = new ArrayList<>();
+
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ReglaFirewall> reglasFirewall = new ArrayList<>();
 }
 
