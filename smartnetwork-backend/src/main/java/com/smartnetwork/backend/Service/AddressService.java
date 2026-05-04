@@ -260,26 +260,114 @@ public class AddressService {
             throw new RuntimeException("Relación no encontrada");
         }
 
-        // El address es el mismo para todas las relaciones
-        Address address = relaciones.get(0).getAddress();
+        Address original = relaciones.get(0).getAddress();
 
-        // =========================
-        // VALIDAR USUARIO EN TODOS
-        // =========================
+        // 🔒 validar usuario
         for (DispositivoAddress rel : relaciones) {
             if (!rel.getDispositivo().getUsuario().getUsername().equals(username)) {
                 throw new RuntimeException("No autorizado");
             }
         }
+
+        List<Long> dispositivosActuales = relaciones.stream()
+                .map(rel -> rel.getDispositivo().getId())
+                .toList();
+
+        List<Long> dispositivosEditar = dto.getDispositivosIds();
+
+        if (dispositivosEditar == null || dispositivosEditar.isEmpty()) {
+            throw new RuntimeException("Debes enviar dispositivosIds");
+        }
+
+        boolean edicionTotal = dispositivosActuales.containsAll(dispositivosEditar)
+                && dispositivosEditar.containsAll(dispositivosActuales);
+
         Usuario user = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // =========================
+        // 🔵 EDICIÓN TOTAL
+        // =========================
+        if (edicionTotal) {
+
+            aplicarCambiosAddress(original, dto, user);
+
+            for (DispositivoAddress rel : relaciones) {
+
+                Dispositivo dispositivo = rel.getDispositivo();
+
+                Map<String, Object> resultado = fortiGateService
+                        .editarAddress(dispositivo, original, original.getName());
+
+                if (!(Boolean) resultado.get("success")) {
+                    throw new RuntimeException(
+                            "Error editando Address en FortiGate (" + dispositivo.getNombre() + "): " + resultado
+                    );
+                }
+            }
+
+            Address saved = addressRepo.save(original);
+            return toAddressDTO(saved);
+        }
+
+        // =========================
+        // 🔴 EDICIÓN PARCIAL
+        // =========================
+
+        // 1. Crear nueva address
+        Address nueva = new Address();
+        nueva.setName(original.getName());
+        nueva.setUsuario(original.getUsuario());
+
+        aplicarCambiosAddress(nueva, dto, user);
+
+        Address nuevaGuardada = addressRepo.save(nueva);
+
+        // 2. Procesar SOLO los dispositivos seleccionados
+        for (DispositivoAddress rel : relaciones) {
+
+            Long dispId = rel.getDispositivo().getId();
+
+            if (!dispositivosEditar.contains(dispId)) continue;
+
+            Dispositivo dispositivo = rel.getDispositivo();
+
+            // 🔥 1. eliminar antigua en Fortigate
+            Map<String, Object> eliminar = fortiGateService
+                    .eliminarAddress(dispositivo, original.getName());
+
+            if (!(Boolean) eliminar.get("success")) {
+                throw new RuntimeException("Error eliminando address antigua en Fortigate");
+            }
+
+            // 🔥 2. eliminar relación BD
+            dispositivoAddressRepo.delete(rel);
+
+            // 🔥 3. aplicar nueva correctamente (USANDO TU LÓGICA BUENA)
+            asignarAddressADispositivos(
+                    nuevaGuardada.getId(),
+                    List.of(dispId),
+                    username
+            );
+        }
+
+        // 🔥 3. limpiar original si ya no se usa
+        boolean quedanRelaciones = dispositivoAddressRepo
+                .existsByAddressId(original.getId());
+
+        if (!quedanRelaciones) {
+            addressRepo.delete(original);
+        }
+
+        return toAddressDTO(nuevaGuardada);
+    }
+
+    private void aplicarCambiosAddress(Address address, CrearAddressDTO dto, Usuario user) {
 
         address.setType(dto.getType());
         address.setIp(dto.getIp());
         address.setIpdestino(dto.getIpdestino() != null ? dto.getIpdestino().trim() : null);
         address.setComentario(dto.getComentario());
-
-        Dispositivo dispositivoRef = relaciones.get(0).getDispositivo();
 
         if (dto.getInterfazId() != null) {
 
@@ -316,29 +404,5 @@ public class AddressService {
         } else {
             address.setInterfaz(null);
         }
-
-        // =========================
-        // ACTUALIZAR EN FORTIGATE (TODOS LOS DISPOSITIVOS)
-        // =========================
-        for (DispositivoAddress rel : relaciones) {
-
-            Dispositivo dispositivo = rel.getDispositivo();
-
-            Map<String, Object> resultado = fortiGateService
-                    .editarAddress(dispositivo, address, address.getName());
-
-            if (!(Boolean) resultado.get("success")) {
-                throw new RuntimeException(
-                        "Error editando Address en FortiGate (" + dispositivo.getNombre() + "): " + resultado
-                );
-            }
-        }
-
-        // =========================
-        // GUARDAR EN BD
-        // =========================
-        Address saved = addressRepo.save(address);
-
-        return toDTO(saved, dispositivoRef.getId());
     }
 }

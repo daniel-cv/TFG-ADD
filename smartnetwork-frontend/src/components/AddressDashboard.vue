@@ -70,16 +70,16 @@
     </div>
 
     <!-- FORM -->
-    <div v-else class="formulario-inline">
-      <AddressForm
-        :address-edit="addressSeleccionada"
-        :dispositivo-id="dispositivoId"
-        :interfaces="interfaces"
-        modo="simple"
-        @creada="recargarYCerrar"
-        @cancelar="cerrarFormulario"
-      />
-    </div>
+<div v-else class="formulario-inline">
+  <AddressForm
+    :address-edit="addressSeleccionada"
+    :dispositivo-id="dispositivoId"
+    :interfaces="interfaces"
+    modo="simple"
+    @creada="recargarYCerrar"
+    @cancelar="cerrarFormulario"
+  />
+</div>
 
     <!-- ===================== -->
     <!-- MODAL EDITAR (CON SELECCIÓN) -->
@@ -95,7 +95,7 @@
 
           <div class="device-list">
             <v-card
-              v-for="d in dispositivos"
+              v-for="d in dispositivosEditDisponibles"
               :key="d.id"
               class="device-item-modern"
               :class="{ selected: seleccionados.includes(d.id) }"
@@ -227,11 +227,15 @@ const dispositivos = ref([])
 const implementaciones = ref({})
 
 const interfaces = computed(() => interfazStore.interfaces)
-
+const dispositivosEdit = computed(() => {
+  return dispositivos.value.filter(d =>
+    seleccionados.value.includes(d.id)
+  )
+})
 /* EDITAR */
 const dialogEditar = ref(false)
 const addressEditar = ref(null)
-
+const dispositivosEditDisponibles = ref([])
 /* FORM */
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
@@ -295,41 +299,43 @@ const dispositivosEliminar = computed(() => {
 onMounted(cargarDatos)
 
 /* --- SECCIÓN EDITAR CORREGIDA --- */
-const editarAddress = (address) => {
+const editarAddress = async (address) => {
   addressEditar.value = address
-  // Pre-seleccionamos los dispositivos donde ya está implementado
-  const listaNombres = implementaciones.value[address.id] || []
-  seleccionados.value = dispositivos.value
-    .filter(d => {
-      const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
-      return listaNombres.includes(nombre)
-    })
-    .map(d => d.id)
-    
+
+  await mapearImplementaciones()
+
+  const lista = implementaciones.value[address.id] || []
+
+  // 🔥 SOLO dispositivos donde existe
+  dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
+    const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
+    return lista.includes(nombre)
+  })
+
+  // 🔥 preselección inicial
+  seleccionados.value = dispositivosEditDisponibles.value.map(d => d.id)
+
   dialogEditar.value = true
 }
 
 const confirmarEditar = () => {
-  addressSeleccionada.value = { ...addressEditar.value }
+  addressSeleccionada.value = {
+    ...addressEditar.value,
+    dispositivosIds: [...seleccionados.value] // 🔥 CLAVE
+  }
+
   dialogEditar.value = false
   mostrandoFormulario.value = true
 }
-
 const recargarYCerrar = async () => {
   mostrandoFormulario.value = false
-  const idAddress = addressSeleccionada.value?.id
-  const idsDispositivos = [...seleccionados.value]
 
   await addressStore.obtenerMisAddresses()
   addresses.value = addressStore.addresses
 
-  // Aplicar a los seleccionados manualmente en el modal de editar
-  if (idAddress && idsDispositivos.length) {
-    await addressStore.aplicarAddressToDispositivos(idAddress, idsDispositivos)
-  }
-
   addressSeleccionada.value = null
   seleccionados.value = []
+
   await mapearImplementaciones()
 }
 /* -------------------------------- */

@@ -2,14 +2,13 @@
   <v-form @submit.prevent="handleSubmit">
 
     <!-- NAME -->
-
     <v-text-field
       v-model="name"
       label="Nombre"
       prepend-inner-icon="mdi-label"
       variant="outlined"
       class="mb-3"
-      :disabled="addressEdit"  
+      :disabled="isEdit"
       required
     />
 
@@ -34,7 +33,7 @@
       required
     />
 
-    <!-- IP DESTINO / MASCARA -->
+    <!-- IP DESTINO / MÁSCARA -->
     <v-text-field
       v-if="type === 'iprange'"
       v-model="ipdestino"
@@ -44,6 +43,7 @@
       class="mb-3"
       required
     />
+
     <v-text-field
       v-if="type === 'ipmask' || type === 'subnet'"
       v-model="ipdestino"
@@ -56,16 +56,16 @@
 
     <!-- INTERFAZ -->
     <v-select
-  v-model="interfazId"
-  :items="interfaces"
-  item-title="title"
-  item-value="value"
-  label="Interfaz (opcional)"
-  prepend-inner-icon="mdi-lan"
-  variant="outlined"
-  class="mb-3"
-  clearable
-/>
+      v-model="interfazId"
+      :items="interfaces"
+      item-title="title"
+      item-value="value"
+      label="Interfaz (opcional)"
+      prepend-inner-icon="mdi-lan"
+      variant="outlined"
+      class="mb-3"
+      clearable
+    />
 
     <!-- COMENTARIO -->
     <v-textarea
@@ -77,7 +77,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      {{ addressEdit ? 'Actualizar Address' : 'Crear Address' }}
+      {{ isEdit ? 'Actualizar Address' : 'Crear Address' }}
     </v-btn>
 
     <v-btn
@@ -96,23 +96,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
-import { useRoute } from "vue-router";
-import { useInterfazStore } from '@/stores/interfazStore'
 import { obtenerInterfacesPorDispositivo, obtenerInterfacesUsuario } from '@/services/interfazService'
 
 const props = defineProps({
-  dispositivoId: { type: Number, required: true },
+  dispositivoId: { type: Number, required: false },
   addressEdit: { type: Object, default: null },
   modo: { type: String, default: 'simple' }
 })
-console.log("MODO:", props.modo)
 
 const emit = defineEmits(['creada', 'cancelar'])
 
 const addressStore = useAddressStore()
-const route = useRoute()
 
 const name = ref("")
 const type = ref("")
@@ -122,13 +118,15 @@ const interfazId = ref(null)
 const comentario = ref("")
 const interfaces = ref([])
 const mensaje = ref("")
-const dispositivoId = Number(route.params.id)
+
+// ✅ modo edición limpio
+const isEdit = computed(() => !!props.addressEdit)
 
 onMounted(async () => {
   try {
     let res = null;
 
-    if (props.modo == "full") {
+    if (props.modo === "full") {
       res = await obtenerInterfacesPorDispositivo(props.dispositivoId);
     } else {
       res = await obtenerInterfacesUsuario();
@@ -136,40 +134,56 @@ onMounted(async () => {
 
     const apiData = res.data;
 
+    // 🔹 Generar puertos base
     const puertosBase = [1, 2, 3, 4].map(num => {
-  const nombreBuscado = `port${num}`;
-  const coincidencia = apiData.find(
-    inter => inter.name.toLowerCase() === nombreBuscado
-  );
+      const nombreBuscado = `port${num}`;
+      const coincidencia = apiData.find(
+        inter => (inter.name ?? '').toLowerCase() === nombreBuscado
+      );
 
-  return {
-    title: `Port${num}`,
-    value: coincidencia ? coincidencia.id : -num // ✅ NEGATIVOS si no existe
-  };
-});
+      return {
+        title: `Port${num}`,
+        value: coincidencia ? Number(coincidencia.id) : num // ⚠️ quitamos negativos
+      };
+    });
 
-const idsUsados = puertosBase
-  .filter(p => p.value > 0) // solo IDs reales
-  .map(p => p.value);
+    const idsUsados = puertosBase
+      .filter(p => p.value > 0)
+      .map(p => p.value);
 
-interfaces.value = [
-  { title: 'Vacío', value: null },
-  ...puertosBase,
-  ...apiData
-    .filter(inter => !idsUsados.includes(inter.id))
-    .map(inter => ({
-      title: inter.name,
-      value: inter.id
-    }))
-];
+    interfaces.value = [
+      { title: 'Vacío', value: null },
+      ...puertosBase,
+      ...apiData
+        .filter(inter => !idsUsados.includes(Number(inter.id)))
+        .map(inter => ({
+          title: inter.name ?? `Interfaz ${inter.id}`,
+          value: Number(inter.id)
+        }))
+    ];
 
-    // 🔥 IMPORTANTE: después de cargar interfaces
+    await nextTick();
+
     if (props.addressEdit) {
       name.value = props.addressEdit.name;
       type.value = props.addressEdit.type;
       ip.value = props.addressEdit.ip;
       ipdestino.value = props.addressEdit.ipdestino;
-      interfazId.value = props.addressEdit.interfazId;
+
+      const id = props.addressEdit.interfazId
+        ? Number(props.addressEdit.interfazId)
+        : null;
+
+      interfazId.value = id;
+
+      // 🔥 CLAVE: asegurar que el select tiene ese valor
+      if (id && !interfaces.value.find(i => i.value === id)) {
+        interfaces.value.push({
+          title: `Port${id}`,
+          value: id
+        });
+      }
+
       comentario.value = props.addressEdit.comentario;
     }
 
@@ -185,33 +199,47 @@ const handleSubmit = async () => {
       ip: ip.value,
       type: type.value,
       ipdestino:
-        type.value === 'iprange' || type.value === 'ipmask' || type.value === 'subnet'
+        (type.value === 'iprange' || type.value === 'ipmask' || type.value === 'subnet')
           ? ipdestino.value
           : null,
       interfazId: interfazId.value || null,
       comentario: comentario.value
     };
 
-    // 🔥 MODO FULL (desde dispositivos)
-    if (props.modo === 'full' && props.dispositivoId) {
-      payload.dispositivosIds = [props.dispositivoId]
+    // EDIT
+    if (props.addressEdit) {
+
+      if (props.addressEdit.dispositivosIds?.length) {
+        payload.dispositivosIds = props.addressEdit.dispositivosIds
+      }
+      else if (props.modo === 'full' && props.dispositivoId) {
+        payload.dispositivosIds = [props.dispositivoId]
+      }
+
+      await addressStore.actualizarAddress(
+        props.addressEdit.id,
+        payload
+      )
+
+      mensaje.value = "Address actualizada correctamente"
     }
 
-    if (props.addressEdit) {
-      await addressStore.actualizarAddress(props.addressEdit.id, payload)
-      mensaje.value = "Address actualizada correctamente"
-    } else {
-      if (props.modo === 'full') {
+    // CREATE
+    else {
+      if (props.modo === 'full' && props.dispositivoId) {
+        payload.dispositivosIds = [props.dispositivoId]
         await addressStore.crearAddressCompleto(payload)
       } else {
         await addressStore.crearAddress(payload)
       }
+
       mensaje.value = "Address creada correctamente"
     }
 
     emit("creada")
 
   } catch (error) {
+    console.error(error)
     mensaje.value = props.addressEdit
       ? "Error al actualizar la address"
       : "Error al crear la address"

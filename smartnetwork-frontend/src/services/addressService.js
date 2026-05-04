@@ -22,10 +22,7 @@ export function eliminarAddress(addressId, dispositivosIds) {
 }
 
 export function actualizarAddress(id, address) {
-  return api.put('/api/firewalls/addresses/edit/' + id, {
-    ...address,
-    dispositivosIds: address.dispositivosIds
-  })
+  return api.put('/api/firewalls/addresses/edit/' + id, address)
 }
 
 export function obtenerAddressPorId() {
