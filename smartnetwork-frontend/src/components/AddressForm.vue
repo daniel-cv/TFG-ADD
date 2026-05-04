@@ -56,14 +56,16 @@
 
     <!-- INTERFAZ -->
     <v-select
-      v-model="interfazId"
-      :items="interfaces"
-      label="Interfaz (opcional)"
-      prepend-inner-icon="mdi-lan"
-      variant="outlined"
-      class="mb-3"
-      clearable
-    />
+  v-model="interfazId"
+  :items="interfaces"
+  item-title="title"
+  item-value="value"
+  label="Interfaz (opcional)"
+  prepend-inner-icon="mdi-lan"
+  variant="outlined"
+  class="mb-3"
+  clearable
+/>
 
     <!-- COMENTARIO -->
     <v-textarea
@@ -116,59 +118,65 @@ const name = ref("")
 const type = ref("")
 const ip = ref("")
 const ipdestino = ref("")
-const interfazId = ref("")
+const interfazId = ref(null)
 const comentario = ref("")
 const interfaces = ref([])
 const mensaje = ref("")
 const dispositivoId = Number(route.params.id)
 
 onMounted(async () => {
-  if (props.addressEdit) {
-    name.value = props.addressEdit.name
-    type.value = props.addressEdit.type
-    ip.value = props.addressEdit.ip
-    ipdestino.value = props.addressEdit.ipdestino
-    interfazId.value = props.addressEdit.interfazId
-    comentario.value = props.addressEdit.comentario
+  try {
+    let res = null;
+
+    if (props.modo == "full") {
+      res = await obtenerInterfacesPorDispositivo(props.dispositivoId);
+    } else {
+      res = await obtenerInterfacesUsuario();
+    }
+
+    const apiData = res.data;
+
+    const puertosBase = [1, 2, 3, 4].map(num => {
+  const nombreBuscado = `port${num}`;
+  const coincidencia = apiData.find(
+    inter => inter.name.toLowerCase() === nombreBuscado
+  );
+
+  return {
+    title: `Port${num}`,
+    value: coincidencia ? coincidencia.id : -num // ✅ NEGATIVOS si no existe
+  };
+});
+
+const idsUsados = puertosBase
+  .filter(p => p.value > 0) // solo IDs reales
+  .map(p => p.value);
+
+interfaces.value = [
+  { title: 'Vacío', value: null },
+  ...puertosBase,
+  ...apiData
+    .filter(inter => !idsUsados.includes(inter.id))
+    .map(inter => ({
+      title: inter.name,
+      value: inter.id
+    }))
+];
+
+    // 🔥 IMPORTANTE: después de cargar interfaces
+    if (props.addressEdit) {
+      name.value = props.addressEdit.name;
+      type.value = props.addressEdit.type;
+      ip.value = props.addressEdit.ip;
+      ipdestino.value = props.addressEdit.ipdestino;
+      interfazId.value = props.addressEdit.interfazId;
+      comentario.value = props.addressEdit.comentario;
+    }
+
+  } catch (error) {
+    console.error('Error cargando interfaces', error);
   }
- try {
-  var res=null;
-  if(props.modo=="full"){res = await obtenerInterfacesPorDispositivo(props.dispositivoId);}
-  else{res= await obtenerInterfacesUsuario()};
-  console.log(props.modo)
-  const apiData = res.data;
-  const puertosBase = [1, 2, 3, 4].map(num => {
-    const nombreBuscado = `port${num}`;
-    const coincidencia = apiData.find(inter => inter.name.toLowerCase() === nombreBuscado);
-    
-    return {
-      title: `Port${num}`,
-      value: coincidencia ? coincidencia.id : -num 
-    };
-  });
-
-  const idsProcesados = puertosBase.map(p => p.value);
-
-  interfaces.value = [
-  {
-    title: 'Vacío',
-    value: null
-  },
-    ...puertosBase,
-    ...apiData
-      .filter(inter => {
-        const name = inter.name.toLowerCase();
-        return !['port1', 'port2', 'port3', 'port4'].includes(name);
-      })
-      .map(inter => ({
-        title: inter.name,
-        value: inter.id
-      }))
-  ];
-} catch (error) {
-  console.error('Error cargando interfaces', error);
-}
-})
+});
 
 const handleSubmit = async () => {
   try {

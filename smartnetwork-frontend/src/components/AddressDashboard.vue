@@ -1,7 +1,7 @@
 <template>
   <div class="addresses-wrapper">
 
-    <!-- LISTA -->
+    <!-- LISTADO -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -21,6 +21,7 @@
             <th>Interfaz</th>
             <th>Comentario</th>
             <th>Máscara/IP Final</th>
+            <th>Implementado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -30,26 +31,36 @@
             <td>{{ address.name }}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
-            <td>{{ obtenerNombreInterfaz(address.interfazId)}}</td>
+            <td>{{ obtenerNombreInterfaz(address.interfazId) }}</td>
             <td>{{ address.comentario || 'Sin comentario' }}</td>
             <td>{{ address.ipdestino || '' }}</td>
 
             <td>
-              <!-- EDITAR -->
-              <v-btn color="green" size="small"
-                @click="editarAddress(address)">
+              <div v-if="implementaciones[address.id]?.length">
+                <v-chip
+                  v-for="nombreDisp in implementaciones[address.id]"
+                  :key="nombreDisp"
+                  size="x-small"
+                  color="blue"
+                  class="ma-1"
+                  variant="flat"
+                >
+                  {{ nombreDisp }}
+                </v-chip>
+              </div>
+              <span v-else class="text-caption text-grey">No aplicado</span>
+            </td>
+
+            <td>
+              <v-btn color="green" size="small" @click="editarAddress(address)">
                 EDITAR
               </v-btn>
 
-              <!-- ELIMINAR -->
-              <v-btn color="red" size="small"
-                @click="eliminarAddress(address.id)">
+              <v-btn color="red" size="small" @click="abrirEliminar(address)">
                 ELIMINAR
               </v-btn>
 
-              <!-- APLICAR -->
-              <v-btn color="blue" size="small"
-                @click="aplicarAddressToDispositivos(address)">
+              <v-btn color="blue" size="small" @click="aplicarAddressToDispositivos(address)">
                 APLICAR
               </v-btn>
             </td>
@@ -58,7 +69,7 @@
       </v-table>
     </div>
 
-    <!-- FORMULARIO -->
+    <!-- FORM -->
     <div v-else class="formulario-inline">
       <AddressForm
         :address-edit="addressSeleccionada"
@@ -70,14 +81,57 @@
       />
     </div>
 
-    <!-- MODAL APLICAR -->
-    <v-dialog v-model="dialogAplicar" max-width="650px">
-
+    <!-- ===================== -->
+    <!-- MODAL EDITAR (CON SELECCIÓN) -->
+    <!-- ===================== -->
+    <v-dialog v-model="dialogEditar" max-width="650px">
       <v-card class="apply-card">
-
         <v-card-title class="apply-title">
-          Aplicar Address
+          Editar Address y Sincronizar
         </v-card-title>
+
+        <v-card-text>
+          <p>Selecciona los dispositivos donde quieres actualizar esta address:</p>
+
+          <div class="device-list">
+            <v-card
+              v-for="d in dispositivos"
+              :key="d.id"
+              class="device-item-modern"
+              :class="{ selected: seleccionados.includes(d.id) }"
+              @click="toggleSeleccion(d.id)"
+            >
+              <div class="device-info">
+                <v-checkbox :model-value="seleccionados.includes(d.id)" hide-details />
+
+                <div>
+                  <div class="device-name">
+                    {{ d.name || d.nombre || d.hostname || 'Sin nombre' }}
+                  </div>
+                  <div class="device-ip">{{ d.ip }}</div>
+                </div>
+              </div>
+            </v-card>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn variant="text" @click="dialogEditar = false">
+            Cancelar
+          </v-btn>
+          <v-btn color="green" @click="confirmarEditar">
+            Continuar a Edición
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- ===================== -->
+    <!-- APLICAR -->
+    <!-- ===================== -->
+    <v-dialog v-model="dialogAplicar" max-width="650px">
+      <v-card class="apply-card">
+        <v-card-title class="apply-title">Aplicar Address</v-card-title>
 
         <v-card-text>
           <p>Selecciona dispositivos:</p>
@@ -91,30 +145,62 @@
               @click="toggleSeleccion(d.id)"
             >
               <div class="device-info">
-                <v-checkbox
-                  :model-value="seleccionados.includes(d.id)"
-                  hide-details
-                />
+                <v-checkbox :model-value="seleccionados.includes(d.id)" hide-details />
+
                 <div>
-                  <div class="device-name">{{ d.nombre }}</div>
+                  <div class="device-name">
+                    {{ d.name || d.nombre || d.hostname || 'Sin nombre' }}
+                  </div>
                   <div class="device-ip">{{ d.ip }}</div>
                 </div>
               </div>
             </v-card>
           </div>
-
         </v-card-text>
 
         <v-card-actions>
-          <v-btn variant="text" @click="dialogAplicar = false">
-            Cancelar
-          </v-btn>
-
-          <v-btn color="primary" @click="aplicarAhora">
-            Aplicar
-          </v-btn>
+          <v-btn variant="text" @click="dialogAplicar = false">Cancelar</v-btn>
+          <v-btn color="primary" @click="aplicarAhora">Aplicar</v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
 
+    <!-- ===================== -->
+    <!-- ELIMINAR -->
+    <!-- ===================== -->
+    <v-dialog v-model="dialogEliminar" max-width="650px">
+      <v-card class="apply-card">
+        <v-card-title class="apply-title">Eliminar Address</v-card-title>
+
+        <v-card-text>
+          <p>Selecciona dispositivos donde quieres eliminarla:</p>
+
+          <div class="device-list">
+            <v-card
+              v-for="d in dispositivosEliminar"
+              :key="d.id"
+              class="device-item-modern"
+              :class="{ selected: seleccionadosEliminar.includes(d.id) }"
+              @click="toggleSeleccionEliminar(d.id)"
+            >
+              <div class="device-info">
+                <v-checkbox :model-value="seleccionadosEliminar.includes(d.id)" hide-details />
+
+                <div>
+                  <div class="device-name">
+                    {{ d.name || d.nombre || d.hostname || 'Sin nombre' }}
+                  </div>
+                  <div class="device-ip">{{ d.ip }}</div>
+                </div>
+              </div>
+            </v-card>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn variant="text" @click="dialogEliminar = false">Cancelar</v-btn>
+          <v-btn color="red" @click="eliminarAhora">Eliminar</v-btn>
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -122,11 +208,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAddressStore } from '@/stores/addressStores'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
-import { useInterfazStore } from '@/stores/interfazStore' // <--- IMPORTANTE: Importar
+import { useInterfazStore } from '@/stores/interfazStore'
 import AddressForm from '@/components/AddressForm.vue'
 
 const route = useRoute()
@@ -134,54 +220,122 @@ const dispositivoId = Number(route.params.id)
 
 const addressStore = useAddressStore()
 const dispositivoStore = useDispositivoStore()
-const interfazStore = useInterfazStore() // <--- IMPORTANTE: Inicializar
+const interfazStore = useInterfazStore()
 
-// Usamos directamente las propiedades del store si son reactivas (usando refs o getters)
-// O bien, las mantenemos como refs si prefieres el manejo manual actual
 const addresses = ref([])
 const dispositivos = ref([])
+const implementaciones = ref({})
 
+const interfaces = computed(() => interfazStore.interfaces)
+
+/* EDITAR */
+const dialogEditar = ref(false)
+const addressEditar = ref(null)
+
+/* FORM */
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
 
-/* ===================== */
 /* APLICAR */
-/* ===================== */
 const dialogAplicar = ref(false)
 const addressAplicar = ref(null)
 const seleccionados = ref([])
 
-/* ===================== */
-/* LOAD DATA */
-/* ===================== */
+/* ELIMINAR */
+const dialogEliminar = ref(false)
+const addressEliminar = ref(null)
+const seleccionadosEliminar = ref([])
+
+/* CARGA */
 const cargarDatos = async () => {
-  // Cargamos interfaces primero para que obtenerNombreInterfaz funcione bien
   await Promise.all([
     addressStore.obtenerMisAddresses(),
     dispositivoStore.getMisDispositivos(),
-    interfazStore.cargarInterfacesUsuario() // Asegúrate de que este método existe en tu interfazStore
+    interfazStore.cargarInterfacesUsuario()
   ])
-  
+
   addresses.value = addressStore.addresses
   dispositivos.value = dispositivoStore.dispositivos
+
+  await mapearImplementaciones()
 }
+
+const mapearImplementaciones = async () => {
+  const mapa = {}
+  for (const disp of dispositivos.value) {
+    try {
+      const res = await addressStore.cargarAddresses(disp.id)
+      const addressesDelDisp = res || addressStore.addresses
+      if (Array.isArray(addressesDelDisp)) {
+        const nombre = disp.name || disp.nombre || disp.hostname || 'Sin nombre'
+        addressesDelDisp.forEach(addr => {
+          if (!mapa[addr.id]) mapa[addr.id] = []
+          if (!mapa[addr.id].includes(nombre)) {
+            mapa[addr.id].push(nombre)
+          }
+        })
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
+  implementaciones.value = mapa
+}
+
+/* ELIMINAR COMPUTED */
+const dispositivosEliminar = computed(() => {
+  if (!addressEliminar.value) return []
+  const lista = implementaciones.value[addressEliminar.value.id] || []
+  return dispositivos.value.filter(d => {
+    const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
+    return lista.includes(nombre)
+  })
+})
 
 onMounted(cargarDatos)
 
-/* ===================== */
-/* ACCIONES */
-/* ===================== */
+/* --- SECCIÓN EDITAR CORREGIDA --- */
 const editarAddress = (address) => {
-  addressSeleccionada.value = { ...address }
+  addressEditar.value = address
+  // Pre-seleccionamos los dispositivos donde ya está implementado
+  const listaNombres = implementaciones.value[address.id] || []
+  seleccionados.value = dispositivos.value
+    .filter(d => {
+      const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
+      return listaNombres.includes(nombre)
+    })
+    .map(d => d.id)
+    
+  dialogEditar.value = true
+}
+
+const confirmarEditar = () => {
+  addressSeleccionada.value = { ...addressEditar.value }
+  dialogEditar.value = false
   mostrandoFormulario.value = true
 }
 
-const eliminarAddress = async (id) => {
-  if (confirm('¿Estás seguro de eliminar esta dirección?')) {
-    await addressStore.eliminarAddress(id)
-    await addressStore.obtenerMisAddresses()
-    addresses.value = addressStore.addresses
+const recargarYCerrar = async () => {
+  mostrandoFormulario.value = false
+  const idAddress = addressSeleccionada.value?.id
+  const idsDispositivos = [...seleccionados.value]
+
+  await addressStore.obtenerMisAddresses()
+  addresses.value = addressStore.addresses
+
+  // Aplicar a los seleccionados manualmente en el modal de editar
+  if (idAddress && idsDispositivos.length) {
+    await addressStore.aplicarAddressToDispositivos(idAddress, idsDispositivos)
   }
+
+  addressSeleccionada.value = null
+  seleccionados.value = []
+  await mapearImplementaciones()
+}
+/* -------------------------------- */
+
+const cerrarFormulario = () => {
+  mostrandoFormulario.value = false
 }
 
 const aplicarAddressToDispositivos = (address) => {
@@ -190,48 +344,48 @@ const aplicarAddressToDispositivos = (address) => {
   dialogAplicar.value = true
 }
 
-const toggleSeleccion = (id) => {
-  const index = seleccionados.value.indexOf(id)
-  if (index > -1) {
-    seleccionados.value.splice(index, 1)
-  } else {
-    seleccionados.value.push(id)
-  }
-}
-
-const aplicarAhora = async () => {
-  if (seleccionados.value.length === 0) return alert('Selecciona al menos un dispositivo')
-  
-  await addressStore.aplicarAddressToDispositivos(
-    addressAplicar.value.id,
-    seleccionados.value
-  )
-  dialogAplicar.value = false
-}
-
-/* ===================== */
-/* FORMULARIO */
-/* ===================== */
 const mostrarCrear = () => {
   addressSeleccionada.value = null
   mostrandoFormulario.value = true
 }
 
-const recargarYCerrar = async () => {
-  mostrandoFormulario.value = false
+const toggleSeleccion = (id) => {
+  const i = seleccionados.value.indexOf(id)
+  if (i > -1) seleccionados.value.splice(i, 1)
+  else seleccionados.value.push(id)
+}
+
+const aplicarAhora = async () => {
+  if (!seleccionados.value.length) return alert('Selecciona al menos un dispositivo')
+  await addressStore.aplicarAddressToDispositivos(addressAplicar.value.id, seleccionados.value)
+  dialogAplicar.value = false
+  await mapearImplementaciones()
+}
+
+const abrirEliminar = (address) => {
+  addressEliminar.value = address
+  seleccionadosEliminar.value = []
+  dialogEliminar.value = true
+}
+
+const toggleSeleccionEliminar = (id) => {
+  const i = seleccionadosEliminar.value.indexOf(id)
+  if (i > -1) seleccionadosEliminar.value.splice(i, 1)
+  else seleccionadosEliminar.value.push(id)
+}
+
+const eliminarAhora = async () => {
+  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
+  await addressStore.eliminarAddressEnDispositivos(addressEliminar.value.id, seleccionadosEliminar.value)
+  dialogEliminar.value = false
   await addressStore.obtenerMisAddresses()
   addresses.value = addressStore.addresses
+  await mapearImplementaciones()
 }
 
-const cerrarFormulario = () => {
-  mostrandoFormulario.value = false
-}
-
-const obtenerNombreInterfaz = (interfazId) => {
-  if (!interfazId) return 'N/A'
-  
-  // Buscamos en el store que ya debe estar cargado
-  const interfaz = interfazStore.interfaces.find(i => Number(i.id) === Number(interfazId))
+const obtenerNombreInterfaz = (id) => {
+  if (!id) return 'N/A'
+  const interfaz = interfaces.value.find(i => Number(i.id) === Number(id))
   return interfaz ? interfaz.name : 'N/A'
 }
 </script>
@@ -349,12 +503,8 @@ const obtenerNombreInterfaz = (interfazId) => {
 .apply-title {
   font-size: 20px;
   font-weight: 600;
-  color: #0f172a;
+  color: #ffffff;
   padding: 20px 24px;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.apply-body {
   padding: 20px 24px;
 }
 

@@ -13,4 +13,5 @@ public interface DispositivoAddressRepository extends JpaRepository<DispositivoA
     List<DispositivoAddress> findAllByAddressId(Long addressId);
     Optional<DispositivoAddress> findByAddressId(Long addressId);
     boolean existsByDispositivoIdAndAddressId(Long dispositivoId, Long addressId);
+    boolean existsByAddressId (Long addressId);
 }

@@ -103,7 +103,7 @@ const props = defineProps({
 
 const eliminarAddress = async (id) => {
   try {
-    await addressStore.eliminarAddress(id)
+    await addressStore.eliminarAddress(id,[dispositivoId])
     await addressStore.cargarAddresses(dispositivoId)
   } catch (error) {
     console.error("Error eliminando address", error)

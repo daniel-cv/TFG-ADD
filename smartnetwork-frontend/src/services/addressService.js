@@ -14,13 +14,17 @@ export function crearAddress(address) {
   })
 }
 
-export function eliminarAddress(id) {
-  return api.delete('/api/firewalls/addresses/delete/' + id)
+export function eliminarAddress(addressId, dispositivosIds) {
+  console.log(dispositivosIds)
+  return api.delete('/api/firewalls/addresses/delete/' + addressId, {
+    data: dispositivosIds
+  })
 }
 
 export function actualizarAddress(id, address) {
-  return api.put('/api/firewalls/addresses/edit/' + id, { 
-    ...address 
+  return api.put('/api/firewalls/addresses/edit/' + id, {
+    ...address,
+    dispositivosIds: address.dispositivosIds
   })
 }
 

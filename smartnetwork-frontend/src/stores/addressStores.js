@@ -55,9 +55,9 @@ export const useAddressStore = defineStore('address', {
       }
     },
 
-     async eliminarAddress(id) {
+     async eliminarAddress(id, dispositivos) {
       try {
-        await eliminarAddressService(id) 
+        await eliminarAddressService(id, dispositivos) 
         this.addresses = this.addresses.filter(a => a.id !== id) 
       } catch (error) {
         console.error("Error eliminando address", error)
@@ -110,6 +110,27 @@ export const useAddressStore = defineStore('address', {
         this.mensaje = "Error al aplicar la address"
         throw error
       }
+    },
+
+    async eliminarAddressEnDispositivos(addressId, dispositivosIds) {
+  try {
+    if (!dispositivosIds.length) {
+      this.mensaje = "Selecciona al menos un dispositivo"
+      return
     }
+
+    await Promise.all(
+      dispositivosIds.map(() => {
+        return eliminarAddressService(addressId, dispositivosIds)
+      })
+    )
+
+    this.mensaje = "Address eliminada correctamente"
+  } catch (error) {
+    console.error("Error eliminando address", error)
+    this.mensaje = "Error al eliminar la address"
+    throw error
+  }
+}
   }
 })

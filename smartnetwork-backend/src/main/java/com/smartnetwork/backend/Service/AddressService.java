@@ -67,10 +67,33 @@ public class AddressService {
             address.setIpdestino(dto.getIpdestino().trim());
         }
 
-        if (dto.getInterfazId() != null && dto.getInterfazId() > 0) {
-            Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
-                    .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-            address.setInterfaz(interfaz);
+        // --- Lógica unificada para Interfaz ---
+        if (dto.getInterfazId() != null) {
+            if (dto.getInterfazId() < 0) {
+                // Manejo de puertos por defecto (Igual que en editarAddress)
+                String nombrePort = switch (dto.getInterfazId().intValue()) {
+                    case -1 -> "port1";
+                    case -2 -> "port2";
+                    case -3 -> "port3";
+                    case -4 -> "port4";
+                    default -> throw new RuntimeException("Puerto default no soportado");
+                };
+
+                Interfaz interfaz = interfazRepo.findByName(nombrePort)
+                        .orElseGet(() -> {
+                            Interfaz nueva = new Interfaz();
+                            nueva.setName(nombrePort);
+                            nueva.setTipo("Default");
+                            nueva.setUsuario(usuario);
+                            return interfazRepo.save(nueva);
+                        });
+                address.setInterfaz(interfaz);
+            } else {
+                // Manejo de interfaces personalizadas por ID
+                Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
+                        .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
+                address.setInterfaz(interfaz);
+            }
         }
 
         address.setUsuario(usuario);
@@ -104,9 +127,9 @@ public class AddressService {
             if (yaExiste) continue;
 
 
-           Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
+            Map<String, Object> resultado = fortiGateService.crearAddress(dispositivo, address);
             if (!(Boolean) resultado.get("success")) {
-               throw new RuntimeException("Error creando address en FortiGate: " + resultado);
+                throw new RuntimeException("Error creando address en FortiGate: " + resultado);
             }
 
 
@@ -183,7 +206,7 @@ public class AddressService {
     }
 
     @Transactional
-    public void eliminarAddress(Long addressId, String username) {
+    public void eliminarAddress(Long addressId, List<Long> dispositivosIds, String username) {
 
         Address address = addressRepo.findById(addressId)
                 .orElseThrow(() -> new RuntimeException("Address no existe"));
@@ -192,12 +215,17 @@ public class AddressService {
                 .findAllByAddressId(addressId);
 
         if (relaciones.isEmpty()) {
-            throw new RuntimeException("Relación no encontrada");
+            throw new RuntimeException("No existen relaciones para este Address");
         }
 
         for (DispositivoAddress rel : relaciones) {
 
             Dispositivo dispositivo = rel.getDispositivo();
+
+            // Solo eliminar de los dispositivos seleccionados
+            if (!dispositivosIds.contains(dispositivo.getId())) {
+                continue;
+            }
 
             if (!dispositivo.getUsuario().getUsername().equals(username)) {
                 throw new RuntimeException("No autorizado");
@@ -213,8 +241,13 @@ public class AddressService {
             dispositivoAddressRepo.delete(rel);
         }
 
-        // Eliminar el address solo cuando ya no tenga relaciones
-        addressRepo.delete(address);
+        // 🔥 IMPORTANTE: solo borrar Address si ya no tiene relaciones
+        boolean quedanRelaciones = dispositivoAddressRepo
+                .existsByAddressId(addressId);
+
+        if (!quedanRelaciones) {
+            addressRepo.delete(address);
+        }
     }
 
     @Transactional

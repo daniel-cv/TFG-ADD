@@ -65,12 +65,13 @@ public class AddressController {
         return addressService.listarPorUsuario(auth.getName());
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{addressId}")
     public void eliminar(
-            @PathVariable Long id,
+            @RequestBody List <Long> dispositivosIds,
+            @PathVariable Long addressId,
             Authentication auth
     ) {
-        addressService.eliminarAddress(id, auth.getName());
+        addressService.eliminarAddress(addressId,dispositivosIds, auth.getName());
     }
     @PutMapping("/edit/{id}")
     public AddressDTO editar(
