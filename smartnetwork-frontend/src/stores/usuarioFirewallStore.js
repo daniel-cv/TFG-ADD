@@ -20,18 +20,35 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
 
   actions: {
 
-    async cargarUsuariosPorDispositivo(dispositivoId) {
-      try {
-        this.cargando = true
-        const res = await obtenerUsuariosFirewallPorDispositivo(dispositivoId)
-        this.usuarios = res.data
-      } catch (error) {
-        console.error("Error cargando usuarios firewall por dispositivo:", error)
-        this.mensaje = "Error cargando usuarios del dispositivo"
-      } finally {
-        this.cargando = false
-      }
-    },
+   async cargarUsuariosPorDispositivo(dispositivoId) {
+  try {
+
+    this.cargando = true
+
+    const res =
+      await obtenerUsuariosFirewallPorDispositivo(dispositivoId)
+
+    this.usuarios = res.data
+
+    return res.data
+
+  } catch (error) {
+
+    console.error(
+      "Error cargando usuarios firewall por dispositivo:",
+      error
+    )
+
+    this.mensaje =
+      "Error cargando usuarios del dispositivo"
+
+    return []
+
+  } finally {
+
+    this.cargando = false
+  }
+},
 
     async cargarUsuariosPorUsuario() {
       try {
@@ -90,16 +107,34 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
       }
     },
 
-    async eliminarUsuarioFirewall(id) {
-      try {
-        await apiEliminarUsuarioFirewall(id)
-        this.usuarios = this.usuarios.filter(u => u.id !== id)
-        this.mensaje = "Usuario Firewall eliminado correctamente"
-      } catch (error) {
-        console.error("Error eliminando usuario firewall:", error)
-        this.mensaje = "Error eliminando usuario firewall"
-      }
-    },
+    async eliminarUsuarioFirewall(id, dispositivosIds) {
+
+  try {
+
+    await apiEliminarUsuarioFirewall(
+      id,
+      dispositivosIds
+    )
+
+    this.usuarios =
+      this.usuarios.filter(u => u.id !== id)
+
+    this.mensaje =
+      "Usuario Firewall eliminado correctamente"
+
+  } catch (error) {
+
+    console.error(
+      "Error eliminando usuario firewall:",
+      error
+    )
+
+    this.mensaje =
+      "Error eliminando usuario firewall"
+
+    throw error
+  }
+},
 
     async actualizarUsuarioFirewall(id, payload) {
       try {
@@ -115,7 +150,29 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
         this.mensaje = "Error al actualizar usuario firewall"
         throw error
       }
+    },
+    async eliminarUsuarioFirewallEnDispositivos(usuarioId, dispositivosIds) {
+
+  try {
+
+    if (!dispositivosIds.length) {
+      this.mensaje = "Selecciona dispositivos"
+      return
     }
+
+    await apiEliminarUsuarioFirewall(usuarioId, dispositivosIds)
+
+    this.mensaje = "Usuario eliminado correctamente"
+
+  } catch (error) {
+
+    console.error(error)
+
+    this.mensaje = "Error eliminando usuario"
+
+    throw error
+  }
+}
 
   }
 })

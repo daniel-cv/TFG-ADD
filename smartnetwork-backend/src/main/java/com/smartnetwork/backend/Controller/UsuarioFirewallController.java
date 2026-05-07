@@ -68,11 +68,15 @@ public class UsuarioFirewallController {
     @DeleteMapping("/delete/{id}")
     public void eliminar(
             @PathVariable Long id,
+            @RequestBody List<Long> dispositivosIds,
             Authentication auth
     ) {
-        usuarioFirewallService.eliminarUsuarioFirewall(id, auth.getName());
+        usuarioFirewallService.eliminarUsuarioFirewall(
+                id,
+                dispositivosIds,
+                auth.getName()
+        );
     }
-
     @PutMapping("/edit/{id}")
     public UsuarioFirewallDTO editar(
             @PathVariable Long id,

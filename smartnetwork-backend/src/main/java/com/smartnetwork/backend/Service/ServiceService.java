@@ -130,31 +130,6 @@ public class ServiceService {
                 .toList();
     }
 
-    @Transactional
-    public com.smartnetwork.backend.domain.Entity.Service update(
-            com.smartnetwork.backend.domain.Entity.Service service,
-            String username,
-            List<Long> dispositivoIds) {
-
-        // =========================
-        // VALIDACIÓN USUARIO (como el update simple)
-        // =========================
-        for (Long dispositivoId : dispositivoIds) {
-
-            Dispositivo dispositivo = dispositivoRepository
-                    .findById(dispositivoId)
-                    .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
-
-            if (!dispositivo.getUsuario().getUsername().equals(username)) {
-                throw new RuntimeException("No autorizado");
-            }
-        }
-
-        // =========================
-        // GUARDAR UNA SOLA VEZ
-        // =========================
-        return serviceRepository.save(service);
-    }
 
     public List<com.smartnetwork.backend.domain.Entity.Service> findAllByDispositivo(
             Long dispositivoId,
@@ -247,14 +222,4 @@ public class ServiceService {
         return dto;
     }
 
-    private void aplicarCambios(
-            com.smartnetwork.backend.domain.Entity.Service service,
-            CrearServiceDTO dto
-    ) {
-
-        service.setTipoProtocolo(dto.getTipoProtocolo());
-        service.setIp(dto.getIp());
-        service.setDestinationPort(dto.getDestinationPort());
-        service.setComentario(dto.getComentario());
-    }
 }

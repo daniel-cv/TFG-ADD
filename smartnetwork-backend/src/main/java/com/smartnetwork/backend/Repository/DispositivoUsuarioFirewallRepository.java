@@ -9,4 +9,5 @@ public interface DispositivoUsuarioFirewallRepository extends JpaRepository<Disp
     boolean existsByDispositivoIdAndUsuarioFirewallId(Long dispositivoId, Long usuarioFirewallId);
     List<DispositivoUsuarioFirewall> findByUsuarioFirewallId(Long usuarioFirewallId);
     List<DispositivoUsuarioFirewall> findByDispositivoId(Long dispositivoId);
+    boolean existsByUsuarioFirewallId(Long usuarioFirewallId);
 }

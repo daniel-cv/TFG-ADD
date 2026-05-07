@@ -20,10 +20,15 @@ export function asignarUsuarioFirewallADispositivos(usuarioId, dispositivosIds) 
   return api.post(`/api/firewalls/usuarioFirewall/${usuarioId}/dispositivos`, dispositivosIds)
 }
 
-export function eliminarUsuarioFirewall(id) {
-  return api.delete(`/api/firewalls/usuarioFirewall/delete/${id}`)
-}
-
 export function actualizarUsuarioFirewall(id, usuarioFirewall) {
   return api.put(`/api/firewalls/usuarioFirewall/edit/${id}`, usuarioFirewall)
+}
+
+export function eliminarUsuarioFirewall(id, dispositivosIds) {
+  return api.delete(
+    `/api/firewalls/usuarioFirewall/delete/${id}`,
+    {
+      data: dispositivosIds
+    }
+  )
 }

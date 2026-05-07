@@ -23,7 +23,7 @@
           <tr>
             <th>Nombre</th>
             <th>Email</th>
-            <th>Rol</th>
+            <th>Autenticación</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -95,11 +95,24 @@ const props = defineProps({
 })
 
 const eliminarUsuario = async (id) => {
+
   try {
-    await usuarioFirewallStore.eliminarUsuarioFirewall(id)
-    await usuarioFirewallStore.cargarUsuariosPorDispositivo(dispositivoId)
+
+    await usuarioFirewallStore.eliminarUsuarioFirewall(
+      id,
+      [dispositivoId]
+    )
+
+    await usuarioFirewallStore.cargarUsuariosPorDispositivo(
+      dispositivoId
+    )
+
   } catch (error) {
-    console.error("Error eliminando usuario", error)
+
+    console.error(
+      "Error eliminando usuario",
+      error
+    )
   }
 }
 

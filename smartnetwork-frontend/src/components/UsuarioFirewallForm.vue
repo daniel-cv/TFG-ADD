@@ -65,73 +65,159 @@ import { ref, onMounted } from "vue";
 import { useUsuarioFirewallStore } from "@/stores/usuarioFirewallStore";
 
 const props = defineProps({
-  usuarioEdit: { type: Object, default: null },
-  dispositivoId: { type: Number, required: true },
-  modo: { type: String, default: 'simple' }
+  usuarioEdit: {
+    type: Object,
+    default: null
+  },
+
+  dispositivoId: {
+    type: Number,
+    required: false
+  },
+
+  modo: {
+    type: String,
+    default: 'simple'
+  }
 })
 
-const emit = defineEmits(['creado', 'cancelar'])
+const emit = defineEmits([
+  'creado',
+  'cancelar'
+])
 
 const userStore = useUsuarioFirewallStore()
 
-const name = ref("");
-const password = ref("");
-const email = ref("");
-const twoFactor = ref("");
-const mensaje = ref("");
+const name = ref("")
+const password = ref("")
+const email = ref("")
+const twoFactor = ref("disable")
+const mensaje = ref("")
 
 const twoFactorOptions = [
-  { title: "Deshabilitado", value: "disable" },
-  { title: "Habilitado", value: "enable" }
-];
+  {
+    title: "Deshabilitado",
+    value: "disable"
+  },
+  {
+    title: "Habilitado",
+    value: "enable"
+  }
+]
 
 onMounted(() => {
+
   if (props.usuarioEdit) {
-    name.value = props.usuarioEdit.nombre
-    email.value = props.usuarioEdit.email
-    twoFactor.value = props.usuarioEdit.twoFactor || "disable"
+
+    name.value = props.usuarioEdit.nombre || ""
+
+    email.value = props.usuarioEdit.email || ""
+
+    twoFactor.value =
+      props.usuarioEdit.factor ||
+      props.usuarioEdit.twoFactor ||
+      "disable"
   }
 })
 
 const handleSubmitUsuario = async () => {
+
   try {
+
     const payload = {
+
       name: name.value,
+
       password: password.value || undefined,
+
       email: email.value || null,
+
       type: 'password',
-      twoFactor: twoFactor.value,
-      dispositivosId: props.dispositivoId
-    };
 
-
-    if (props.modo === 'full' && props.dispositivoId) {
-      payload.dispositivosId = [props.dispositivoId]
+      twoFactor: twoFactor.value
     }
 
+    /* ========================= */
+    /* EDITAR */
+    /* ========================= */
+
     if (props.usuarioEdit) {
-      await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id, payload)
-      mensaje.value = "Usuario actualizado correctamente"
-    } else {
-      if (props.modo === 'full' && props.dispositivoId) {
-        await userStore.crearUsuarioFirewallCompleto(payload)
-      }else{
-        await userStore.crearUsuarioFirewall(payload)
+
+      /*
+       * IMPORTANTE:
+       * EL BACKEND EXIGE dispositivosIds
+       */
+
+      if (
+        props.usuarioEdit.dispositivosIds &&
+        props.usuarioEdit.dispositivosIds.length
+      ) {
+
+        payload.dispositivosIds =
+          props.usuarioEdit.dispositivosIds
+
       }
-      mensaje.value = "Usuario creado correctamente"
+
+      else if (props.dispositivoId) {
+
+        payload.dispositivosIds = [
+          props.dispositivoId
+        ]
+      }
+
+      console.log(
+        'PAYLOAD EDIT =>',
+        payload
+      )
+
+      await userStore.actualizarUsuarioFirewall(
+        props.usuarioEdit.id,
+        payload
+      )
+
+      mensaje.value =
+        "Usuario actualizado correctamente"
+    }
+
+    /* ========================= */
+    /* CREAR */
+    /* ========================= */
+
+    else {
+
+      if (
+        props.modo === 'full' &&
+        props.dispositivoId
+      ) {
+
+        payload.dispositivosIds = [
+          props.dispositivoId
+        ]
+
+        await userStore.crearUsuarioFirewallCompleto(
+          payload
+        )
+
+      } else {
+
+        await userStore.crearUsuarioFirewall(
+          payload
+        )
+      }
+
+      mensaje.value =
+        "Usuario creado correctamente"
     }
 
     emit("creado")
 
-    if (!props.usuarioEdit) {
-      name.value = "";
-      password.value = "";
-      email.value = "";
-      twoFactor.value = "";
-    }
-
   } catch (error) {
-    mensaje.value = props.usuarioEdit ? "Error al actualizar el usuario" : "Error al crear el usuario"
+
+    console.error(error)
+
+    mensaje.value = props.usuarioEdit
+      ? "Error actualizando usuario"
+      : "Error creando usuario"
   }
 }
 
