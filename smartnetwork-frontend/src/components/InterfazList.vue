@@ -61,7 +61,12 @@ import { ref, onMounted } from 'vue'
 import { useInterfazStore } from '@/stores/interfazStore'
 import { useDispositivoSeleccionadoStore } from '@/stores/dispositivoSeleccionadoStore'
 import InterfazForm from '@/components/InterfazForm.vue'
-
+const props = defineProps({
+  modo: {
+    type: String,
+    default: 'full'
+  }
+})
 const interfazStore = useInterfazStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 

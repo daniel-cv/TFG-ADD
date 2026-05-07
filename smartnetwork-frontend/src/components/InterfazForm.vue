@@ -167,10 +167,26 @@ onMounted(async () => {
 
   const res = await obtenerInterfacesUsuario()
 
-  interfacesDisponibles.value = res.data.map(i => ({
-    title: i.name,
-    value: i.name
-  }))
+const puertosBase = [
+  { title: 'Port1', value: 'port1' },
+  { title: 'Port2', value: 'port2' },
+  { title: 'Port3', value: 'port3' },
+  { title: 'Port4', value: 'port4' }
+]
+
+const nombresBase = new Set(
+  puertosBase.map(p => p.value.toLowerCase())
+)
+
+interfacesDisponibles.value = [
+  ...puertosBase,
+  ...res.data
+    .filter(i => !nombresBase.has(i.name.toLowerCase()))
+    .map(i => ({
+      title: i.name,
+      value: i.name
+    }))
+]
 })
 
 const handleSubmit = async () => {
