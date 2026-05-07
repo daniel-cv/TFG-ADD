@@ -12,4 +12,5 @@ public interface DispositivoServiceRepository extends JpaRepository<DispositivoS
 
     List<DispositivoService> findByServiceId(Long serviceId);
     boolean existsByDispositivoIdAndServiceId(Long dispositivoId, Long serviceId);
+    boolean existsByServiceId(Long serviceId);
 }

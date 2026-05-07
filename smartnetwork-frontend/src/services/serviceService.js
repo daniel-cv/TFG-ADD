@@ -31,14 +31,19 @@ export function obtenerServicePorId(serviceId, dispositivoId) {
 }
 
 // Actualizar service
-export function actualizarService(serviceId, dispositivoIds) {
+export function actualizarService(serviceId, payload) {
   return api.put(
-    `/api/firewalls/services/${serviceId}/dispositivos`,
-    dispositivoIds
+    `/api/firewalls/services/edit/${serviceId}`,
+    payload
   )
 }
 
 // Eliminar service
-export function eliminarService(id) {
-  return api.delete(`/api/firewalls/services/delete/${id}`)
+export function eliminarService(serviceId, dispositivosIds) {
+  return api.delete(
+    `/api/firewalls/services/delete/${serviceId}`,
+    {
+      data: dispositivosIds
+    }
+  )
 }

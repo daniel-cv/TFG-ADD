@@ -187,31 +187,47 @@ public class ServiceService {
         return serviceRepository.findByIdAndDispositivoServices_Dispositivo_Id(serviceId, dispositivoId);
     }
 
-    public void eliminarService(Long serviceId, String username) {
+    @Transactional
+    public void eliminarService(
+            Long serviceId,
+            List<Long> dispositivosIds,
+            String username
+    ) {
 
-        com.smartnetwork.backend.domain.Entity.Service service = serviceRepository.findById(serviceId)
-                .orElseThrow(() -> new RuntimeException("Service no existe"));
+        com.smartnetwork.backend.domain.Entity.Service service =
+                serviceRepository.findById(serviceId)
+                        .orElseThrow(() -> new RuntimeException("Service no existe"));
 
-        if (!service.getUsuario().getUsername().equals(username)) {
-            throw new RuntimeException("No autorizado");
-        }
-
-        List<DispositivoService> relaciones = dispositivoServiceRepository.findByServiceId(serviceId);
+        List<DispositivoService> relaciones =
+                dispositivoServiceRepository.findByServiceId(serviceId);
 
         for (DispositivoService rel : relaciones) {
 
             Dispositivo dispositivo = rel.getDispositivo();
 
-            Map<String, Object> resultado = fortiGateService.eliminarService(dispositivo, service.getNombre());
+            if (!dispositivosIds.contains(dispositivo.getId())) {
+                continue;
+            }
+
+            Map<String, Object> resultado =
+                    fortiGateService.eliminarService(
+                            dispositivo,
+                            service.getNombre()
+                    );
 
             if (!(Boolean) resultado.get("success")) {
-                throw new RuntimeException("Error eliminando Service en FortiGate: " + resultado);
+                throw new RuntimeException("Error eliminando service");
             }
 
             dispositivoServiceRepository.delete(rel);
         }
 
-        serviceRepository.delete(service);
+        boolean quedan =
+                dispositivoServiceRepository.existsByServiceId(serviceId);
+
+        if (!quedan) {
+            serviceRepository.delete(service);
+        }
     }
 
     private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.Service service) {
@@ -231,4 +247,14 @@ public class ServiceService {
         return dto;
     }
 
+    private void aplicarCambios(
+            com.smartnetwork.backend.domain.Entity.Service service,
+            CrearServiceDTO dto
+    ) {
+
+        service.setTipoProtocolo(dto.getTipoProtocolo());
+        service.setIp(dto.getIp());
+        service.setDestinationPort(dto.getDestinationPort());
+        service.setComentario(dto.getComentario());
+    }
 }

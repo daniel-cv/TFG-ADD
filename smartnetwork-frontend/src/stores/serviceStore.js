@@ -73,6 +73,24 @@ export const useServiceStore = defineStore('service', {
     async eliminarService(id) {
       await eliminarServiceApi(id)
       this.services = this.services.filter(s => s.id !== id)
-    }
+    },
+
+    async actualizarService(id, payload) {
+
+  const res = await actualizarServiceApi(id, payload)
+
+  const index = this.services.findIndex(s => s.id === id)
+
+  if (index !== -1) {
+    this.services[index] = res.data
+  }
+
+  return res.data
+},
+
+async eliminarServiceEnDispositivos(serviceId, dispositivosIds) {
+
+  await eliminarServiceApi(serviceId, dispositivosIds)
+}
   }
 })

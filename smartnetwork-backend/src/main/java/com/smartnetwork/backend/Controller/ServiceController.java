@@ -75,24 +75,18 @@ public class ServiceController {
         return serviceService.findById(serviceId, dispositivoId, auth.getName());
     }
 
-    @PutMapping("/{serviceId}/dispositivos")
-    public Service actualizar(
-            @PathVariable Long serviceId,
-            @RequestBody List<Long> dispositivoIds,
-            Authentication auth
-    ) {
-        Service service = new Service();
-        service.setId(serviceId);
-        System.out.println(dispositivoIds);
-        return serviceService.update(service, auth.getName(), dispositivoIds);
-    }
 
     @DeleteMapping("/delete/{serviceId}")
     public void eliminar(
             @PathVariable Long serviceId,
+            @RequestBody List<Long> dispositivosIds,
             Authentication auth
     ) {
-        serviceService.eliminarService(serviceId, auth.getName());
+        serviceService.eliminarService(
+                serviceId,
+                dispositivosIds,
+                auth.getName()
+        );
     }
 }
 

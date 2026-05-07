@@ -78,7 +78,10 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useServiceStore } from "@/stores/serviceStore";
-import { obtenerAddressesPorDispositivo, obtenerAddressesPorUsuario } from "@/services/addressService";
+import {
+  obtenerAddressesPorDispositivo,
+  obtenerAddressesPorUsuario
+} from "@/services/addressService";
 
 const props = defineProps({
   dispositivoId: { type: Number, required: true },
@@ -86,93 +89,147 @@ const props = defineProps({
   modo: { type: String, default: "simple" }
 });
 
-console.log("ServiceForm props:", props.modo);
-
 const emit = defineEmits(["creada", "cancelar"]);
 
 const serviceStore = useServiceStore();
 
 const name = ref("");
 const protocol = ref("");
-const ip = ref("");
+const ip = ref(null);
 const portRange = ref("");
 const comentario = ref("");
 const mensaje = ref("");
 
 const protocolos = ["TCP", "UDP", "ICMP"];
+
+/*
+  Ahora cada address tendrá:
+  {
+    title: "hola (10.0.0.1)",
+    value: 15, // ID único
+    ip: "10.0.0.1"
+  }
+*/
 const direcciones = ref([]);
 
 onMounted(async () => {
-  // Si estamos editando, rellenar campos
+
+  // EDITAR
   if (props.serviceEdit) {
     name.value = props.serviceEdit.nombre;
     protocol.value = props.serviceEdit.tipoProtocolo;
-    ip.value = props.serviceEdit.ip;
     portRange.value = props.serviceEdit.destinationPort;
     comentario.value = props.serviceEdit.comentario;
   }
 
-  // Cargar direcciones del dispositivo
   try {
-    if(props.modo === "simple") {
+
+    let addresses = [];
+
+    // SIMPLE
+    if (props.modo === "simple") {
+
       const resUsuario = await obtenerAddressesPorUsuario();
-      direcciones.value = resUsuario.data.map(addr => ({
-        title: addr.name,
-        value: addr.ip
-      }));
+
+      addresses = resUsuario.data;
+
     } else {
-      const res = await obtenerAddressesPorDispositivo(props.dispositivoId);
-      direcciones.value = res.data.map(addr => ({
-        title: addr.name,
-        value: addr.ip
-      }));
+
+      const res = await obtenerAddressesPorDispositivo(
+        props.dispositivoId
+      );
+
+      addresses = res.data;
     }
+
+    // MAPEO CORRECTO
+    direcciones.value = addresses.map(addr => ({
+      title: `${addr.name} (${addr.ip})`,
+      value: addr.id,
+      ip: addr.ip
+    }));
+
+    // PRESELECCIONAR EN EDITAR
+    if (props.serviceEdit?.ip) {
+
+      const encontrada = direcciones.value.find(
+        d => d.ip === props.serviceEdit.ip
+      );
+
+      if (encontrada) {
+        ip.value = encontrada.value;
+      }
+    }
+
   } catch (error) {
+
     console.error("Error cargando direcciones", error);
   }
 });
 
 const handleSubmit = async () => {
+
   try {
+
+    // BUSCAR ADDRESS SELECCIONADA
+    const selectedAddress = direcciones.value.find(
+      d => d.value === ip.value
+    );
+
     const payload = {
       nombre: name.value,
       tipoProtocolo: protocol.value,
-      ip: ip.value,
+
+      // IP REAL
+      ip: selectedAddress?.ip || "",
+
       destinationPort: portRange.value,
       comentario: comentario.value
     };
 
-    // 🔥 MODO FULL → crear + asignar automáticamente
-    if (!props.serviceEdit && props.modo === "full") {
-      payload.dispositivosId = [props.dispositivoId];
-      await serviceStore.crearServiceCompleto(payload);
-      mensaje.value = "Service creado y asignado correctamente";
-    }
+    // EDITAR
+    if (props.serviceEdit) {
 
-    // 🔥 MODO SIMPLE → solo crear
-    else if (!props.serviceEdit) {
-      await serviceStore.crearService(payload);
-      mensaje.value = "Service creado correctamente";
-    }
+      if (props.serviceEdit.dispositivosIds?.length) {
 
-    // 🔥 EDITAR
-    else {
+        payload.dispositivosIds =
+          props.serviceEdit.dispositivosIds;
+      }
+
       await serviceStore.actualizarService(
         props.serviceEdit.id,
-        props.dispositivoId,
         payload
       );
+
       mensaje.value = "Service actualizado correctamente";
+    }
+
+    // CREAR
+    else {
+
+      if (props.modo === "full") {
+
+        payload.dispositivosId = [props.dispositivoId];
+
+        await serviceStore.crearServiceCompleto(payload);
+
+      } else {
+
+        await serviceStore.crearService(payload);
+      }
+
+      mensaje.value = "Service creado correctamente";
     }
 
     emit("creada");
 
-
   } catch (error) {
-    console.error("Error creando/actualizando service:", error);
+
+    console.error(error);
+
     mensaje.value = props.serviceEdit
-      ? "Error al actualizar el service"
-      : "Error al crear el service";
+      ? "Error actualizando"
+      : "Error creando";
   }
 };
 </script>

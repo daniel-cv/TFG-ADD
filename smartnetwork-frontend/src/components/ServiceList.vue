@@ -23,7 +23,6 @@
             <th>Protocolo</th>
             <th>IP</th>
             <th>Puerto</th>
-            <th>Categoría</th>
             <th>Comentario</th>
             <th>Acciones</th>
           </tr>
@@ -38,11 +37,6 @@
             <td>{{ service.tipoProtocolo }}</td>
             <td>{{ service.ip }}</td>
             <td>{{ service.destinationPort }}</td>
-            <td>
-              <span v-if="service.categoria" class="category">
-                {{ service.categoria }}
-              </span>
-            </td>
             <td class="comment">{{ service.comentario }}</td>
 
             <td>
