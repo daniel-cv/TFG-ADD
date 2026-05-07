@@ -123,7 +123,18 @@ export const useInterfazStore = defineStore('interfaz', {
         this.mensaje = "Error al asignar interfaz"
         throw error
       }
-    }
+    },
 
+async eliminarInterfazEnDispositivos(interfazId, dispositivosIds) {
+  try {
+    await apiEliminarInterfaz(interfazId, dispositivosIds)
+
+    this.mensaje = "Interfaz eliminada correctamente"
+  } catch (error) {
+    console.error("Error eliminando interfaz", error)
+    this.mensaje = "Error al eliminar la interfaz"
+    throw error
+  }
+}
   }
 })

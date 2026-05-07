@@ -31,8 +31,10 @@ public class InterfazService {
 
     public InterfazService(
             InterfazRepository interfazRepo,
-            DispositivoRepository dispositivoRepo, DispositivoInterfazRepository dispositivoInterfazRepo,
-            FortiGateService fortiGateService, UsuarioRepository usuarioRepo
+            DispositivoRepository dispositivoRepo,
+            DispositivoInterfazRepository dispositivoInterfazRepo,
+            FortiGateService fortiGateService,
+            UsuarioRepository usuarioRepo
     ) {
         this.interfazRepo = interfazRepo;
         this.dispositivoRepo = dispositivoRepo;
@@ -41,57 +43,52 @@ public class InterfazService {
         this.usuarioRepo = usuarioRepo;
     }
 
-    public InterfazDTO crear(CrearInterfazDTO crearInterfazDTO, String nombre) {
-        InterfazDTO interfaz = crearInterfaz(crearInterfazDTO, nombre);
+    // =========================
+    // CREATE COMPLETO
+    // =========================
+    @Transactional
+    public InterfazDTO crear(CrearInterfazDTO dto, String username) {
 
-        if (crearInterfazDTO.getDispositivosId() != null && !crearInterfazDTO.getDispositivosId().isEmpty()) {
-            asignarInterfazADispositivos(interfaz.getId(), crearInterfazDTO.getDispositivosId());
+        InterfazDTO interfaz = crearInterfaz(dto, username);
+
+        if (dto.getDispositivosId() != null && !dto.getDispositivosId().isEmpty()) {
+            asignarInterfazADispositivos(interfaz.getId(), dto.getDispositivosId(), username);
         }
 
         return interfaz;
     }
 
+    // =========================
+    // CREATE BÁSICO
+    // =========================
     public InterfazDTO crearInterfaz(CrearInterfazDTO dto, String username) {
+
         Usuario usuario = usuarioRepo.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if ("vlan".equals(dto.getTipo())) {
-            if (dto.getVlanid() == null || dto.getInterfacePadre() == null) {
-                throw new RuntimeException("VLAN requiere interfacePadre y vlanid");
-            }
-        }
-
         Interfaz interfaz = new Interfaz();
-        interfaz.setName(dto.getName());
-        interfaz.setTipo(dto.getTipo());
-        interfaz.setInterfacePadre(dto.getInterfacePadre());
-        interfaz.setVlanid(dto.getVlanid());
-        interfaz.setVdom(dto.getVdom() != null ? dto.getVdom() : "root");
-        interfaz.setMode(dto.getMode());
-        interfaz.setIp(dto.getIp());
-        interfaz.setAllowaccess(dto.getAllowaccess());
-        interfaz.setRole(dto.getRole());
-        interfaz.setDescription(dto.getDescription());
+        aplicarCambios(interfaz, dto);
         interfaz.setUsuario(usuario);
 
-        Interfaz saved = interfazRepo.save(interfaz);
-        return toInterfazDTO(saved);
+        return toInterfazDTO(interfazRepo.save(interfaz));
     }
 
-    public void asignarInterfazADispositivos(Long interfazId, List<Long> dispositivosId) {
+    // =========================
+    // ASIGNAR
+    // =========================
+    @Transactional
+    public void asignarInterfazADispositivos(Long interfazId, List<Long> dispositivosIds, String username) {
+
         Interfaz interfaz = interfazRepo.findById(interfazId)
                 .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
 
-        if (!interfaz.getUsuario().getId().equals(interfaz.getUsuario().getId())) {
-            throw new  RuntimeException("No autorizado");
-        }
+        for (Long dispositivoId : dispositivosIds) {
 
-        for (Long dispositivoId : dispositivosId) {
             Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
-                    .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
+                    .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
 
-            if(!dispositivo.getUsuario().getId().equals(interfaz.getUsuario().getId())) {
-                throw new  RuntimeException("No autorizado");
+            if (!dispositivo.getUsuario().getUsername().equals(username)) {
+                throw new RuntimeException("No autorizado");
             }
 
             boolean yaExiste = dispositivoInterfazRepo
@@ -99,25 +96,27 @@ public class InterfazService {
 
             if (yaExiste) continue;
 
-            Map<String, Object> resultado = fortiGateService.crearInterfaz(dispositivo, interfaz);
+            Map<String, Object> res = fortiGateService.crearInterfaz(dispositivo, interfaz);
 
-          if (!(Boolean) resultado.get("success")) {
-               throw new RuntimeException("Error creando address en FortiGate: " + resultado);
-           }
+            if (!(Boolean) res.get("success")) {
+                throw new RuntimeException("Error creando interfaz en FortiGate");
+            }
 
             DispositivoInterfaz rel = new DispositivoInterfaz();
             rel.setDispositivo(dispositivo);
             rel.setInterfaz(interfaz);
-            rel.setComentario(interfaz.getDescription());
 
             dispositivoInterfazRepo.save(rel);
         }
     }
 
+    // =========================
+    // LISTAR
+    // =========================
     public List<InterfazDTO> listarPorDispositivo(Long dispositivoId, String username) {
 
         Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+                .orElseThrow();
 
         if (!dispositivo.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
@@ -130,12 +129,9 @@ public class InterfazService {
     }
 
     public List<InterfazDTO> listarPorUsuario(String username) {
-        Usuario usuario = usuarioRepo.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if(!usuario.getUsername().equals(username)){
-            throw new RuntimeException("No autorizado");
-        }
+        Usuario usuario = usuarioRepo.findByUsername(username)
+                .orElseThrow();
 
         return interfazRepo.findByUsuarioId(usuario.getId())
                 .stream()
@@ -143,130 +139,167 @@ public class InterfazService {
                 .toList();
     }
 
-    private InterfazDTO toDTO(Interfaz interfaz, Long dispositivoId) {
+    // =========================
+    // 🔥 ELIMINAR MULTI
+    // =========================
+    @Transactional
+    public void eliminarInterfaz(Long interfazId, List<Long> dispositivosIds, String username) {
 
-        InterfazDTO dto = new InterfazDTO();
-        dto.setId(interfaz.getId());
-        dto.setName(interfaz.getName());
-        dto.setTipo(interfaz.getTipo());
-        dto.setInterfacePadre(interfaz.getInterfacePadre());
-        dto.setVlanid(interfaz.getVlanid());
-        dto.setVdom(interfaz.getVdom());
-        dto.setMode(interfaz.getMode());
-        dto.setIp(interfaz.getIp());
-        dto.setAllowaccess(interfaz.getAllowaccess());
-        dto.setRole(interfaz.getRole());
-        dto.setDescription(interfaz.getDescription());
-
-        dto.setDispositivoId(dispositivoId);
-
-        return dto;
-    }
-
-    private InterfazDTO toInterfazDTO(Interfaz interfaz) {
-        InterfazDTO dto = new InterfazDTO();
-        dto.setId(interfaz.getId());
-        dto.setName(interfaz.getName());
-        dto.setTipo(interfaz.getTipo());
-        dto.setInterfacePadre(interfaz.getInterfacePadre());
-        dto.setVlanid(interfaz.getVlanid());
-        dto.setVdom(interfaz.getVdom());
-        dto.setMode(interfaz.getMode());
-        dto.setIp(interfaz.getIp());
-        dto.setAllowaccess(interfaz.getAllowaccess());
-        dto.setRole(interfaz.getRole());
-        dto.setDescription(interfaz.getDescription());
-        return dto;
-    }
-
-    public void eliminarInterfaz(Long interfazId, String username) {
         Interfaz interfaz = interfazRepo.findById(interfazId)
-                .orElseThrow(() -> new RuntimeException("Interfaz no encontrado"));
+                .orElseThrow();
 
-        List<DispositivoInterfaz> rel = dispositivoInterfazRepo
-                .findByIdInterfazId(interfazId);
+        List<DispositivoInterfaz> relaciones =
+                dispositivoInterfazRepo.findByIdInterfazId(interfazId);
 
-        for (DispositivoInterfaz dispositivoInterfaz : rel) {
-            Dispositivo dispositivo = dispositivoInterfaz.getDispositivo();
+        for (DispositivoInterfaz rel : relaciones) {
 
-            if (!dispositivo.getUsuario().getUsername().equals(username)) {
-                throw new RuntimeException("No autorizado");
+            Dispositivo d = rel.getDispositivo();
+
+            if (!dispositivosIds.contains(d.getId())) continue;
+
+            Map<String, Object> res =
+                    fortiGateService.eliminarInterfaz(d, interfaz.getName());
+
+            if (!(Boolean) res.get("success")) {
+                throw new RuntimeException("Error eliminando interfaz");
             }
 
-                    Map<String, Object> resultado = fortiGateService.eliminarInterfaz(dispositivo, interfaz.getName());
-
-                   if (!(Boolean) resultado.get("success")) {
-                       throw new RuntimeException("Error eliminando Interfaz en FortiGate: " + resultado);
-                    }
-
-            dispositivoInterfazRepo.delete(dispositivoInterfaz);
+            dispositivoInterfazRepo.delete(rel);
         }
-        interfazRepo.delete(interfaz);
+
+        boolean quedan =
+                dispositivoInterfazRepo.existsByIdInterfazId(interfazId);
+
+        if (!quedan) {
+            interfazRepo.delete(interfaz);
+        }
     }
 
+    // =========================
+    // 🔥 EDITAR (TOTAL vs PARCIAL)
+    // =========================
     @Transactional
-    public InterfazDTO actualizar(Long interfazId, CrearInterfazDTO dto, String username) {
+    public InterfazDTO editarInterfaz(Long interfazId, CrearInterfazDTO dto, String username) {
 
-        List<DispositivoInterfaz> relaciones = dispositivoInterfazRepo
-                .findByIdInterfazId(interfazId);
+        List<DispositivoInterfaz> relaciones =
+                dispositivoInterfazRepo.findByIdInterfazId(interfazId);
 
         if (relaciones.isEmpty()) {
-            throw new RuntimeException("Relación no encontrada");
+            throw new RuntimeException("No existe relación");
         }
 
-        // Interfaz compartida
-        Interfaz interfaz = relaciones.get(0).getInterfaz();
+        Interfaz original = relaciones.get(0).getInterfaz();
+
+        List<Long> actuales = relaciones.stream()
+                .map(r -> r.getDispositivo().getId())
+                .toList();
+
+        List<Long> editar = dto.getDispositivosId();
+
+        if (editar == null || editar.isEmpty()) {
+            throw new RuntimeException("Debes enviar dispositivosIds");
+        }
+
+        boolean edicionTotal =
+                actuales.containsAll(editar) && editar.containsAll(actuales);
 
         // =========================
-        // VALIDAR USUARIO EN TODOS
+        // 🔵 TOTAL
         // =========================
-        for (DispositivoInterfaz rel : relaciones) {
-            if (!rel.getDispositivo().getUsuario().getUsername().equals(username)) {
-                throw new RuntimeException("No autorizado");
+        if (edicionTotal) {
+
+            aplicarCambios(original, dto);
+
+            for (DispositivoInterfaz rel : relaciones) {
+
+                Map<String, Object> res =
+                        fortiGateService.editarInterfaz(rel.getDispositivo(),original, original.getName());
+
+                if (!(Boolean) res.get("success")) {
+                    throw new RuntimeException("Error editando interfaz");
+                }
             }
+
+            return toInterfazDTO(interfazRepo.save(original));
         }
 
-        // Guardar nombre antiguo (IMPORTANTE)
-        String nombreAnterior = interfaz.getName();
+        // =========================
+        // 🔴 PARCIAL
+        // =========================
+        Interfaz nueva = new Interfaz();
+        nueva.setName(original.getName());
+        nueva.setUsuario(original.getUsuario());
 
-        // =========================
-        // ACTUALIZAR DATOS
-        // =========================
+        aplicarCambios(nueva, dto);
+
+        Interfaz nuevaGuardada = interfazRepo.save(nueva);
+
+        for (DispositivoInterfaz rel : relaciones) {
+
+            Long dispId = rel.getDispositivo().getId();
+
+            if (!editar.contains(dispId)) continue;
+
+            Dispositivo d = rel.getDispositivo();
+
+            fortiGateService.eliminarInterfaz(d, original.getName());
+
+            dispositivoInterfazRepo.delete(rel);
+
+            asignarInterfazADispositivos(
+                    nuevaGuardada.getId(),
+                    List.of(dispId),
+                    username
+            );
+        }
+
+        boolean quedan =
+                dispositivoInterfazRepo.existsByIdInterfazId(original.getId());
+
+        if (!quedan) {
+            interfazRepo.delete(original);
+        }
+
+        return toInterfazDTO(nuevaGuardada);
+    }
+
+    // =========================
+    // HELPERS
+    // =========================
+    private void aplicarCambios(Interfaz interfaz, CrearInterfazDTO dto) {
+
         interfaz.setName(dto.getName());
+
         interfaz.setTipo(dto.getTipo());
         interfaz.setInterfacePadre(dto.getInterfacePadre());
         interfaz.setVlanid(dto.getVlanid());
-        interfaz.setVdom(dto.getVdom() != null ? dto.getVdom() : "root");
+        interfaz.setVdom(dto.getVdom());
         interfaz.setMode(dto.getMode());
         interfaz.setIp(dto.getIp());
         interfaz.setAllowaccess(dto.getAllowaccess());
         interfaz.setRole(dto.getRole());
         interfaz.setDescription(dto.getDescription());
+    }
 
-        Dispositivo dispositivoRef = relaciones.get(0).getDispositivo();
+    private InterfazDTO toDTO(Interfaz interfaz, Long dispositivoId) {
+        InterfazDTO dto = toInterfazDTO(interfaz);
+        dto.setDispositivoId(dispositivoId);
+        return dto;
+    }
 
-        // =========================
-        // ACTUALIZAR EN FORTIGATE
-        // =========================
-        for (DispositivoInterfaz rel : relaciones) {
-
-            Dispositivo dispositivo = rel.getDispositivo();
-
-            Map<String, Object> resultado =
-                    fortiGateService.editarInterfaz(dispositivo, interfaz, nombreAnterior);
-
-            if (!(Boolean) resultado.get("success")) {
-                throw new RuntimeException(
-                        "Error editando Interfaz en FortiGate (" + dispositivo.getNombre() + "): " + resultado
-                );
-            }
-        }
-
-        // =========================
-        // GUARDAR EN BD
-        // =========================
-        Interfaz saved = interfazRepo.save(interfaz);
-
-        return toDTO(saved, dispositivoRef.getId());
+    private InterfazDTO toInterfazDTO(Interfaz i) {
+        InterfazDTO dto = new InterfazDTO();
+        dto.setId(i.getId());
+        dto.setName(i.getName());
+        dto.setTipo(i.getTipo());
+        dto.setInterfacePadre(i.getInterfacePadre());
+        dto.setVlanid(i.getVlanid());
+        dto.setVdom(i.getVdom());
+        dto.setMode(i.getMode());
+        dto.setIp(i.getIp());
+        dto.setAllowaccess(i.getAllowaccess());
+        dto.setRole(i.getRole());
+        dto.setDescription(i.getDescription());
+        return dto;
     }
 }

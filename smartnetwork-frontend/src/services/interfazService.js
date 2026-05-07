@@ -24,6 +24,8 @@ export function actualizarInterfaz(id, interfaz) {
   return api.put(`/api/firewall/interfaz/edit/${id}`, interfaz)
 }
 
-export function eliminarInterfaz(id) {
-  return api.delete(`/api/firewall/interfaz/${id}`)
+export function eliminarInterfaz(id, dispositivosIds) {
+  return api.delete(`/api/firewall/interfaz/${id}`, {
+    data: dispositivosIds
+  })
 }

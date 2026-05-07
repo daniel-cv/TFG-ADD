@@ -122,18 +122,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useInterfazStore } from '@/stores/interfazStore'
-import { obtenerInterfacesPorDispositivo, obtenerInterfacesUsuario } from '@/services/interfazService'
+import { obtenerInterfacesUsuario } from '@/services/interfazService'
 
 const props = defineProps({
-  dispositivoId: { type: Number, required: true },
-  interfazEdit: { type: Object, default: null },
-  modo: { type: String, default: "simple" }
+  dispositivoId: Number,
+  interfazEdit: Object,
+  modo: { type: String, default: 'simple' }
 })
 
-console.log("Dispositivo ID en InterfazForm:", props.dispositivoId)
-console.log("InterfazForm props:", props.modo)
 const emit = defineEmits(['creada', 'cancelar'])
 const interfazStore = useInterfazStore()
 
@@ -147,107 +145,86 @@ const ip = ref('')
 const allowaccess = ref('')
 const role = ref('')
 const description = ref('')
+const interfacesDisponibles = ref([])
 const mensaje = ref('')
 
-const interfacesDisponibles = ref([])
-
 onMounted(async () => {
+
+  // 🔥 RELLENAR FORMULARIO EN EDIT
   if (props.interfazEdit) {
-    name.value = props.interfazEdit.name
-    tipo.value = props.interfazEdit.tipo
-    interfacePadre.value = props.interfazEdit.interfacePadre
-    vlanid.value = props.interfazEdit.vlanid
-    vdom.value = props.interfazEdit.vdom
-    mode.value = props.interfazEdit.mode
-    ip.value = props.interfazEdit.ip
-    allowaccess.value = props.interfazEdit.allowaccess
-    role.value = props.interfazEdit.role
-    description.value = props.interfazEdit.description
+
+    name.value = props.interfazEdit.name || ''
+    tipo.value = props.interfazEdit.tipo || ''
+    interfacePadre.value = props.interfazEdit.interfacePadre || null
+    vlanid.value = props.interfazEdit.vlanid || null
+    vdom.value = props.interfazEdit.vdom || 'root'
+    mode.value = props.interfazEdit.mode || ''
+    ip.value = props.interfazEdit.ip || ''
+    allowaccess.value = props.interfazEdit.allowaccess || ''
+    role.value = props.interfazEdit.role || ''
+    description.value = props.interfazEdit.description || ''
   }
 
-  try {
-   var res=null;
-  if(props.modo=="full"){res = await obtenerInterfacesPorDispositivo(props.dispositivoId);}
-  else{res= await obtenerInterfacesUsuario()}
-  
-    const puertosBase = [
-      { title: 'Port1', value: 'port1' },
-      { title: 'Port2', value: 'port2' },
-      { title: 'Port3', value: 'port3' },
-      { title: 'Port4', value: 'port4' }
-    ]
-    const nombresBase = new Set(puertosBase.map(p => p.value.toLowerCase()))
+  const res = await obtenerInterfacesUsuario()
 
-    interfacesDisponibles.value = [
-      ...puertosBase,
-      ...res.data
-        .filter(inter => !nombresBase.has(inter.name.toLowerCase()))
-        .map(inter => ({
-          title: inter.name,
-          value: inter.name
-        }))
-    ]
-  } catch (error) {
-    console.error('Error cargando interfaces', error)
-  }
-})
-
-watch(tipo, t => {
-  if (t !== 'vlan') {
-    interfacePadre.value = null
-    vlanid.value = null
-  }
-})
-watch(mode, m => {
-  if (m !== 'static') ip.value = null
+  interfacesDisponibles.value = res.data.map(i => ({
+    title: i.name,
+    value: i.name
+  }))
 })
 
 const handleSubmit = async () => {
+
+  const payload = {
+    name: name.value,
+    tipo: tipo.value,
+    interfacePadre: interfacePadre.value,
+    vlanid: vlanid.value,
+    vdom: vdom.value,
+    mode: mode.value,
+    ip: ip.value,
+    allowaccess: allowaccess.value,
+    role: role.value,
+    description: description.value,
+  }
+
   try {
-    const payload = {
-      name: name.value,
-      tipo: tipo.value,
-      interfacePadre: interfacePadre.value,
-      vlanid: vlanid.value,
-      vdom: vdom.value,
-      mode: mode.value,
-      ip: ip.value,
-      allowaccess: allowaccess.value,
-      role: role.value,
-      description: description.value,
-    }
 
-    if (props.modo === 'full' && props.dispositivoId) {
-      console.log("Payload antes de enviar (modo full):", payload)
-      payload.dispositivosId = [props.dispositivoId]
-    }
+    // ================= EDITAR =================
+    if (props.interfazEdit) {
 
-    if (!props.interfazEdit && props.modo === "full") {
-      console.log("Creando interfaz en modo completo con payload:", payload)
-      await interfazStore.crearInterfaz(payload)
-      mensaje.value = "Interfaz creada (modo completo)"
-    }
+      if (props.interfazEdit.dispositivosId?.length) {
+        payload.dispositivosId = props.interfazEdit.dispositivosId
+      }
+      else if (props.modo === 'full') {
+        payload.dispositivosId = [props.dispositivoId]
+      }
 
-    else if (!props.interfazEdit) {
-      await interfazStore.crearInterfazBasica(payload)
-      mensaje.value = "Interfaz creada (modo básico)"
-    }
-
-    else {
       await interfazStore.actualizarInterfaz(
         props.interfazEdit.id,
         payload
       )
-      mensaje.value = "Interfaz actualizada correctamente"
+
+      mensaje.value = "Actualizada"
+    }
+
+    // ================= CREAR =================
+    else {
+
+      if (props.modo === 'full') {
+        payload.dispositivosId = [props.dispositivoId]
+      }
+
+      await interfazStore.crearInterfaz(payload)
+
+      mensaje.value = "Creada"
     }
 
     emit('creada')
 
-  } catch (error) {
-    console.error(error)
-    mensaje.value = props.interfazEdit
-      ? "Error al actualizar interfaz"
-      : "Error al crear interfaz"
+  } catch (e) {
+    console.error(e)
+    mensaje.value = "Error"
   }
 }
 </script>

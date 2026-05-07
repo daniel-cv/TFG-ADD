@@ -13,4 +13,6 @@ public interface DispositivoInterfazRepository extends JpaRepository<Dispositivo
     List<DispositivoInterfaz> findByIdDispositivoId(Long dispositivoId);
 
     List<DispositivoInterfaz> findByIdInterfazId(Long interfazId);
+
+    boolean existsByIdInterfazId(Long interfazId);
 }

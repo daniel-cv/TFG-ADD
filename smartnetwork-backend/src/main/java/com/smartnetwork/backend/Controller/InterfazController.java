@@ -40,7 +40,7 @@ public class InterfazController {
             @RequestBody List<Long> dispositivosId,
             Authentication auth
     ) {
-        interfazService.asignarInterfazADispositivos(interfazId, dispositivosId);
+        interfazService.asignarInterfazADispositivos(interfazId, dispositivosId, auth.getName());
     }
 
     @GetMapping("/dispositivo/{id}")
@@ -56,20 +56,23 @@ public class InterfazController {
         return interfazService.listarPorUsuario(auth.getName());
     }
 
+    // 🔥 NUEVO → eliminar MULTI
     @DeleteMapping("/{id}")
     public void eliminar(
             @PathVariable Long id,
+            @RequestBody List<Long> dispositivosIds,
             Authentication auth
     ) {
-        interfazService.eliminarInterfaz(id, auth.getName());
+        interfazService.eliminarInterfaz(id, dispositivosIds, auth.getName());
     }
 
+    // 🔥 NUEVO → editar MULTI
     @PutMapping("/edit/{interfazId}")
     public InterfazDTO actualizar(
             @PathVariable Long interfazId,
             @RequestBody CrearInterfazDTO dto,
             Authentication auth
     ) {
-        return interfazService.actualizar(interfazId, dto, auth.getName());
+        return interfazService.editarInterfaz(interfazId, dto, auth.getName());
     }
 }

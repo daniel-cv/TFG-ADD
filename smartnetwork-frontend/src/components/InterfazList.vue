@@ -62,44 +62,29 @@ import { useInterfazStore } from '@/stores/interfazStore'
 import { useDispositivoSeleccionadoStore } from '@/stores/dispositivoSeleccionadoStore'
 import InterfazForm from '@/components/InterfazForm.vue'
 
-const props = defineProps({
-  dispositivoId: Number,
-  modo: {
-    type: String,
-    default: 'simple'
-  }
-})
-
 const interfazStore = useInterfazStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 
 const dispositivoId = seleccionadoStore.dispositivo.id
 
+const interfaces = ref([])
 const mostrandoFormulario = ref(false)
 const interfazSeleccionada = ref(null)
-
-const interfaces = ref([])
 
 const cargar = async () => {
   await interfazStore.cargarInterfaces(dispositivoId)
   interfaces.value = interfazStore.interfaces
 }
 
-onMounted(() => {
-  cargar()
-})
+onMounted(cargar)
 
 const eliminarInterfaz = async (id) => {
-  try {
-    await interfazStore.eliminarInterfaz(id)
-    await cargar()
-  } catch (error) {
-    console.error('Error eliminando interfaz', error)
-  }
+  await interfazStore.eliminarInterfazEnDispositivos(id, [dispositivoId])
+  await cargar()
 }
 
-const editarInterfaz = (interfaz) => {
-  interfazSeleccionada.value = { ...interfaz }
+const editarInterfaz = (i) => {
+  interfazSeleccionada.value = i
   mostrandoFormulario.value = true
 }
 
