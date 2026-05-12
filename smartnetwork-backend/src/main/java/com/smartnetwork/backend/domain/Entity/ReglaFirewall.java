@@ -1,6 +1,10 @@
 package com.smartnetwork.backend.domain.Entity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "reglas_firewall")
@@ -8,7 +12,6 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "dispositivo")
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReglaFirewall {
 
@@ -17,10 +20,9 @@ public class ReglaFirewall {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dispositivo_id", nullable = false)
-    private Dispositivo dispositivo;
+    @OneToMany(mappedBy = "reglaFirewall", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoReglaFirewall> dispositivoReglaFirewalls = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)

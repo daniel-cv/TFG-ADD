@@ -58,6 +58,8 @@
       <ReglaFirewallForm
         :regla-edit="reglaSeleccionada"
         @creada="recargarYCerrar"
+        :modo="props.modo"
+        :dispositivo-id="dispositivoId"
         @cancelar="cerrarFormulario"
       />
     </div>
@@ -71,6 +73,8 @@ import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
 import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
 
+
+
 const reglaStore = useReglaFirewallStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 
@@ -78,6 +82,14 @@ const mostrandoFormulario = ref(false)
 const reglaSeleccionada = ref(null)
 const dispositivoId = computed(() => seleccionadoStore.dispositivo?.id)
 
+const props = defineProps({
+  dispositivoId: Number,
+  modo: {
+    type: String,
+    default: 'simple'
+  }
+})
+console.log(props.modo)
 const eliminarRegla = async (id) => {
   try {
   await reglaStore.eliminarRegla(id)

@@ -65,7 +65,7 @@ public class Dispositivo {
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<ReglaFirewall> reglasFirewall = new ArrayList<>();
+    private List<DispositivoReglaFirewall> reglasFirewall = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

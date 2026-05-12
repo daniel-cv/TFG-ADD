@@ -3,6 +3,8 @@ package com.smartnetwork.backend.domain.dtos.Policys;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Getter
 @Setter
 public class CrearReglaFirewallDTO {
@@ -16,5 +18,5 @@ public class CrearReglaFirewallDTO {
     private String servicio;
     private String nat;
     private String action;
-    private Long dispositivoId;
+    private List<Long> dispositivosId;
 }
