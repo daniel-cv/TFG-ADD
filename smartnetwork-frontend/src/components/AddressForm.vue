@@ -1,5 +1,5 @@
 <template>
-  <v-form @submit.prevent="handleSubmit">
+  <v-form ref="form" @submit.prevent="handleSubmit">
 
     <!-- NAME -->
     <v-text-field
@@ -30,6 +30,7 @@
       prepend-inner-icon="mdi-ip"
       variant="outlined"
       class="mb-3"
+      :rules="[requiredRule, ipRule]"
       required
     />
 
@@ -41,6 +42,7 @@
       prepend-inner-icon="mdi-ip"
       variant="outlined"
       class="mb-3"
+      :rules="[requiredRule, ipRule]"
       required
     />
 
@@ -51,6 +53,7 @@
       prepend-inner-icon="mdi-ip"
       variant="outlined"
       class="mb-3"
+      :rules="[requiredRule, maskRule]"
       required
     />
 
@@ -98,7 +101,10 @@
 <script setup>
 import { ref, onMounted, computed, nextTick } from "vue";
 import { useAddressStore } from '@/stores/addressStores'
-import { obtenerInterfacesPorDispositivo, obtenerInterfacesUsuario } from '@/services/interfazService'
+import {
+  obtenerInterfacesPorDispositivo,
+  obtenerInterfacesUsuario
+} from '@/services/interfazService'
 
 const props = defineProps({
   dispositivoId: { type: Number, required: false },
@@ -110,6 +116,8 @@ const emit = defineEmits(['creada', 'cancelar'])
 
 const addressStore = useAddressStore()
 
+const form = ref(null)
+
 const name = ref("")
 const type = ref("")
 const ip = ref("")
@@ -119,8 +127,39 @@ const comentario = ref("")
 const interfaces = ref([])
 const mensaje = ref("")
 
-// ✅ modo edición limpio
 const isEdit = computed(() => !!props.addressEdit)
+
+/* ---------------- VALIDACIONES ---------------- */
+
+const isValidIp = (value) => {
+  if (!value) return false
+  const parts = value.split('.')
+  if (parts.length !== 4) return false
+
+  return parts.every(p => {
+    const n = Number(p)
+    return p !== '' && !isNaN(n) && n >= 0 && n <= 255
+  })
+}
+
+// máscara real: bits 1 seguidos de 0s (ej: 1111111100000000)
+const isValidMask = (mask) => {
+  if (!isValidIp(mask)) return false
+
+  const binary = mask
+    .split('.')
+    .map(octet => Number(octet).toString(2).padStart(8, '0'))
+    .join('')
+
+  return /^1*0*$/.test(binary)
+}
+
+/* Vuetify rules */
+const requiredRule = v => !!v || "Campo obligatorio"
+const ipRule = v => isValidIp(v) || "IP inválida"
+const maskRule = v => isValidMask(v) || "Máscara inválida"
+
+/* ---------------- INIT ---------------- */
 
 onMounted(async () => {
   try {
@@ -134,7 +173,6 @@ onMounted(async () => {
 
     const apiData = res.data;
 
-    // 🔹 Generar puertos base
     const puertosBase = [1, 2, 3, 4].map(num => {
       const nombreBuscado = `port${num}`;
       const coincidencia = apiData.find(
@@ -143,7 +181,7 @@ onMounted(async () => {
 
       return {
         title: `Port${num}`,
-        value: coincidencia ? Number(coincidencia.id) : -num // ⚠️ quitamos negativos
+        value: coincidencia ? Number(coincidencia.id) : -num
       };
     });
 
@@ -169,20 +207,9 @@ onMounted(async () => {
       type.value = props.addressEdit.type;
       ip.value = props.addressEdit.ip;
       ipdestino.value = props.addressEdit.ipdestino;
-
-      const id = props.addressEdit.interfazId
+      interfazId.value = props.addressEdit.interfazId
         ? Number(props.addressEdit.interfazId)
         : null;
-
-      interfazId.value = id;
-
-      // 🔥 CLAVE: asegurar que el select tiene ese valor
-      if (id && !interfaces.value.find(i => i.value === id)) {
-        interfaces.value.push({
-          title: `Port${id}`,
-          value: id
-        });
-      }
 
       comentario.value = props.addressEdit.comentario;
     }
@@ -190,9 +217,14 @@ onMounted(async () => {
   } catch (error) {
     console.error('Error cargando interfaces', error);
   }
-});
+})
+
+/* ---------------- SUBMIT ---------------- */
 
 const handleSubmit = async () => {
+  const result = await form.value.validate()
+  if (!result.valid) return
+
   try {
     const payload = {
       name: name.value,
@@ -204,28 +236,18 @@ const handleSubmit = async () => {
           : null,
       interfazId: interfazId.value || null,
       comentario: comentario.value
-    };
+    }
 
-    // EDIT
     if (props.addressEdit) {
-
       if (props.addressEdit.dispositivosIds?.length) {
         payload.dispositivosIds = props.addressEdit.dispositivosIds
-      }
-      else if (props.modo === 'full' && props.dispositivoId) {
+      } else if (props.modo === 'full' && props.dispositivoId) {
         payload.dispositivosIds = [props.dispositivoId]
       }
 
-      await addressStore.actualizarAddress(
-        props.addressEdit.id,
-        payload
-      )
-
+      await addressStore.actualizarAddress(props.addressEdit.id, payload)
       mensaje.value = "Address actualizada correctamente"
-    }
-
-    // CREATE
-    else {
+    } else {
       if (props.modo === 'full' && props.dispositivoId) {
         payload.dispositivosIds = [props.dispositivoId]
         await addressStore.crearAddressCompleto(payload)
