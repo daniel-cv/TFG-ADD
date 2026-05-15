@@ -110,10 +110,17 @@
   </v-form>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<!-- ReglaFirewallForm.vue -->
 
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
+<script setup>
+import {
+  ref,
+  onMounted
+} from 'vue'
+
+import {
+  useReglaFirewallStore
+} from '@/stores/reglafirewallStore'
 
 import {
   obtenerAddressesPorDispositivo,
@@ -126,16 +133,21 @@ import {
 } from '@/services/interfazService'
 
 const props = defineProps({
-  dispositivoId: Number,
+
   reglaEdit: {
     type: Object,
     default: null
   },
+
   modo: {
     type: String,
-    default: "simple"
+    default: 'simple'
   },
-  dispositivoId: { type: Number, required: true },
+
+  dispositivoId: {
+    type: Number,
+    required: false
+  }
 })
 
 const emit = defineEmits([
@@ -143,65 +155,130 @@ const emit = defineEmits([
   'cancelar'
 ])
 
-const store = useReglaFirewallStore()
+const store =
+  useReglaFirewallStore()
+
+/* ========================= */
+/* FORM */
+/* ========================= */
+
 const nombre = ref('')
+
 const origen = ref('')
+
 const destino = ref('')
+
 const ipOrigen = ref('')
+
 const ipDestino = ref('')
+
 const servicio = ref('ALL')
+
 const nat = ref('')
+
 const action = ref('')
+
 const mensaje = ref('')
+
+/* ========================= */
+/* DATA */
+/* ========================= */
+
 const direcciones = ref([])
+
 const interfaces = ref([])
 
+/* ========================= */
+/* MOUNT */
+/* ========================= */
+
 onMounted(async () => {
+
   if (props.reglaEdit) {
-    nombre.value = props.reglaEdit.nombre
-    origen.value = props.reglaEdit.origen
-    destino.value = props.reglaEdit.destino
-    ipOrigen.value = props.reglaEdit.ipOrigen
-    ipDestino.value = props.reglaEdit.ipDestino
-    servicio.value = props.reglaEdit.servicio
-    nat.value = props.reglaEdit.nat
-    action.value = props.reglaEdit.action
+
+    nombre.value =
+      props.reglaEdit.nombre
+
+    origen.value =
+      props.reglaEdit.origen
+
+    destino.value =
+      props.reglaEdit.destino
+
+    ipOrigen.value =
+      props.reglaEdit.ipOrigen ||
+      props.reglaEdit.iporigen
+
+    ipDestino.value =
+      props.reglaEdit.ipDestino ||
+      props.reglaEdit.ipdestino
+
+    servicio.value =
+      props.reglaEdit.servicio
+
+    nat.value =
+      props.reglaEdit.nat
+
+    action.value =
+      props.reglaEdit.action
   }
+
   await cargarDirecciones()
+
   await cargarInterfaces()
 })
 
-const cargarDirecciones = async () => {
+/* ========================= */
+/* DIRECCIONES */
+/* ========================= */
+
+const cargarDirecciones =
+async () => {
+
   try {
+
     let res = null
-    if (props.modo === "simple") {
-      res = await obtenerAddressPorId()
-    }
-    else {
-      res = await obtenerAddressesPorDispositivo(
-        props.dispositivoId
-      )
+
+    if (props.modo === 'simple') {
+
+      res =
+        await obtenerAddressPorId()
+
+    } else {
+
+      res =
+        await obtenerAddressesPorDispositivo(
+          props.dispositivoId
+        )
     }
 
     const baseAddresses = [
+
       {
         title: 'ALL',
         value: 'all'
       }
     ]
+
     direcciones.value = [
+
       ...baseAddresses,
+
       ...res.data
-        .filter(
-          addr =>
-            addr.name.toLowerCase() !== 'all'
+        .filter(addr =>
+          addr.name.toLowerCase()
+            !== 'all'
         )
         .map(addr => ({
+
           title: addr.name,
+
           value: addr.name
         }))
     ]
+
   } catch (error) {
+
     console.error(
       'Error cargando direcciones',
       error
@@ -209,32 +286,65 @@ const cargarDirecciones = async () => {
   }
 }
 
-const cargarInterfaces = async () => {
+/* ========================= */
+/* INTERFACES */
+/* ========================= */
+
+const cargarInterfaces =
+async () => {
+
   try {
+
     let res = null
-    if (props.modo === "simple") {
-      res = await obtenerInterfacesUsuario()
-    }
-    else {
-      res = await obtenerInterfacesPorDispositivo(
-        props.dispositivoId
-      )
+
+    if (props.modo === 'simple') {
+
+      res =
+        await obtenerInterfacesUsuario()
+
+    } else {
+
+      res =
+        await obtenerInterfacesPorDispositivo(
+          props.dispositivoId
+        )
     }
 
     const puertosBase = [
-      { title: 'Port1', value: 'port1' },
-      { title: 'Port2', value: 'port2' },
-      { title: 'Port3', value: 'port3' },
-      { title: 'Port4', value: 'port4' }
+
+      {
+        title: 'Port1',
+        value: 'port1'
+      },
+
+      {
+        title: 'Port2',
+        value: 'port2'
+      },
+
+      {
+        title: 'Port3',
+        value: 'port3'
+      },
+
+      {
+        title: 'Port4',
+        value: 'port4'
+      }
     ]
 
-    const nombresBase = new Set(
-      puertosBase.map(
-        p => p.value.toLowerCase()
+    const nombresBase =
+      new Set(
+
+        puertosBase.map(
+          p => p.value.toLowerCase()
+        )
       )
-    )
+
     interfaces.value = [
+
       ...puertosBase,
+
       ...res.data
         .filter(inter =>
           !nombresBase.has(
@@ -242,11 +352,15 @@ const cargarInterfaces = async () => {
           )
         )
         .map(inter => ({
+
           title: inter.name,
+
           value: inter.name
         }))
     ]
+
   } catch (error) {
+
     console.error(
       'Error cargando interfaces',
       error
@@ -258,55 +372,131 @@ const cargarInterfaces = async () => {
 /* SUBMIT */
 /* ========================= */
 
-const handleSubmit = async () => {
+const handleSubmit =
+async () => {
+
   try {
+
     const payload = {
+
       nombre: nombre.value,
+
       origen: origen.value,
+
       destino: destino.value,
+
       ipOrigen: ipOrigen.value,
+
       ipDestino: ipDestino.value,
+
       servicio: servicio.value,
+
       nat: nat.value,
+
       action: action.value,
+
       schedule: 'always',
+
       habilitada: true
     }
-    if (
-      props.modo === 'full'
-      && props.dispositivoId
-    ) {
-      payload.dispositivosId = [
+
+    /* ========================= */
+    /* EDITAR */
+    /* ========================= */
+
+    if (props.reglaEdit) {
+
+      /* ========================= */
+      /* DASHBOARD */
+      /* ========================= */
+
+      if (
+        props.reglaEdit
+          .dispositivosIds?.length
+      ) {
+
+        payload.dispositivosId =
+          props.reglaEdit
+            .dispositivosIds
+      }
+
+      /* ========================= */
+      /* INDIVIDUAL */
+      /* ========================= */
+
+      else if (
+
+        props.modo === 'full'
+
+        &&
+
         props.dispositivoId
-      ]
+      ) {
+
+        payload.dispositivosId = [
+
+          props.dispositivoId
+        ]
+      }
+
+      await store.actualizarRegla(
+
+        props.reglaEdit.id,
+
+        payload
+      )
+
+      mensaje.value =
+        'Regla actualizada correctamente'
     }
-    if (!props.reglaEdit && props.modo === 'simple') {
-      await store.crearRegla(payload)
+
+    /* ========================= */
+    /* CREAR */
+    /* ========================= */
+
+    else {
+
+      if (
+
+        props.modo === 'full'
+
+        &&
+
+        props.dispositivoId
+      ) {
+
+        payload.dispositivosId = [
+
+          props.dispositivoId
+        ]
+
+        await store
+          .crearReglaCompleta(
+            payload
+          )
+
+      } else {
+
+        await store
+          .crearRegla(payload)
+      }
+
       mensaje.value =
         'Regla creada correctamente'
     }
 
-    if(!props.reglaEdit && props.modo === 'full') {
-      console.log("Creando regla en modo completo con payload:", payload)
-      await store.crearReglaCompleta(payload)
-      mensaje.value =
-        'Regla creada correctamente (modo completo)'
-    }
-
-    else {
-      await store.actualizarRegla(
-        props.reglaEdit.id,
-        payload
-      )
-      mensaje.value =
-        'Regla actualizada correctamente'
-    }
     emit('creada')
+
   } catch (error) {
+
     console.error(error)
-    mensaje.value = props.reglaEdit
-      ? 'Error al actualizar regla'
-      : 'Error al crear regla'
+
+    mensaje.value =
+      props.reglaEdit
+
+        ? 'Error al actualizar regla'
+
+        : 'Error al crear regla'
   }
 }
 </script>

@@ -1,7 +1,9 @@
 <template>
   <div class="services-wrapper">
 
+    <!-- ========================= -->
     <!-- LISTADO -->
+    <!-- ========================= -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -17,6 +19,7 @@
       </div>
 
       <v-table class="professional-table">
+
         <thead>
           <tr>
             <th>Nombre</th>
@@ -25,29 +28,36 @@
             <th>IP Origen</th>
             <th>IP Destino</th>
             <th>Servicio</th>
+            <th>Implementado</th>
             <th>Acciones</th>
           </tr>
         </thead>
 
         <tbody>
+
           <tr
             v-for="regla in reglas"
             :key="regla.id"
           >
+
             <td class="name">
               {{ regla.nombre }}
             </td>
 
-            <td>{{ regla.origen }}</td>
+            <td>
+              {{ regla.origen }}
+            </td>
 
-            <td>{{ regla.destino }}</td>
-
-            <td class="ip">
-              {{ regla.iporigen }}
+            <td>
+              {{ regla.destino }}
             </td>
 
             <td class="ip">
-              {{ regla.ipdestino }}
+              {{ regla.ipOrigen }}
+            </td>
+
+            <td class="ip">
+              {{ regla.ipDestino }}
             </td>
 
             <td>
@@ -56,7 +66,38 @@
               </span>
             </td>
 
+            <!-- IMPLEMENTACIONES -->
+            <td>
+
+              <div
+                v-if="implementaciones[regla.id]?.length"
+              >
+
+                <v-chip
+                  v-for="nombreDisp in implementaciones[regla.id]"
+                  :key="nombreDisp"
+                  size="x-small"
+                  color="blue"
+                  class="ma-1"
+                  variant="flat"
+                >
+                  {{ nombreDisp }}
+                </v-chip>
+
+              </div>
+
+              <span
+                v-else
+                class="text-caption text-grey"
+              >
+                No aplicado
+              </span>
+
+            </td>
+
+            <!-- ACCIONES -->
             <td class="actions">
+
               <v-btn
                 color="green"
                 size="small"
@@ -68,7 +109,7 @@
               <v-btn
                 color="red"
                 size="small"
-                @click="eliminarRegla(regla.id)"
+                @click="abrirEliminar(regla)"
               >
                 ELIMINAR
               </v-btn>
@@ -80,64 +121,192 @@
               >
                 APLICAR
               </v-btn>
+
             </td>
+
           </tr>
+
         </tbody>
+
       </v-table>
+
     </div>
 
-    <!-- FORMULARIO -->
-    <div v-else class="formulario-inline">
+    <!-- ========================= -->
+    <!-- FORM -->
+    <!-- ========================= -->
+    <div
+      v-else
+      class="formulario-inline"
+    >
 
       <ReglaFirewallForm
         :regla-edit="reglaSeleccionada"
-        :modo="props.modo"
+        modo="simple"
         @creada="recargarYCerrar"
         @cancelar="cerrarFormulario"
       />
+
     </div>
 
-    <!-- MODAL APLICAR -->
-    <v-dialog v-model="dialogAplicar" max-width="650px">
+    <!-- ========================= -->
+    <!-- MODAL EDITAR -->
+    <!-- ========================= -->
+    <v-dialog
+      v-model="dialogEditar"
+      max-width="650px"
+    >
+
       <v-card class="apply-card">
 
         <v-card-title class="apply-title">
-          Aplicar Policy: {{ reglaAplicar?.nombre }}
+          Editar Policy y Sincronizar
         </v-card-title>
 
         <v-card-text>
-          <p>Selecciona dispositivos:</p>
+
+          <p>
+            Selecciona dispositivos donde quieres actualizar:
+          </p>
 
           <div class="device-list">
+
             <v-card
-              v-for="d in dispositivos"
+              v-for="d in dispositivosEditDisponibles"
               :key="d.id"
               class="device-item-modern"
-              :class="{ selected: seleccionados.includes(d.id) }"
+              :class="{
+                selected:
+                  seleccionados.includes(d.id)
+              }"
               @click="toggleSeleccion(d.id)"
             >
+
               <div class="device-info">
+
                 <v-checkbox
-                  :model-value="seleccionados.includes(d.id)"
+                  :model-value="
+                    seleccionados.includes(d.id)
+                  "
                   hide-details
                 />
 
                 <div>
+
                   <div class="device-name">
-                    {{ d.nombre }}
+                    {{
+                      d.name ||
+                      d.nombre ||
+                      d.hostname ||
+                      'Sin nombre'
+                    }}
                   </div>
 
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
+
                 </div>
+
               </div>
+
             </v-card>
+
           </div>
 
         </v-card-text>
 
         <v-card-actions>
+
+          <v-btn
+            variant="text"
+            @click="dialogEditar = false"
+          >
+            Cancelar
+          </v-btn>
+
+          <v-btn
+            color="green"
+            @click="confirmarEditar"
+          >
+            Continuar
+          </v-btn>
+
+        </v-card-actions>
+
+      </v-card>
+
+    </v-dialog>
+
+    <!-- ========================= -->
+    <!-- MODAL APLICAR -->
+    <!-- ========================= -->
+    <v-dialog
+      v-model="dialogAplicar"
+      max-width="650px"
+    >
+
+      <v-card class="apply-card">
+
+        <v-card-title class="apply-title">
+          Aplicar Policy
+        </v-card-title>
+
+        <v-card-text>
+
+          <p>
+            Selecciona dispositivos:
+          </p>
+
+          <div class="device-list">
+
+            <v-card
+              v-for="d in dispositivos"
+              :key="d.id"
+              class="device-item-modern"
+              :class="{
+                selected:
+                  seleccionados.includes(d.id)
+              }"
+              @click="toggleSeleccion(d.id)"
+            >
+
+              <div class="device-info">
+
+                <v-checkbox
+                  :model-value="
+                    seleccionados.includes(d.id)
+                  "
+                  hide-details
+                />
+
+                <div>
+
+                  <div class="device-name">
+                    {{
+                      d.name ||
+                      d.nombre ||
+                      d.hostname ||
+                      'Sin nombre'
+                    }}
+                  </div>
+
+                  <div class="device-ip">
+                    {{ d.ip }}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </v-card>
+
+          </div>
+
+        </v-card-text>
+
+        <v-card-actions>
+
           <v-btn
             variant="text"
             @click="dialogAplicar = false"
@@ -151,135 +320,366 @@
           >
             Aplicar
           </v-btn>
+
         </v-card-actions>
 
       </v-card>
+
+    </v-dialog>
+
+    <!-- ========================= -->
+    <!-- MODAL ELIMINAR -->
+    <!-- ========================= -->
+    <v-dialog
+      v-model="dialogEliminar"
+      max-width="650px"
+    >
+
+      <v-card class="apply-card">
+
+        <v-card-title class="apply-title">
+          Eliminar Policy
+        </v-card-title>
+
+        <v-card-text>
+
+          <p>
+            Selecciona dispositivos:
+          </p>
+
+          <div class="device-list">
+
+            <v-card
+              v-for="d in dispositivosEliminar"
+              :key="d.id"
+              class="device-item-modern"
+              :class="{
+                selected:
+                  seleccionadosEliminar.includes(d.id)
+              }"
+              @click="
+                toggleSeleccionEliminar(d.id)
+              "
+            >
+
+              <div class="device-info">
+
+                <v-checkbox
+                  :model-value="
+                    seleccionadosEliminar.includes(d.id)
+                  "
+                  hide-details
+                />
+
+                <div>
+
+                  <div class="device-name">
+                    {{
+                      d.name ||
+                      d.nombre ||
+                      d.hostname ||
+                      'Sin nombre'
+                    }}
+                  </div>
+
+                  <div class="device-ip">
+                    {{ d.ip }}
+                  </div>
+
+                </div>
+
+              </div>
+
+            </v-card>
+
+          </div>
+
+        </v-card-text>
+
+        <v-card-actions>
+
+          <v-btn
+            variant="text"
+            @click="dialogEliminar = false"
+          >
+            Cancelar
+          </v-btn>
+
+          <v-btn
+            color="red"
+            @click="eliminarAhora"
+          >
+            Eliminar
+          </v-btn>
+
+        </v-card-actions>
+
+      </v-card>
+
     </v-dialog>
 
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import {
+  ref,
+  onMounted,
+  computed
+} from 'vue'
 
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
-import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore"
-import { useDispositivoStore } from '@/stores/dispositivoStore'
+import {
+  useReglaFirewallStore
+} from '@/stores/reglafirewallStore'
 
-import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
+import {
+  useDispositivoStore
+} from '@/stores/dispositivoStore'
 
-const props = defineProps({
-  dispositivoId: Number,
-  modo: {
-    type: String,
-    default: 'simple'
-  }
-})
+import ReglaFirewallForm
+from '@/components/ReglaFirewallForm.vue'
 
 const reglaStore = useReglaFirewallStore()
-const seleccionadoStore = useDispositivoSeleccionadoStore()
 const dispositivoStore = useDispositivoStore()
 
 const reglas = ref([])
-
-const mostrandoFormulario = ref(false)
-const reglaSeleccionada = ref(null)
-
-const dispositivoId = computed(
-  () => seleccionadoStore.dispositivo?.id
-)
-
-/* ===================== */
-/* DISPOSITIVOS */
-/* ===================== */
 const dispositivos = ref([])
 
-/* ===================== */
+const implementaciones = ref({})
+
+/* ========================= */
+/* FORM */
+/* ========================= */
+
+const mostrandoFormulario = ref(false)
+
+const reglaSeleccionada = ref(null)
+
+/* ========================= */
+/* EDITAR */
+/* ========================= */
+
+const dialogEditar = ref(false)
+
+const reglaEditar = ref(null)
+
+const dispositivosEditDisponibles =
+  ref([])
+
+/* ========================= */
 /* APLICAR */
-/* ===================== */
+/* ========================= */
+
 const dialogAplicar = ref(false)
+
 const reglaAplicar = ref(null)
+
 const seleccionados = ref([])
 
-onMounted(async () => {
-  await cargar()
+/* ========================= */
+/* ELIMINAR */
+/* ========================= */
 
-  await dispositivoStore.getMisDispositivos()
-  dispositivos.value = dispositivoStore.dispositivos
+const dialogEliminar = ref(false)
+
+const reglaEliminar = ref(null)
+
+const seleccionadosEliminar = ref([])
+
+/* ========================= */
+/* COMPUTED */
+/* ========================= */
+
+const dispositivosEliminar = computed(() => {
+
+  if (!reglaEliminar.value) return []
+
+  const lista =
+    implementaciones.value[
+      reglaEliminar.value.id
+    ] || []
+
+  return dispositivos.value.filter(d => {
+
+    const nombre =
+      d.name ||
+      d.nombre ||
+      d.hostname ||
+      'Sin nombre'
+
+    return lista.includes(nombre)
+  })
 })
 
-const cargar = async () => {
+/* ========================= */
+/* CARGA */
+/* ========================= */
 
-  // MODO FULL
-  if (props.modo === 'full') {
+const cargarDatos = async () => {
 
-    if (dispositivoId.value) {
-      await reglaStore.cargarReglas(dispositivoId.value)
-      reglas.value = reglaStore.reglas
-    }
-  }
+  await Promise.all([
 
-  // MODO SIMPLE
-  if (props.modo === 'simple') {
-    await reglaStore.cargarReglasUsuario()
-    reglas.value = reglaStore.reglas
-  }
+    reglaStore.cargarReglasUsuario(),
+
+    dispositivoStore.getMisDispositivos()
+
+  ])
+
+  reglas.value = reglaStore.reglas
+
+  dispositivos.value =
+    dispositivoStore.dispositivos
+
+  await mapearImplementaciones()
 }
 
-const mostrarCrear = () => {
-  reglaSeleccionada.value = null
-  mostrandoFormulario.value = true
-}
+const mapearImplementaciones = async () => {
 
-const editarRegla = (regla) => {
-  reglaSeleccionada.value = { ...regla }
-  mostrandoFormulario.value = true
-}
+  const mapa = {}
 
-const eliminarRegla = async (id) => {
-
-  if (confirm('¿Estás seguro?')) {
+  for (const disp of dispositivos.value) {
 
     try {
 
-      await reglaStore.eliminarRegla(id)
+      const res =
+        await reglaStore
+          .obtenerReglasDispositivo(disp.id)
 
-      await cargar()
+      const reglasDisp = res || []
 
-    } catch (error) {
+      reglasDisp.forEach(regla => {
 
-      console.error("Error eliminando regla", error)
+        if (!mapa[regla.id]) {
+          mapa[regla.id] = []
+        }
+
+        const nombre =
+          disp.name ||
+          disp.nombre ||
+          disp.hostname ||
+          'Sin nombre'
+
+        if (
+          !mapa[regla.id]
+            .includes(nombre)
+        ) {
+
+          mapa[regla.id]
+            .push(nombre)
+        }
+      })
+
+    } catch (e) {
+
+      console.error(e)
     }
   }
+
+  implementaciones.value = mapa
+}
+
+onMounted(cargarDatos)
+
+/* ========================= */
+/* FORM */
+/* ========================= */
+
+const mostrarCrear = () => {
+
+  reglaSeleccionada.value = null
+
+  mostrandoFormulario.value = true
 }
 
 const recargarYCerrar = async () => {
 
   mostrandoFormulario.value = false
 
-  await cargar()
+  await cargarDatos()
+
+  reglaSeleccionada.value = null
+
+  seleccionados.value = []
 }
 
 const cerrarFormulario = () => {
+
   mostrandoFormulario.value = false
 }
 
-/* ===================== */
+/* ========================= */
+/* EDITAR */
+/* ========================= */
+
+const editarRegla = async (regla) => {
+
+  reglaEditar.value = regla
+
+  await mapearImplementaciones()
+
+  const lista =
+    implementaciones.value[
+      regla.id
+    ] || []
+
+  dispositivosEditDisponibles.value =
+    dispositivos.value.filter(d => {
+
+      const nombre =
+        d.name ||
+        d.nombre ||
+        d.hostname ||
+        'Sin nombre'
+
+      return lista.includes(nombre)
+    })
+
+  seleccionados.value =
+    dispositivosEditDisponibles.value
+      .map(d => d.id)
+
+  dialogEditar.value = true
+}
+
+const confirmarEditar = () => {
+
+  reglaSeleccionada.value = {
+
+    ...reglaEditar.value,
+
+    dispositivosIds: [
+      ...seleccionados.value
+    ]
+  }
+
+  dialogEditar.value = false
+
+  mostrandoFormulario.value = true
+}
+
+/* ========================= */
 /* APLICAR */
-/* ===================== */
-const aplicarReglaToDispositivos = (regla) => {
+/* ========================= */
+
+const aplicarReglaToDispositivos = (
+  regla
+) => {
+
   reglaAplicar.value = regla
+
   seleccionados.value = []
+
   dialogAplicar.value = true
 }
 
 const toggleSeleccion = (id) => {
 
-  if (seleccionados.value.includes(id)) {
+  const i =
+    seleccionados.value.indexOf(id)
 
-    seleccionados.value = seleccionados.value.filter(
-      x => x !== id
-    )
+  if (i > -1) {
+
+    seleccionados.value.splice(i, 1)
 
   } else {
 
@@ -289,22 +689,62 @@ const toggleSeleccion = (id) => {
 
 const aplicarAhora = async () => {
 
-  try {
+  await reglaStore.asignarRegla(
+    reglaAplicar.value.id,
+    seleccionados.value
+  )
 
-    await reglaStore.asignarRegla(
-      reglaAplicar.value.id,
-      seleccionados.value
-    )
+  dialogAplicar.value = false
 
-    dialogAplicar.value = false
+  await mapearImplementaciones()
+}
 
-  } catch (error) {
+/* ========================= */
+/* ELIMINAR */
+/* ========================= */
 
-    console.error(
-      "Error aplicando regla",
-      error
-    )
+const abrirEliminar = (regla) => {
+
+  reglaEliminar.value = regla
+
+  seleccionadosEliminar.value = []
+
+  dialogEliminar.value = true
+}
+
+const toggleSeleccionEliminar = (
+  id
+) => {
+
+  const i =
+    seleccionadosEliminar.value
+      .indexOf(id)
+
+  if (i > -1) {
+
+    seleccionadosEliminar.value
+      .splice(i, 1)
+
+  } else {
+
+    seleccionadosEliminar.value
+      .push(id)
   }
+}
+
+const eliminarAhora = async () => {
+
+  await reglaStore
+    .eliminarReglaEnDispositivos(
+
+      reglaEliminar.value.id,
+
+      seleccionadosEliminar.value
+    )
+
+  dialogEliminar.value = false
+
+  await cargarDatos()
 }
 </script>
 

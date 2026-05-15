@@ -143,7 +143,7 @@ onMounted(async () => {
 
       return {
         title: `Port${num}`,
-        value: coincidencia ? Number(coincidencia.id) : num // ⚠️ quitamos negativos
+        value: coincidencia ? Number(coincidencia.id) : -num // ⚠️ quitamos negativos
       };
     });
 

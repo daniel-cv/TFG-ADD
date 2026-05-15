@@ -26,8 +26,8 @@
             <td class="name">{{ regla.nombre }}</td>
             <td>{{ regla.origen }}</td>
             <td>{{ regla.destino }}</td>
-            <td class="ip">{{ regla.iporigen }}</td>
-            <td class="ip">{{ regla.ipdestino }}</td>
+            <td class="ip">{{ regla.ipOrigen }}</td>
+            <td class="ip">{{ regla.ipDestino }}</td>
             <td>
               <span class="service-badge">{{ regla.servicio }}</span>
             </td>
@@ -92,7 +92,7 @@ const props = defineProps({
 console.log(props.modo)
 const eliminarRegla = async (id) => {
   try {
-  await reglaStore.eliminarRegla(id)
+  await reglaStore.eliminarReglaEnDispositivos(id,[dispositivoId.value])
     if (dispositivoId.value) {
       await reglaStore.cargarReglas(dispositivoId.value)
     }

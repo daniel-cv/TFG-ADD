@@ -114,18 +114,15 @@ export const useAddressStore = defineStore('address', {
 
     async eliminarAddressEnDispositivos(addressId, dispositivosIds) {
   try {
+
     if (!dispositivosIds.length) {
       this.mensaje = "Selecciona al menos un dispositivo"
       return
     }
-
-    await Promise.all(
-      dispositivosIds.map(() => {
-        return eliminarAddressService(addressId, dispositivosIds)
-      })
-    )
+    await eliminarAddressService(addressId, dispositivosIds)
 
     this.mensaje = "Address eliminada correctamente"
+
   } catch (error) {
     console.error("Error eliminando address", error)
     this.mensaje = "Error al eliminar la address"

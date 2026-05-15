@@ -1,136 +1,318 @@
+// stores/reglafirewallStore.js
+
 import { defineStore } from 'pinia'
 import { useUserStore } from "@/stores/userStore";
 
 import {
+
   obtenerReglasPorDispositivo,
   obtenerReglasUsuario,
+
   crearReglaFirewall,
   crearReglaFirewallCompleta,
+
   eliminarReglaFirewall,
   actualizarReglaFirewall,
+
   asignarReglaADispositivos
+
 } from '@/services/reglaFirewallService'
 
-export const useReglaFirewallStore = defineStore('reglaFirewall', {
+export const useReglaFirewallStore =
+defineStore('reglaFirewall', {
+
   state: () => ({
+
     reglas: [],
+
     cargando: false,
+
     mensaje: "",
+
   }),
 
   actions: {
 
+    /* ========================= */
+    /* CARGAR */
+    /* ========================= */
+
     async cargarReglas(dispositivoId) {
+
       this.cargando = true
+
       try {
-        const res = await obtenerReglasPorDispositivo(dispositivoId)
+
+        const res =
+          await obtenerReglasPorDispositivo(
+            dispositivoId
+          )
+
         this.reglas = res.data
+
       } catch (error) {
+
         console.error(error)
-        this.mensaje = "Error cargando las reglas"
+
+        this.mensaje =
+          "Error cargando las reglas"
+
       } finally {
+
         this.cargando = false
       }
+    },
+
+    async obtenerReglasDispositivo(
+      dispositivoId
+    ) {
+
+      const res =
+        await obtenerReglasPorDispositivo(
+          dispositivoId
+        )
+
+      return res.data
     },
 
     async cargarReglasUsuario() {
+
       this.cargando = true
+
       try {
-        const res = await obtenerReglasUsuario()
+
+        const res =
+          await obtenerReglasUsuario()
+
         this.reglas = res.data
+
       } catch (error) {
+
         console.error(error)
-        this.mensaje = "Error cargando reglas del usuario"
+
+        this.mensaje =
+          "Error cargando reglas del usuario"
+
       } finally {
+
         this.cargando = false
       }
     },
 
+    /* ========================= */
+    /* CREAR */
+    /* ========================= */
+
     async crearRegla(regla) {
+
       try {
+
         const userStore = useUserStore();
+
         if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión";
+
+          this.mensaje =
+            "Debes iniciar sesión";
+
           return;
         }
 
-        const res = await crearReglaFirewall(regla);
+        const res =
+          await crearReglaFirewall(regla);
 
         this.reglas.push(res.data)
 
-        this.mensaje = "Regla creada correctamente";
+        this.mensaje =
+          "Regla creada correctamente";
+
         return res.data;
 
       } catch (error) {
+
         console.error(error);
-        this.mensaje = "Error al crear la regla";
+
+        this.mensaje =
+          "Error al crear la regla";
+
         throw error;
       }
     },
 
     async crearReglaCompleta(regla) {
+
       try {
-        const res = await crearReglaFirewallCompleta(regla)
+
+        const res =
+          await crearReglaFirewallCompleta(
+            regla
+          )
+
         this.reglas.push(res.data)
+
         return res.data
+
       } catch (error) {
+
         console.error(error)
+
         throw error
       }
     },
 
-    async eliminarRegla(reglaId) {
+    /* ========================= */
+    /* ELIMINAR */
+    /* ========================= */
+
+    async eliminarRegla(
+      reglaId,
+      dispositivosIds
+    ) {
+
       try {
+
         const userStore = useUserStore()
+
         if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión"
+
+          this.mensaje =
+            "Debes iniciar sesión"
+
           return
         }
 
-        await eliminarReglaFirewall(reglaId)
+        await eliminarReglaFirewall(
+          reglaId,
+          dispositivosIds
+        )
 
-        this.reglas = this.reglas.filter(r => r.id !== reglaId)
+        this.reglas =
+          this.reglas.filter(
+            r => r.id !== reglaId
+          )
 
-        this.mensaje = "Regla eliminada correctamente"
+        this.mensaje =
+          "Regla eliminada correctamente"
 
       } catch (error) {
-        console.error("Error al eliminar la regla", error)
-        this.mensaje = "Error eliminando regla"
+
+        console.error(
+          "Error eliminando regla",
+          error
+        )
+
+        this.mensaje =
+          "Error eliminando regla"
+
+        throw error
       }
     },
+
+    async eliminarReglaEnDispositivos(
+      reglaId,
+      dispositivosIds
+    ) {
+
+      try {
+
+        await eliminarReglaFirewall(
+          reglaId,
+          dispositivosIds
+        )
+
+        this.mensaje =
+          "Regla eliminada correctamente"
+
+      } catch (error) {
+
+        console.error(error)
+
+        throw error
+      }
+    },
+
+    /* ========================= */
+    /* EDITAR */
+    /* ========================= */
 
     async actualizarRegla(id, regla) {
+
       try {
+
         const userStore = useUserStore()
+
         if (!userStore.autenticado) {
-          this.mensaje = "Debes iniciar sesión"
+
+          this.mensaje =
+            "Debes iniciar sesión"
+
           return
         }
 
-        const res = await actualizarReglaFirewall(id, regla)
+        const res =
+          await actualizarReglaFirewall(
+            id,
+            regla
+          )
 
-        const index = this.reglas.findIndex(r => r.id === id)
+        const index =
+          this.reglas.findIndex(
+            r => r.id === id
+          )
+
         if (index !== -1) {
-          this.reglas[index] = res.data
+
+          this.reglas[index] =
+            res.data
         }
 
-        this.mensaje = "Regla actualizada correctamente"
+        this.mensaje =
+          "Regla actualizada correctamente"
+
         return res.data
 
       } catch (error) {
-        console.error("Error actualizando regla", error)
-        this.mensaje = "Error actualizando regla"
+
+        console.error(
+          "Error actualizando regla",
+          error
+        )
+
+        this.mensaje =
+          "Error actualizando regla"
+
         throw error
       }
     },
 
-    async asignarRegla(reglaId, dispositivosIds) {
+    /* ========================= */
+    /* APLICAR */
+    /* ========================= */
+
+    async asignarRegla(
+      reglaId,
+      dispositivosIds
+    ) {
+
       try {
-        await asignarReglaADispositivos(reglaId, dispositivosIds)
-        this.mensaje = "Regla asignada correctamente"
+
+        await asignarReglaADispositivos(
+          reglaId,
+          dispositivosIds
+        )
+
+        this.mensaje =
+          "Regla asignada correctamente"
+
       } catch (error) {
-        console.error("Error asignando regla", error)
-        this.mensaje = "Error asignando regla"
+
+        console.error(
+          "Error asignando regla",
+          error
+        )
+
+        this.mensaje =
+          "Error asignando regla"
+
         throw error
       }
     }

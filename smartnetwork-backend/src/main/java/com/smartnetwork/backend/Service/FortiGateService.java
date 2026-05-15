@@ -344,7 +344,7 @@ public class FortiGateService {
     public Map<String, Object> editarAddress(Dispositivo dispositivo, Address address, String nombreOriginal) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall/address/"
-                + URLEncoder.encode(nombreOriginal, StandardCharsets.UTF_8)
+                + nombreOriginal
                 + "?vdom=root";
 
         Map<String, Object> resultado = new HashMap<>();
@@ -383,7 +383,7 @@ public class FortiGateService {
     public Map<String, Object> eliminarAddress(Dispositivo dispositivo, String addressName) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall/address/"
-                + URLEncoder.encode(addressName, StandardCharsets.UTF_8)
+                + addressName
                 + "?vdom=root";
 
         return eliminarEntidad(dispositivo, url);
@@ -401,7 +401,7 @@ public class FortiGateService {
     public Map<String, Object> eliminarService(Dispositivo dispositivo, String serviceName) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall.service/custom/"
-                + URLEncoder.encode(serviceName, StandardCharsets.UTF_8).replace("+", "%20")
+                + serviceName
                 + "?vdom=root";
 
         return eliminarEntidad(dispositivo, url);
@@ -410,7 +410,7 @@ public class FortiGateService {
     public Map<String, Object> eliminarUsuarioFirewall(Dispositivo dispositivo, String username) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/user/local/"
-                + URLEncoder.encode(username, StandardCharsets.UTF_8)
+                + username
                 + "?vdom=root";
 
         return eliminarEntidad(dispositivo, url);
@@ -488,7 +488,7 @@ public class FortiGateService {
 
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/system/interface/"
-                + URLEncoder.encode(nombreOriginal, StandardCharsets.UTF_8)
+                + nombreOriginal
                 + "?vdom=root";
 
         Map<String, Object> result = new HashMap<>();
@@ -537,7 +537,7 @@ public class FortiGateService {
 
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/user/local/"
-                + URLEncoder.encode(oldName, StandardCharsets.UTF_8)
+                + oldName
                 + "?vdom=root";
 
         String json = """
@@ -585,7 +585,7 @@ public class FortiGateService {
     public Map<String, Object> editarVirtualIp(Dispositivo dispositivo,VirtualIp virtualIp, String nombreOriginal) {
         String url = "http://" + dispositivo.getIp()
                 + "/api/v2/cmdb/firewall/service/custom/"
-                + URLEncoder.encode(nombreOriginal, StandardCharsets.UTF_8)
+                + nombreOriginal
                 + "?vdom=root";
 
         Map<String, Object> resultado = new HashMap<>();

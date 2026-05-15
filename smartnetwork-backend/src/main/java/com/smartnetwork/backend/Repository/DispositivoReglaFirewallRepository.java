@@ -1,12 +1,62 @@
 package com.smartnetwork.backend.Repository;
 
 import com.smartnetwork.backend.domain.Entity.DispositivoReglaFirewall;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface DispositivoReglaFirewallRepository extends JpaRepository<DispositivoReglaFirewall, Long> {
-    boolean existsByDispositivoIdAndReglaFirewallId (Long dispositivoId, Long reglaFirewallId);
-    List<DispositivoReglaFirewall> findByDispositivoId (Long dispositivoId);
-    List<DispositivoReglaFirewall>  findByReglaFirewallId (Long reglaFirewallId);
+@Repository
+public interface DispositivoReglaFirewallRepository
+        extends JpaRepository<
+        DispositivoReglaFirewall,
+        Long
+        > {
+
+    /* ===================================================== */
+    /* FIND */
+    /* ===================================================== */
+
+    List<DispositivoReglaFirewall>
+    findByDispositivoId(
+            Long dispositivoId
+    );
+
+    List<DispositivoReglaFirewall>
+    findByReglaFirewallId(
+            Long reglaFirewallId
+    );
+
+    List<DispositivoReglaFirewall>
+    findAllByDispositivoId(
+            Long dispositivoId
+    );
+
+    List<DispositivoReglaFirewall>
+    findAllByReglaFirewallId(
+            Long reglaFirewallId
+    );
+
+    /* ===================================================== */
+    /* EXISTS */
+    /* ===================================================== */
+
+    boolean existsByDispositivoIdAndReglaFirewallId(
+            Long dispositivoId,
+            Long reglaFirewallId
+    );
+
+    boolean existsByReglaFirewallId(
+            Long reglaFirewallId
+    );
+
+    /* ===================================================== */
+    /* DELETE */
+    /* ===================================================== */
+
+    void deleteByDispositivoIdAndReglaFirewallId(
+            Long dispositivoId,
+            Long reglaFirewallId
+    );
 }

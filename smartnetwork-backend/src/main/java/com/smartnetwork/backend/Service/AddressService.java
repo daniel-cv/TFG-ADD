@@ -218,14 +218,19 @@ public class AddressService {
             throw new RuntimeException("No existen relaciones para este Address");
         }
 
-        for (DispositivoAddress rel : relaciones) {
+        // 🔥 Relaciones que realmente se eliminarán
+        List<DispositivoAddress> relacionesABorrar = relaciones.stream()
+                .filter(rel -> dispositivosIds.contains(rel.getDispositivo().getId()))
+                .toList();
+
+        if (relacionesABorrar.isEmpty()) {
+            throw new RuntimeException("No hay dispositivos válidos para eliminar");
+        }
+
+        // 🔥 Validar y eliminar en FortiGate
+        for (DispositivoAddress rel : relacionesABorrar) {
 
             Dispositivo dispositivo = rel.getDispositivo();
-
-            // Solo eliminar de los dispositivos seleccionados
-            if (!dispositivosIds.contains(dispositivo.getId())) {
-                continue;
-            }
 
             if (!dispositivo.getUsuario().getUsername().equals(username)) {
                 throw new RuntimeException("No autorizado");
@@ -235,13 +240,20 @@ public class AddressService {
                     .eliminarAddress(dispositivo, address.getName());
 
             if (!(Boolean) resultado.get("success")) {
-                throw new RuntimeException("Error eliminando Address en FortiGate: " + resultado);
+                throw new RuntimeException(
+                        "Error eliminando Address en FortiGate (" +
+                                dispositivo.getNombre() + "): " + resultado
+                );
             }
-
-            dispositivoAddressRepo.delete(rel);
         }
 
-        // 🔥 IMPORTANTE: solo borrar Address si ya no tiene relaciones
+        // 🔥 Borrar relaciones SOLO después del loop
+        dispositivoAddressRepo.deleteAll(relacionesABorrar);
+
+        // 🔥 Forzar sincronización con BD
+        dispositivoAddressRepo.flush();
+
+        // 🔥 Borrar Address solo si ya no tiene relaciones
         boolean quedanRelaciones = dispositivoAddressRepo
                 .existsByAddressId(addressId);
 
