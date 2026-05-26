@@ -145,6 +145,8 @@ const ip = ref('')
 const allowaccess = ref('')
 const role = ref('')
 const description = ref('')
+const mensaje = ref('')
+
 const interfacesDisponibles = ref([])
 const mensaje = ref('')
 

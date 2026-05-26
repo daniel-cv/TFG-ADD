@@ -1,0 +1,48 @@
+package com.smartnetwork.backend.domain.Entity.firewalls;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+@Table(name = "services")
+
+public class Service {
+
+    @EqualsAndHashCode.Include
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String nombre;
+
+    private String comentario;
+
+    private String categoria;
+
+    @Column(nullable = false)
+    private String tipoProtocolo;
+
+    @Column(nullable = true)
+    private String ip;
+
+    @Column(nullable = true)
+    private String destinationPort;
+
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoService> dispositivoServices = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private Usuario usuario;
+}

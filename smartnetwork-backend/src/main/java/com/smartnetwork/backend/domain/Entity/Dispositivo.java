@@ -2,6 +2,7 @@ package com.smartnetwork.backend.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smartnetwork.backend.domain.Entity.firewalls.*;
 import com.smartnetwork.backend.domain.Enum.EstadoDispositivo;
 import com.smartnetwork.backend.domain.Enum.Fabricante;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
@@ -30,8 +31,14 @@ public class Dispositivo {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String token;
+
+    @Column(nullable = true)
+    private String usuarioConexion;
+
+    @Column(nullable = true)
+    private String passwordConexion;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
