@@ -1,24 +1,22 @@
-package com.smartnetwork.backend.domain.Entity;
+package com.smartnetwork.backend.domain.Entity.firewalls.Address;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-import javax.lang.model.element.NestingKind;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "dispositivo_interfaz")
+@Table(name = "dispositivo_address")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DispositivoInterfaz {
+public class DispositivoAddress {
+
     @EmbeddedId
-    private DispositivoInterfazId id =  new DispositivoInterfazId();
+    private DispositivoAddressId id = new DispositivoAddressId();
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
@@ -28,9 +26,9 @@ public class DispositivoInterfaz {
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("interfazId")
-    @JoinColumn(name = "interfaz_id")
-    private Interfaz interfaz;
+    @MapsId("addressId")
+    @JoinColumn(name = "address_id")
+    private Address address;
 
     private String comentario;
     private LocalDateTime createdAt;
@@ -40,10 +38,10 @@ public class DispositivoInterfaz {
         this.createdAt = LocalDateTime.now();
     }
 
-    public DispositivoInterfaz(Dispositivo dispositivo, Interfaz interfaz, String comentario) {
+    public DispositivoAddress(Dispositivo dispositivo, Address address, String comentario) {
         this.dispositivo = dispositivo;
-        this.interfaz = interfaz;
+        this.address = address;
         this.comentario = comentario;
-        this.id = new DispositivoInterfazId(dispositivo.getId(), interfaz.getId());
+        this.id = new DispositivoAddressId(dispositivo.getId(), address.getId());
     }
 }

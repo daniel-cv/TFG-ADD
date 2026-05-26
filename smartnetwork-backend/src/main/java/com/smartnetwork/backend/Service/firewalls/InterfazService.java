@@ -1,21 +1,18 @@
 package com.smartnetwork.backend.Service.firewalls;
-import com.smartnetwork.backend.Repository.DispositivoInterfazRepository;
+import com.smartnetwork.backend.Repository.firewalls.Interfaz.DispositivoInterfazRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
-import com.smartnetwork.backend.domain.Entity.DispositivoInterfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.DispositivoInterfaz;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import jakarta.transaction.Transactional;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
-import com.smartnetwork.backend.Repository.firewalls.InterfazRepository;
+import com.smartnetwork.backend.Repository.firewalls.Interfaz.InterfazRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.CrearInterfazDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.InterfazDTO;
 
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 

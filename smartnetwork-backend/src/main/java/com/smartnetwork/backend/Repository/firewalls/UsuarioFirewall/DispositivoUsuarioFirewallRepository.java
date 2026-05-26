@@ -1,6 +1,6 @@
-package com.smartnetwork.backend.Repository;
+package com.smartnetwork.backend.Repository.firewalls.UsuarioFirewall;
 
-import com.smartnetwork.backend.domain.Entity.DispositivoUsuarioFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.DispositivoUsuarioFirewall;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

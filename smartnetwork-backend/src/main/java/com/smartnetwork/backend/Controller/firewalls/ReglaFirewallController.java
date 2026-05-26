@@ -1,13 +1,8 @@
 package com.smartnetwork.backend.Controller.firewalls;
 
 import com.smartnetwork.backend.Service.firewalls.ReglaFirewallService;
-import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.firewalls.Policys.CrearReglaFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.Policys.ReglaFirewallDTO;
-import com.smartnetwork.backend.Service.ReglaFirewallService;
-
-import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
-import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
 
 import lombok.RequiredArgsConstructor;
 

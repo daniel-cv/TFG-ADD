@@ -1,24 +1,20 @@
 package com.smartnetwork.backend.Service.firewalls;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
-import com.smartnetwork.backend.Repository.firewalls.UsuarioFirewallRepository;
+import com.smartnetwork.backend.Repository.firewalls.UsuarioFirewall.UsuarioFirewallRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.DispositivoUsuarioFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.UsuarioFirewall;
 import com.smartnetwork.backend.domain.dtos.firewalls.usuarioFirewall.CreaUsuarioFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.usuarioFirewall.UsuarioFirewallDTO;
-import com.smartnetwork.backend.Repository.DispositivoUsuarioFirewallRepository;
-import com.smartnetwork.backend.Repository.UsuarioFirewallRepository;
+import com.smartnetwork.backend.Repository.firewalls.UsuarioFirewall.DispositivoUsuarioFirewallRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.domain.Entity.*;
-import com.smartnetwork.backend.domain.dtos.usuarioFirewall.CreaUsuarioFirewallDTO;
-import com.smartnetwork.backend.domain.dtos.usuarioFirewall.UsuarioFirewallDTO;
 import jakarta.transaction.Transactional;
-import org.springframework.security.web.firewall.FirewalledRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class UsuarioFirewallService {

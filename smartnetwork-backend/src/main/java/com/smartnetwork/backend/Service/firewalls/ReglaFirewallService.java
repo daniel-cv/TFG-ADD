@@ -1,19 +1,15 @@
 package com.smartnetwork.backend.Service.firewalls;
 
-import com.smartnetwork.backend.Repository.DispositivoReglaFirewallRepository;
+import com.smartnetwork.backend.Repository.firewalls.ReglaFirewall.DispositivoReglaFirewallRepository;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
-import com.smartnetwork.backend.Repository.firewalls.ReglaFirewallRepository;
+import com.smartnetwork.backend.Repository.firewalls.ReglaFirewall.ReglaFirewallRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.DispositivoReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.ReglaFirewall;
 import com.smartnetwork.backend.domain.dtos.firewalls.Policys.CrearReglaFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.Policys.ReglaFirewallDTO;
-import com.smartnetwork.backend.Repository.ReglaFirewallRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
-
 import com.smartnetwork.backend.domain.Entity.*;
-
-import com.smartnetwork.backend.domain.dtos.Policys.CrearReglaFirewallDTO;
-import com.smartnetwork.backend.domain.dtos.Policys.ReglaFirewallDTO;
 
 import jakarta.transaction.Transactional;
 

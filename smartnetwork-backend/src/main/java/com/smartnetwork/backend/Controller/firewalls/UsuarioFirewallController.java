@@ -1,7 +1,6 @@
 package com.smartnetwork.backend.Controller.firewalls;
 
 import com.smartnetwork.backend.Service.firewalls.UsuarioFirewallService;
-import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall;
 import com.smartnetwork.backend.domain.dtos.firewalls.usuarioFirewall.CreaUsuarioFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.usuarioFirewall.UsuarioFirewallDTO;
 import org.springframework.http.ResponseEntity;

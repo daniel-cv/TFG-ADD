@@ -1,10 +1,10 @@
 package com.smartnetwork.backend.Service.firewalls;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
-import com.smartnetwork.backend.Repository.firewalls.InterfazRepository;
+import com.smartnetwork.backend.Repository.firewalls.Interfaz.InterfazRepository;
 import com.smartnetwork.backend.Repository.firewalls.VirtualIpRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import com.smartnetwork.backend.domain.Entity.firewalls.VirtualIp;
 import com.smartnetwork.backend.domain.dtos.firewalls.virtualIp.CrearVirtualIpDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.virtualIp.VirtualIpDTO;

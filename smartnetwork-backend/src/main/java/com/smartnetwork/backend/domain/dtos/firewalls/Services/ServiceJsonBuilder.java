@@ -1,6 +1,6 @@
 package com.smartnetwork.backend.domain.dtos.firewalls.Services;
 
-import com.smartnetwork.backend.domain.Entity.firewalls.Service;
+import com.smartnetwork.backend.domain.Entity.firewalls.Service.Service;
 
 public class ServiceJsonBuilder {
 

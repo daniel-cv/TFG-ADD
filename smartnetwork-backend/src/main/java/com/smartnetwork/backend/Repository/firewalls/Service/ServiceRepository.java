@@ -1,9 +1,7 @@
-package com.smartnetwork.backend.Repository.firewalls;
+package com.smartnetwork.backend.Repository.firewalls.Service;
 
-import com.smartnetwork.backend.domain.Entity.Address;
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.Service;
-import com.smartnetwork.backend.domain.Entity.firewalls.Service;
+
+import com.smartnetwork.backend.domain.Entity.firewalls.Service.Service;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

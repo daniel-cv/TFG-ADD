@@ -2,12 +2,10 @@ package com.smartnetwork.backend.Service;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
-import com.smartnetwork.backend.domain.Entity.Address;
 import com.smartnetwork.backend.Repository.switches.InterfacesRepository;
 import com.smartnetwork.backend.Repository.switches.IpRouteRepository;
 import com.smartnetwork.backend.Repository.switches.VlanRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.ReglaFirewall;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Entity.switches.Interfaces;
 import com.smartnetwork.backend.domain.Entity.switches.IpRoute;
@@ -18,15 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpStatusCodeException;
-import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.*;
-import java.net.http.HttpResponse;
-import static java.util.stream.Collectors.toList;
 
 @Service
 public class DispositivoService {

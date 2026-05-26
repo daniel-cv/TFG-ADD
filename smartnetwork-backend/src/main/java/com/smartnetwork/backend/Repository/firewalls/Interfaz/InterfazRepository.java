@@ -1,8 +1,6 @@
-package com.smartnetwork.backend.Repository.firewalls;
+package com.smartnetwork.backend.Repository.firewalls.Interfaz;
 
-import com.smartnetwork.backend.domain.Entity.Address;
-import com.smartnetwork.backend.domain.Entity.Interfaz;
-import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

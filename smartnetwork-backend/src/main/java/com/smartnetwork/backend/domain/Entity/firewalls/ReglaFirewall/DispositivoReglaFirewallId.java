@@ -1,4 +1,4 @@
-package com.smartnetwork.backend.domain.Entity;
+package com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
@@ -14,22 +14,19 @@ import java.util.Objects;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class DispositivoServiceId implements Serializable {
-
+public class DispositivoReglaFirewallId implements Serializable {
     private Long dispositivoId;
-    private Long serviceId;
+    private Long reglaFirewallId;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof DispositivoServiceId)) return false;
-        DispositivoServiceId that = (DispositivoServiceId) o;
+        if (!(o instanceof DispositivoReglaFirewallId)) return false;
+        DispositivoReglaFirewallId that = (DispositivoReglaFirewallId) o;
         return Objects.equals(dispositivoId, that.dispositivoId) &&
-                Objects.equals(serviceId, that.serviceId);
+                Objects.equals(reglaFirewallId, that.reglaFirewallId);
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(dispositivoId, serviceId);
-    }
+    public int hashCode() {return Objects.hash(dispositivoId, reglaFirewallId);}
 }

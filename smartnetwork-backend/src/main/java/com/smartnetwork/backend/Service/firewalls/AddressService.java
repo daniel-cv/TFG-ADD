@@ -1,28 +1,22 @@
 package com.smartnetwork.backend.Service.firewalls;
 
-import com.smartnetwork.backend.Repository.firewalls.AddressRepository;
+import com.smartnetwork.backend.Repository.firewalls.Address.AddressRepository;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
-import com.smartnetwork.backend.Repository.firewalls.InterfazRepository;
-import com.smartnetwork.backend.domain.Entity.firewalls.Address;
+import com.smartnetwork.backend.Repository.firewalls.Address.DispositivoAddressRepository;
+import com.smartnetwork.backend.Repository.firewalls.Interfaz.InterfazRepository;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.DispositivoAddress;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.address.CrearAddressDTO;
 import com.smartnetwork.backend.Repository.*;
-import com.smartnetwork.backend.Service.FortiGateService;
 import com.smartnetwork.backend.domain.Entity.*;
-import com.smartnetwork.backend.domain.dtos.address.AddressDTO;
-import com.smartnetwork.backend.domain.dtos.address.CrearAddressDTO;
 import jakarta.transaction.Transactional;
-import org.springframework.http.*;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class AddressService {
@@ -31,7 +25,7 @@ public class AddressService {
     private final InterfazRepository interfazRepo;
     private final DispositivoRepository dispositivoRepo;
     private final FortiGateService fortiGateService;
-    private final DispositivoAddressRepository  dispositivoAddressRepo;
+    private final DispositivoAddressRepository dispositivoAddressRepo;
     private final UsuarioRepository usuarioRepository;
 
     public AddressService(
@@ -52,8 +46,9 @@ public class AddressService {
 
         AddressDTO address = crearAddress(dto, username);
 
-        Dispositivo dispositivo = dispositivoRepo.findById(dto.getDispositivoId())
-                .orElseThrow(() -> new RuntimeException("Dispositivo no existe"));
+        if (dto.getDispositivosIds() != null && !dto.getDispositivosIds().isEmpty()) {
+            asignarAddressADispositivos(address.getId(), dto.getDispositivosIds(), username);
+        }
 
         return address;
     }

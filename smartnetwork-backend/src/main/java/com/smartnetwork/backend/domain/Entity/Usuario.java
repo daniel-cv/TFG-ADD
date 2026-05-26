@@ -1,5 +1,10 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.ReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.Service.Service;
+import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.UsuarioFirewall;
 import jakarta.persistence.*;
 import lombok.*;
 

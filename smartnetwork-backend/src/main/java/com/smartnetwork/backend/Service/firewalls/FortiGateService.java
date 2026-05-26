@@ -2,6 +2,10 @@ package com.smartnetwork.backend.Service.firewalls;
 
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.firewalls.*;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.ReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.UsuarioFirewall;
 import com.smartnetwork.backend.domain.dtos.firewalls.Services.ServiceJsonBuilder;
 import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressJsonBuilder;
 import org.springframework.http.*;
@@ -128,7 +132,7 @@ public class FortiGateService {
         return result;
     }
 
-    public Map<String, Object> crearServicio(Dispositivo dispositivo, com.smartnetwork.backend.domain.Entity.firewalls.Service service){
+    public Map<String, Object> crearServicio(Dispositivo dispositivo, com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service){
         String url = "http://" + dispositivo.getIp() +
                 "/api/v2/cmdb/firewall.service/custom";
 

@@ -148,7 +148,6 @@ const description = ref('')
 const mensaje = ref('')
 
 const interfacesDisponibles = ref([])
-const mensaje = ref('')
 
 onMounted(async () => {
 

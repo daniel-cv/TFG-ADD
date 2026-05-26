@@ -1,4 +1,4 @@
-package com.smartnetwork.backend.domain.Entity;
+package com.smartnetwork.backend.domain.Entity.firewalls.Interfaz;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package com.smartnetwork.backend.domain.Entity;
+package com.smartnetwork.backend.domain.Entity.firewalls.Address;
 
 import jakarta.persistence.Embeddable;
 import lombok.*;

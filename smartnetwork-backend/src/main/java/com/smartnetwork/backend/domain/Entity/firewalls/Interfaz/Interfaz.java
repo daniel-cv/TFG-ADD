@@ -1,7 +1,8 @@
-package com.smartnetwork.backend.domain.Entity.firewalls;
+package com.smartnetwork.backend.domain.Entity.firewalls.Interfaz;
 
-import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smartnetwork.backend.domain.Entity.Usuario;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
 import jakarta.persistence.*;
 import lombok.*;
 

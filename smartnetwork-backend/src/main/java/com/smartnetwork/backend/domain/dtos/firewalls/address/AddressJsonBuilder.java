@@ -1,6 +1,6 @@
 package com.smartnetwork.backend.domain.dtos.firewalls.address;
 
-import com.smartnetwork.backend.domain.Entity.firewalls.Address;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
 
 public class AddressJsonBuilder {
 

@@ -1,17 +1,12 @@
 package com.smartnetwork.backend.Controller.firewalls;
 
-import com.smartnetwork.backend.Service.DispositivoService;
 import com.smartnetwork.backend.Service.firewalls.ServiceService;
-import com.smartnetwork.backend.domain.Entity.firewalls.Service;
+import com.smartnetwork.backend.domain.Entity.firewalls.Service.Service;
 import com.smartnetwork.backend.domain.dtos.firewalls.Services.CrearServiceDTO;
-import com.smartnetwork.backend.Service.ServiceService;
-import com.smartnetwork.backend.domain.Entity.Service;
-import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
-import com.smartnetwork.backend.domain.dtos.Services.ServiceDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.Services.ServiceDTO;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
-import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController

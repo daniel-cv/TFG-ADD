@@ -1,19 +1,15 @@
 package com.smartnetwork.backend.Service.firewalls;
 
 import com.smartnetwork.backend.Repository.DispositivoRepository;
-import com.smartnetwork.backend.Repository.firewalls.ServiceRepository;
-import com.smartnetwork.backend.Repository.DispositivoServiceRepository;
-import com.smartnetwork.backend.Repository.ServiceRepository;
+import com.smartnetwork.backend.Repository.firewalls.Service.ServiceRepository;
+import com.smartnetwork.backend.Repository.firewalls.Service.DispositivoServiceRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
-import com.smartnetwork.backend.domain.Entity.DispositivoService;
+import com.smartnetwork.backend.domain.Entity.firewalls.Service.DispositivoService;
 import com.smartnetwork.backend.domain.Entity.Usuario;
-import com.smartnetwork.backend.domain.dtos.Services.CrearServiceDTO;
-import com.smartnetwork.backend.domain.dtos.Services.ServiceDTO;
-import jakarta.transaction.Transactional;
-import org.springframework.http.*;
 import com.smartnetwork.backend.domain.dtos.firewalls.Services.CrearServiceDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.Services.ServiceDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,7 +40,7 @@ public class ServiceService {
         Usuario usuario = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        com.smartnetwork.backend.domain.Entity.Service service = new com.smartnetwork.backend.domain.Entity.Service();
+        com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service = new com.smartnetwork.backend.domain.Entity.firewalls.Service.Service();
         service.setNombre(dto.getNombre());
         service.setTipoProtocolo(dto.getTipoProtocolo());
         service.setDestinationPort(dto.getDestinationPort());
@@ -52,7 +48,7 @@ public class ServiceService {
         service.setComentario(dto.getComentario());
         service.setUsuario(usuario);
 
-        com.smartnetwork.backend.domain.Entity.Service saved = serviceRepository.save(service);
+        com.smartnetwork.backend.domain.Entity.firewalls.Service.Service saved = serviceRepository.save(service);
 
         return toDTO(saved);
     }
@@ -72,7 +68,7 @@ public class ServiceService {
     @Transactional
     public void asignarServiceADispositivos(Long serviceId, List<Long> dispositivosIds, String username) {
 
-        com.smartnetwork.backend.domain.Entity.Service service = serviceRepository.findById(serviceId)
+        com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service = serviceRepository.findById(serviceId)
                 .orElseThrow(() -> new RuntimeException("Service no existe"));
 
         if (!service.getUsuario().getUsername().equals(username)) {
@@ -99,7 +95,7 @@ public class ServiceService {
                 throw new RuntimeException("Error creando service en FortiGate: " + resultado);
             }
 
-            com.smartnetwork.backend.domain.Entity.DispositivoService rel = new DispositivoService(dispositivo, service, service.getComentario());
+            DispositivoService rel = new DispositivoService(dispositivo, service, service.getComentario());
             dispositivoServiceRepository.save(rel);
         }
     }
@@ -131,7 +127,7 @@ public class ServiceService {
     }
 
 
-    public List<com.smartnetwork.backend.domain.Entity.Service> findAllByDispositivo(
+    public List<com.smartnetwork.backend.domain.Entity.firewalls.Service.Service> findAllByDispositivo(
             Long dispositivoId,
             String username) {
 
@@ -146,7 +142,7 @@ public class ServiceService {
         return serviceRepository.findByDispositivoServices_Dispositivo_Id(dispositivoId);
     }
 
-    public Optional<com.smartnetwork.backend.domain.Entity.Service> findById(
+    public Optional<com.smartnetwork.backend.domain.Entity.firewalls.Service.Service> findById(
             Long serviceId,
             Long dispositivoId,
             String username) {
@@ -169,7 +165,7 @@ public class ServiceService {
             String username
     ) {
 
-        com.smartnetwork.backend.domain.Entity.Service service =
+        com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service =
                 serviceRepository.findById(serviceId)
                         .orElseThrow(() -> new RuntimeException("Service no existe"));
 
@@ -205,7 +201,7 @@ public class ServiceService {
         }
     }
 
-    private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.Service service) {
+    private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service) {
         ServiceDTO dto = new ServiceDTO();
         dto.setId(service.getId());
         dto.setNombre(service.getNombre());
@@ -216,7 +212,7 @@ public class ServiceService {
         return dto;
     }
 
-    private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.Service service, Long dispositivoId) {
+    private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service, Long dispositivoId) {
         ServiceDTO dto = toDTO(service);
         dto.setDispositivoId(dispositivoId);
         return dto;

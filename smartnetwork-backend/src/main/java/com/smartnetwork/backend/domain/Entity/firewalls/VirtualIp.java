@@ -1,6 +1,7 @@
 package com.smartnetwork.backend.domain.Entity.firewalls;
 
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import jakarta.persistence.*;
 import lombok.*;
 

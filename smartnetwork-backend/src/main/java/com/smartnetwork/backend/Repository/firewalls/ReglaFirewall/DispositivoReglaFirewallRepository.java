@@ -1,6 +1,6 @@
-package com.smartnetwork.backend.Repository;
+package com.smartnetwork.backend.Repository.firewalls.ReglaFirewall;
 
-import com.smartnetwork.backend.domain.Entity.DispositivoReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.DispositivoReglaFirewall;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
