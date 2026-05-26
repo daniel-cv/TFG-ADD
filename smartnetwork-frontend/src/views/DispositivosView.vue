@@ -30,7 +30,9 @@
         <v-card
           class="device-card"
           @click="configurar(d)"
+
         >
+        
           <!-- NOMBRE -->
           <div class="device-name">
             {{ d.nombre }}
@@ -61,7 +63,7 @@
             >
               Configurar
             </v-btn>
-            
+
           </div>
         </v-card>
       </v-col>
@@ -83,7 +85,7 @@ const mensaje = ref("");
 const seleccionadoStore = useDispositivoSeleccionadoStore();
 
 const dispositivoStore = useDispositivoStore();
-const userStore = useUserStore();  
+const userStore = useUserStore();
 const router = useRouter();
 
 function configurar(dispositivo) {

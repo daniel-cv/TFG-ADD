@@ -1,0 +1,75 @@
+package com.smartnetwork.backend.Controller.firewalls;
+
+import com.smartnetwork.backend.Service.DispositivoService;
+import com.smartnetwork.backend.Service.firewalls.ServiceService;
+import com.smartnetwork.backend.domain.Entity.firewalls.Service;
+import com.smartnetwork.backend.domain.dtos.firewalls.Services.CrearServiceDTO;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/firewalls/services")
+public class ServiceController {
+
+    private final ServiceService serviceService;
+    private final DispositivoService dispositivoService;
+
+    public ServiceController(ServiceService serviceService, DispositivoService dispositivoService) {
+        this.serviceService = serviceService;
+        this.dispositivoService = dispositivoService;
+    }
+
+    @PostMapping("/create")
+    public Service crear(@RequestBody CrearServiceDTO dto, Authentication auth) {
+        return serviceService.create(dto, auth.getName());
+    }
+
+    @GetMapping("/dispositivo/{dispositivoId}")
+    public List<Service> listar(
+            @PathVariable Long dispositivoId,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+        return serviceService.findAllByDispositivo(dispositivoId, username);
+    }
+
+    @GetMapping("/get/{serviceId}")
+    public Service obtener(
+            @PathVariable Long dispositivoId,
+            @PathVariable Long serviceId,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+
+        return serviceService
+                .findById(serviceId, dispositivoId, username)
+                .orElseThrow(() -> new RuntimeException("Service no encontrado"));
+    }
+
+    @PutMapping("/update/{serviceId}")
+    public Service actualizar(
+            @PathVariable Long dispositivoId,
+            @PathVariable Long serviceId,
+            @RequestBody Service service,
+            Authentication authentication
+    ) {
+        String username = authentication.getName();
+
+        service.setId(serviceId);
+        service.getDispositivo().setId(dispositivoId);
+
+        return serviceService.update(service, username, dispositivoId);
+    }
+
+    @DeleteMapping("/delete/{serviceId}")
+    public void eliminar(
+            @PathVariable Long serviceId,
+            Authentication auth
+    ) {
+        serviceService.eliminarService(serviceId, auth.getName());
+    }
+
+}
+

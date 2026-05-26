@@ -5,7 +5,6 @@
     <v-text-field
       v-model="name"
       label="Nombre"
-      prepend-inner-icon="mdi-lan"
       variant="outlined"
       class="mb-3"
       :disabled="interfazEdit"
@@ -19,7 +18,6 @@
       label="Tipo"
       variant="outlined"
       class="mb-3"
-      clearable
       :disabled="interfazEdit"  
       required
     />
