@@ -18,13 +18,11 @@ public class VlanController {
         this.vlanService = vlanService;
     }
 
-    // 🔥 LISTAR
     @GetMapping("/dispositivo/{id}")
     public List<VlanDTO> listar(@PathVariable Long id) {
         return vlanService.listarPorDispositivo(id, "test");
     }
 
-    // 🔥 CREAR
     @PostMapping("/create")
     public VlanDTO crear(
             @RequestBody CrearVlanDTO dto,
@@ -33,7 +31,6 @@ public class VlanController {
         return vlanService.crearVlan(dto, auth.getName());
     }
 
-    // 🔥 ACTUALIZAR
     @PostMapping("/edit/{id}")
     public VlanDTO actualizar(
             @PathVariable Long id,
@@ -43,7 +40,6 @@ public class VlanController {
         return vlanService.actualizarVlan(id, dto, auth.getName());
     }
 
-    // 🔥 ELIMINAR
     @DeleteMapping("/{id}")
     public void eliminar(
             @PathVariable Long id,

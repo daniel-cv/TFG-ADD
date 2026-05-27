@@ -7,12 +7,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CrearIpRouteDTO {
-
     private String ipDestino;
-
     private String mascara;
-
     private String gateway;
-
     private Long dispositivoId;
 }

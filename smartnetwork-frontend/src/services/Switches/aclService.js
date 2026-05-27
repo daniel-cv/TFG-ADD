@@ -1,4 +1,4 @@
-// services/Switches/aclService.js
+
 import api from '../api'
 
 export function obtenerAclsPorDispositivo(dispositivoId) {

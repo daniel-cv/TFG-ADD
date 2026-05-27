@@ -1,7 +1,6 @@
 <template>
   <v-form @submit.prevent="handleSubmitUsuario">
 
-    <!-- NOMBRE -->
     <v-text-field
       v-model="name"
       label="Nombre de Usuario"
@@ -12,7 +11,6 @@
       :disabled="usuarioEdit"
     />
 
-    <!-- PASSWORD -->
     <v-text-field
       v-model="password"
       label="Contraseña"
@@ -23,7 +21,6 @@
       :required="!usuarioEdit"
     />
 
-    <!-- EMAIL -->
     <v-text-field
       v-model="email"
       label="Email"
@@ -32,7 +29,6 @@
       class="mb-3"
     />
 
-    <!-- TWO FACTOR -->
     <v-select
       v-model="twoFactor"
       :items="twoFactorOptions"
@@ -87,13 +83,11 @@ const emit = defineEmits([
 ])
 
 const userStore = useUsuarioFirewallStore()
-
 const name = ref("")
 const password = ref("")
 const email = ref("")
 const twoFactor = ref("disable")
 const mensaje = ref("")
-
 const twoFactorOptions = [
   {
     title: "Deshabilitado",
@@ -106,13 +100,9 @@ const twoFactorOptions = [
 ]
 
 onMounted(() => {
-
   if (props.usuarioEdit) {
-
     name.value = props.usuarioEdit.nombre || ""
-
     email.value = props.usuarioEdit.email || ""
-
     twoFactor.value =
       props.usuarioEdit.factor ||
       props.usuarioEdit.twoFactor ||
@@ -121,106 +111,43 @@ onMounted(() => {
 })
 
 const handleSubmitUsuario = async () => {
-
   try {
-
     const payload = {
-
       name: name.value,
-
       password: password.value || undefined,
-
       email: email.value || null,
-
       type: 'password',
-
       twoFactor: twoFactor.value
     }
-
-    /* ========================= */
-    /* EDITAR */
-    /* ========================= */
-
     if (props.usuarioEdit) {
-
-      /*
-       * IMPORTANTE:
-       * EL BACKEND EXIGE dispositivosIds
-       */
-
-      if (
-        props.usuarioEdit.dispositivosIds &&
-        props.usuarioEdit.dispositivosIds.length
-      ) {
-
-        payload.dispositivosIds =
-          props.usuarioEdit.dispositivosIds
-
+      if (props.usuarioEdit.dispositivosIds &&props.usuarioEdit.dispositivosIds.length) {
+        payload.dispositivosIds =props.usuarioEdit.dispositivosIds
       }
-
       else if (props.dispositivoId) {
-
         payload.dispositivosIds = [
           props.dispositivoId
         ]
       }
-
-      console.log(
-        'PAYLOAD EDIT =>',
-        payload
-      )
-
-      await userStore.actualizarUsuarioFirewall(
-        props.usuarioEdit.id,
-        payload
-      )
-
-      mensaje.value =
-        "Usuario actualizado correctamente"
+      console.log('PAYLOAD EDIT =>', payload)
+      await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id,payload)
+      mensaje.value ="Usuario actualizado correctamente"
     }
-
-    /* ========================= */
-    /* CREAR */
-    /* ========================= */
 
     else {
-
-      if (
-        props.modo === 'full' &&
-        props.dispositivoId
-      ) {
-
-        payload.dispositivosIds = [
-          props.dispositivoId
-        ]
-
-        await userStore.crearUsuarioFirewallCompleto(
-          payload
-        )
-
+      if (props.modo === 'full' & props.dispositivoId) {
+        payload.dispositivosIds = [props.dispositivoId]
+        await userStore.crearUsuarioFirewallCompleto(payload)
       } else {
-
-        await userStore.crearUsuarioFirewall(
-          payload
-        )
+        await userStore.crearUsuarioFirewall( payload )
       }
-
-      mensaje.value =
-        "Usuario creado correctamente"
+      mensaje.value = "Usuario creado correctamente"
     }
-
     emit("creado")
-
   } catch (error) {
-
     console.error(error)
-
-    mensaje.value = props.usuarioEdit
-      ? "Error actualizando usuario"
-      : "Error creando usuario"
+    mensaje.value = props.usuarioEdit? "Error actualizando usuario" : "Error creando usuario"
   }
 }
-
 function cancelar() {
   emit('cancelar')
 }

@@ -56,7 +56,6 @@ public class InterfazController {
         return interfazService.listarPorUsuario(auth.getName());
     }
 
-    // 🔥 NUEVO → eliminar MULTI
     @DeleteMapping("/{id}")
     public void eliminar(
             @PathVariable Long id,
@@ -66,7 +65,6 @@ public class InterfazController {
         interfazService.eliminarInterfaz(id, dispositivosIds, auth.getName());
     }
 
-    // 🔥 NUEVO → editar MULTI
     @PutMapping("/edit/{interfazId}")
     public InterfazDTO actualizar(
             @PathVariable Long interfazId,

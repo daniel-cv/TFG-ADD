@@ -1,7 +1,5 @@
 <template>
   <div class="services-wrapper">
-
-    <!-- ================= LISTA ================= -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -77,7 +75,6 @@
       </v-table>
     </div>
 
-    <!-- ================= FORM ================= -->
     <div v-else class="formulario-inline">
       <InterfazForm
         :interfaz-edit="interfazSeleccionada"
@@ -87,7 +84,6 @@
       />
     </div>
 
-    <!-- ================= EDITAR ================= -->
     <v-dialog v-model="dialogEditar" max-width="650px">
       <v-card class="apply-card">
         <v-card-title class="apply-title">
@@ -132,8 +128,6 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
-
-    <!-- ================= APLICAR ================= -->
     <v-dialog v-model="dialogAplicar" max-width="650px">
       <v-card class="apply-card">
         <v-card-title class="apply-title">Aplicar Interfaz</v-card-title>
@@ -171,7 +165,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- ================= ELIMINAR ================= -->
     <v-dialog v-model="dialogEliminar" max-width="650px">
       <v-card class="apply-card">
         <v-card-title class="apply-title">Eliminar Interfaz</v-card-title>
@@ -240,7 +233,6 @@ const dialogEliminar = ref(false)
 const interfazEliminar = ref(null)
 const seleccionadosEliminar = ref([])
 
-/* ================= CARGA ================= */
 const cargar = async () => {
   await Promise.all([
     interfazStore.cargarInterfacesUsuario(),
@@ -253,7 +245,6 @@ const cargar = async () => {
   await mapearImplementaciones()
 }
 
-/* 🔥 CORREGIDO IGUAL QUE ADDRESSES */
 const mapearImplementaciones = async () => {
   const mapa = {}
 
@@ -284,7 +275,6 @@ const mapearImplementaciones = async () => {
 
 onMounted(cargar)
 
-/* ================= EDITAR ================= */
 const editarInterfaz = async (interfaz) => {
   interfazEditar.value = interfaz
 
@@ -312,7 +302,6 @@ const confirmarEditar = () => {
   mostrandoFormulario.value = true
 }
 
-/* ================= APLICAR ================= */
 const asignarInterfaz = (interfaz) => {
   interfazAplicar.value = interfaz
   seleccionados.value = []
@@ -337,7 +326,6 @@ const aplicarAhora = async () => {
   await mapearImplementaciones()
 }
 
-/* ================= ELIMINAR ================= */
 const dispositivosEliminar = computed(() => {
   if (!interfazEliminar.value) return []
 
@@ -373,7 +361,6 @@ const eliminarAhora = async () => {
   await cargar()
 }
 
-/* ================= FORM ================= */
 const mostrarCrear = () => {
   interfazSeleccionada.value = null
   mostrandoFormulario.value = true
@@ -468,7 +455,6 @@ const cerrarFormulario = () => {
   color: #64748b;
 }
 
-/* --- LISTA DE DISPOSITIVOS (ANTIGUA) --- */
 .device-list {
   display: flex;
   flex-direction: column;
@@ -492,7 +478,6 @@ const cerrarFormulario = () => {
   background: #eff6ff;
 }
 
-/* --- MODAL APLICAR ADDRESS --- */
 .apply-card {
   border-radius: 16px;
   padding: 10px 0;
@@ -517,7 +502,6 @@ const cerrarFormulario = () => {
   font-size: 15px;
 }
 
-/* --- LISTA DE DISPOSITIVOS MODERNA --- */
 .device-list {
   display: flex;
   flex-direction: column;
@@ -544,7 +528,6 @@ const cerrarFormulario = () => {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
-/* --- INFO DEL DISPOSITIVO --- */
 .device-info {
   display: flex;
   align-items: center;
@@ -562,7 +545,6 @@ const cerrarFormulario = () => {
   color: #64748b;
 }
 
-/* --- ACCIONES DEL MODAL --- */
 .apply-actions {
   padding: 16px 24px;
   border-top: 1px solid #e2e8f0;

@@ -1,9 +1,6 @@
 <template>
   <div class="services-wrapper">
 
-    <!-- ========================= -->
-    <!-- LISTADO -->
-    <!-- ========================= -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -65,8 +62,6 @@
                 {{ regla.servicio }}
               </span>
             </td>
-
-            <!-- IMPLEMENTACIONES -->
             <td>
 
               <div
@@ -94,8 +89,6 @@
               </span>
 
             </td>
-
-            <!-- ACCIONES -->
             <td class="actions">
 
               <v-btn
@@ -132,9 +125,6 @@
 
     </div>
 
-    <!-- ========================= -->
-    <!-- FORM -->
-    <!-- ========================= -->
     <div
       v-else
       class="formulario-inline"
@@ -149,9 +139,6 @@
 
     </div>
 
-    <!-- ========================= -->
-    <!-- MODAL EDITAR -->
-    <!-- ========================= -->
     <v-dialog
       v-model="dialogEditar"
       max-width="650px"
@@ -238,9 +225,6 @@
 
     </v-dialog>
 
-    <!-- ========================= -->
-    <!-- MODAL APLICAR -->
-    <!-- ========================= -->
     <v-dialog
       v-model="dialogAplicar"
       max-width="650px"
@@ -327,9 +311,6 @@
 
     </v-dialog>
 
-    <!-- ========================= -->
-    <!-- MODAL ELIMINAR -->
-    <!-- ========================= -->
     <v-dialog
       v-model="dialogEliminar"
       max-width="650px"
@@ -447,17 +428,10 @@ const dispositivos = ref([])
 
 const implementaciones = ref({})
 
-/* ========================= */
-/* FORM */
-/* ========================= */
 
 const mostrandoFormulario = ref(false)
 
 const reglaSeleccionada = ref(null)
-
-/* ========================= */
-/* EDITAR */
-/* ========================= */
 
 const dialogEditar = ref(false)
 
@@ -466,9 +440,6 @@ const reglaEditar = ref(null)
 const dispositivosEditDisponibles =
   ref([])
 
-/* ========================= */
-/* APLICAR */
-/* ========================= */
 
 const dialogAplicar = ref(false)
 
@@ -476,9 +447,6 @@ const reglaAplicar = ref(null)
 
 const seleccionados = ref([])
 
-/* ========================= */
-/* ELIMINAR */
-/* ========================= */
 
 const dialogEliminar = ref(false)
 
@@ -486,9 +454,6 @@ const reglaEliminar = ref(null)
 
 const seleccionadosEliminar = ref([])
 
-/* ========================= */
-/* COMPUTED */
-/* ========================= */
 
 const dispositivosEliminar = computed(() => {
 
@@ -511,9 +476,6 @@ const dispositivosEliminar = computed(() => {
   })
 })
 
-/* ========================= */
-/* CARGA */
-/* ========================= */
 
 const cargarDatos = async () => {
 
@@ -580,10 +542,6 @@ const mapearImplementaciones = async () => {
 
 onMounted(cargarDatos)
 
-/* ========================= */
-/* FORM */
-/* ========================= */
-
 const mostrarCrear = () => {
 
   reglaSeleccionada.value = null
@@ -607,9 +565,6 @@ const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
 
-/* ========================= */
-/* EDITAR */
-/* ========================= */
 
 const editarRegla = async (regla) => {
 
@@ -657,9 +612,6 @@ const confirmarEditar = () => {
   mostrandoFormulario.value = true
 }
 
-/* ========================= */
-/* APLICAR */
-/* ========================= */
 
 const aplicarReglaToDispositivos = (
   regla
@@ -699,9 +651,6 @@ const aplicarAhora = async () => {
   await mapearImplementaciones()
 }
 
-/* ========================= */
-/* ELIMINAR */
-/* ========================= */
 
 const abrirEliminar = (regla) => {
 
@@ -844,7 +793,6 @@ const eliminarAhora = async () => {
   gap: 8px;
 }
 
-/* MODAL */
 .apply-card {
   border-radius: 16px;
   padding: 10px 0;
@@ -854,12 +802,11 @@ const eliminarAhora = async () => {
 .apply-title {
   font-size: 20px;
   font-weight: 600;
-  color: #0f172a;
+  color: #ffffff;
   padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
 }
 
-/* LISTA DISPOSITIVOS */
 .device-list {
   display: flex;
   flex-direction: column;
@@ -894,7 +841,7 @@ const eliminarAhora = async () => {
 
 .device-name {
   font-weight: 600;
-  color: #0f172a;
+  color: #ffffff;
   font-size: 15px;
 }
 

@@ -51,7 +51,6 @@ public class DispositivoService {
 
         try {
 
-            // 🔥 FIREWALL
             if (dispositivo.getTipo() == TipoDispositivo.FIREWALL) {
 
                 String url = "http://" + dispositivo.getIp() + "/api/v2/monitor/system/status";
@@ -69,7 +68,6 @@ public class DispositivoService {
                 );
             }
 
-            // 🔥 SWITCH (ARISTA)
             else if (dispositivo.getTipo() == TipoDispositivo.SWITCH) {
 
                 String url = "http://" + dispositivo.getIp() + "/command-api";
@@ -187,13 +185,11 @@ public class DispositivoService {
                 String nombre = it.next();
                 JsonNode data = interfacesJson.get(nombre);
 
-
                 Interfaces interfaz = interfacesRepository
                         .findByNameAndDispositivo(nombre, dispositivo)
                         .orElse(new Interfaces());
 
                 interfaz.setName(nombre);
-
 
                 String estado = data.has("linkStatus")
                         ? data.get("linkStatus").asText()
@@ -218,14 +214,12 @@ public class DispositivoService {
 
                     interfaz.setMode(modo);
 
-                    // 🔥 ACCESS VLAN
                     if (vlanInfo.has("vlanId")) {
                         Integer vlanId = vlanInfo.get("vlanId").asInt();
                         interfaz.setVlanAccess(vlanService.getOrCreateVlan(vlanId, dispositivo));
                     } else {
                         interfaz.setVlanAccess(null);
                     }
-
 
                     if (vlanInfo.has("trunkAllowedVlans")) {
 
@@ -248,7 +242,6 @@ public class DispositivoService {
                 lista.add(interfaz);
             }
 
-            // 🔥 SOLO guardar (create + update)
             interfacesRepository.saveAll(lista);
 
         } catch (Exception e) {

@@ -1,7 +1,6 @@
 <template>
   <v-form @submit.prevent="handleSubmit">
 
-    <!-- NOMBRE -->
     <v-text-field
       v-model="nombre"
       label="Nombre / ID"
@@ -12,7 +11,6 @@
       required
     />
 
-    <!-- ORIGEN -->
     <v-select
       v-model="origen"
       :items="interfaces"
@@ -22,7 +20,6 @@
       class="mb-3"
     />
 
-    <!-- DESTINO -->
     <v-select
       v-model="destino"
       :items="interfaces"
@@ -32,7 +29,6 @@
       class="mb-3"
     />
 
-    <!-- IP ORIGEN -->
     <v-select
       v-model="ipOrigen"
       :items="direcciones"
@@ -42,7 +38,6 @@
       class="mb-3"
     />
 
-    <!-- IP DESTINO -->
     <v-select
       v-model="ipDestino"
       :items="direcciones"
@@ -52,7 +47,6 @@
       class="mb-3"
     />
 
-    <!-- SERVICIO -->
     <v-select
       v-model="servicio"
       :items="['HTTP', 'HTTPS', 'ALL', 'SSH', 'DNS']"
@@ -62,7 +56,6 @@
       class="mb-3"
     />
 
-    <!-- NAT -->
     <v-select
       v-model="nat"
       :items="['disable', 'enable']"
@@ -73,7 +66,6 @@
       :disabled="!!props.reglaEdit"
     />
 
-    <!-- ACTION -->
     <v-select
       v-model="action"
       :items="['accept', 'deny']"
@@ -110,7 +102,6 @@
   </v-form>
 </template>
 
-<!-- ReglaFirewallForm.vue -->
 
 <script setup>
 import {
@@ -133,200 +124,111 @@ import {
 } from '@/services/interfazService'
 
 const props = defineProps({
-
   reglaEdit: {
     type: Object,
     default: null
   },
-
   modo: {
     type: String,
     default: 'simple'
   },
-
   dispositivoId: {
     type: Number,
     required: false
   }
 })
-
 const emit = defineEmits([
   'creada',
   'cancelar'
 ])
-
-const store =
-  useReglaFirewallStore()
-
-/* ========================= */
-/* FORM */
-/* ========================= */
-
+const store = useReglaFirewallStore()
 const nombre = ref('')
-
 const origen = ref('')
-
 const destino = ref('')
-
 const ipOrigen = ref('')
-
 const ipDestino = ref('')
-
 const servicio = ref('ALL')
-
 const nat = ref('')
-
 const action = ref('')
-
 const mensaje = ref('')
-
-/* ========================= */
-/* DATA */
-/* ========================= */
-
 const direcciones = ref([])
-
 const interfaces = ref([])
 
-/* ========================= */
-/* MOUNT */
-/* ========================= */
-
 onMounted(async () => {
-
   if (props.reglaEdit) {
-
-    nombre.value =
-      props.reglaEdit.nombre
-
-    origen.value =
-      props.reglaEdit.origen
-
-    destino.value =
-      props.reglaEdit.destino
-
-    ipOrigen.value =
-      props.reglaEdit.ipOrigen ||
-      props.reglaEdit.iporigen
-
-    ipDestino.value =
-      props.reglaEdit.ipDestino ||
-      props.reglaEdit.ipdestino
-
-    servicio.value =
-      props.reglaEdit.servicio
-
-    nat.value =
-      props.reglaEdit.nat
-
-    action.value =
-      props.reglaEdit.action
+    nombre.value =  props.reglaEdit.nombre
+    origen.value = props.reglaEdit.origen
+    destino.value = props.reglaEdit.destino
+    ipOrigen.value =props.reglaEdit.ipOrigen ||props.reglaEdit.iporigen
+    ipDestino.value =props.reglaEdit.ipDestino ||props.reglaEdit.ipdestino
+    servicio.value = props.reglaEdit.servicio
+    nat.value =props.reglaEdit.nat
+    action.value = props.reglaEdit.action
   }
-
   await cargarDirecciones()
-
   await cargarInterfaces()
 })
-
-/* ========================= */
-/* DIRECCIONES */
-/* ========================= */
-
 const cargarDirecciones =
 async () => {
-
-  try {
-
-    let res = null
-
+  try {let res = null
     if (props.modo === 'simple') {
-
-      res =
-        await obtenerAddressPorId()
-
+      res =  await obtenerAddressPorId()
     } else {
-
       res =
         await obtenerAddressesPorDispositivo(
           props.dispositivoId
         )
     }
-
     const baseAddresses = [
-
       {
         title: 'ALL',
         value: 'all'
       }
     ]
-
     direcciones.value = [
-
       ...baseAddresses,
-
       ...res.data
         .filter(addr =>
           addr.name.toLowerCase()
             !== 'all'
         )
         .map(addr => ({
-
           title: addr.name,
-
           value: addr.name
         }))
     ]
-
   } catch (error) {
-
     console.error(
       'Error cargando direcciones',
       error
     )
   }
 }
-
-/* ========================= */
-/* INTERFACES */
-/* ========================= */
-
 const cargarInterfaces =
 async () => {
-
   try {
-
     let res = null
-
     if (props.modo === 'simple') {
-
-      res =
-        await obtenerInterfacesUsuario()
-
+      res =await obtenerInterfacesUsuario()
     } else {
-
       res =
         await obtenerInterfacesPorDispositivo(
           props.dispositivoId
         )
     }
-
     const puertosBase = [
-
       {
         title: 'Port1',
         value: 'port1'
       },
-
       {
         title: 'Port2',
         value: 'port2'
       },
-
       {
         title: 'Port3',
         value: 'port3'
       },
-
       {
         title: 'Port4',
         value: 'port4'
@@ -335,16 +237,12 @@ async () => {
 
     const nombresBase =
       new Set(
-
         puertosBase.map(
           p => p.value.toLowerCase()
         )
       )
-
     interfaces.value = [
-
       ...puertosBase,
-
       ...res.data
         .filter(inter =>
           !nombresBase.has(
@@ -352,15 +250,11 @@ async () => {
           )
         )
         .map(inter => ({
-
           title: inter.name,
-
           value: inter.name
         }))
     ]
-
   } catch (error) {
-
     console.error(
       'Error cargando interfaces',
       error
@@ -368,134 +262,51 @@ async () => {
   }
 }
 
-/* ========================= */
-/* SUBMIT */
-/* ========================= */
-
 const handleSubmit =
 async () => {
-
   try {
-
     const payload = {
-
       nombre: nombre.value,
-
       origen: origen.value,
-
       destino: destino.value,
-
       ipOrigen: ipOrigen.value,
-
       ipDestino: ipDestino.value,
-
       servicio: servicio.value,
-
       nat: nat.value,
-
       action: action.value,
-
       schedule: 'always',
-
       habilitada: true
     }
-
-    /* ========================= */
-    /* EDITAR */
-    /* ========================= */
-
     if (props.reglaEdit) {
-
-      /* ========================= */
-      /* DASHBOARD */
-      /* ========================= */
-
       if (
         props.reglaEdit
           .dispositivosIds?.length
       ) {
-
         payload.dispositivosId =
           props.reglaEdit
             .dispositivosIds
       }
-
-      /* ========================= */
-      /* INDIVIDUAL */
-      /* ========================= */
-
-      else if (
-
-        props.modo === 'full'
-
-        &&
-
-        props.dispositivoId
-      ) {
-
-        payload.dispositivosId = [
-
-          props.dispositivoId
-        ]
+      else if (props.modo === 'full' &&props.dispositivoId) {
+        payload.dispositivosId = [ props.dispositivoId]
       }
-
-      await store.actualizarRegla(
-
-        props.reglaEdit.id,
-
-        payload
-      )
-
-      mensaje.value =
-        'Regla actualizada correctamente'
+      await store.actualizarRegla(props.reglaEdit.id,payload)
+      mensaje.value ='Regla actualizada correctamente'
     }
-
-    /* ========================= */
-    /* CREAR */
-    /* ========================= */
-
     else {
-
-      if (
-
-        props.modo === 'full'
-
-        &&
-
-        props.dispositivoId
-      ) {
-
-        payload.dispositivosId = [
-
-          props.dispositivoId
-        ]
-
-        await store
-          .crearReglaCompleta(
-            payload
-          )
-
+      if (props.modo === 'full'&& props.dispositivoId) {
+        payload.dispositivosId = [ props.dispositivoId]
+        await store  .crearReglaCompleta(payload)
       } else {
-
-        await store
-          .crearRegla(payload)
+        await store.crearRegla(payload)
       }
-
-      mensaje.value =
-        'Regla creada correctamente'
+      mensaje.value ='Regla creada correctamente'
     }
-
     emit('creada')
-
   } catch (error) {
-
     console.error(error)
-
     mensaje.value =
       props.reglaEdit
-
         ? 'Error al actualizar regla'
-
         : 'Error al crear regla'
   }
 }

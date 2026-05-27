@@ -1,7 +1,5 @@
 <template>
   <v-form>
-
-    <!-- NAME -->
     <v-text-field
       v-model="name"
       label="Nombre"
@@ -12,7 +10,6 @@
       required
     />
 
-    <!-- INTERFAZ EXTERNA (extintf) -->
     <v-select
       v-model="interfazId"
       :items="interfaces"
@@ -22,7 +19,6 @@
       required
     />
 
-    <!-- TYPE -->
     <v-select
       v-model="type"
       :items="['static-nat']"
@@ -33,7 +29,6 @@
       required
     />
 
-    <!-- EXTERNAL IP -->
     <v-select
       v-model="externalIp"
       :items="direcciones"
@@ -45,7 +40,6 @@
       required
     />
 
-    <!-- INTERNAL IP -->
     <v-select
       v-model="internalIp"
       :items="direcciones"
@@ -57,7 +51,6 @@
       required
     />
 
-    <!-- COMMENTS -->
     <v-textarea
       v-model="comments"
       label="Comentarios"
@@ -65,7 +58,6 @@
       class="mb-3"
     />
 
-    <!-- BOTÓN CREAR / ACTUALIZAR -->
     <v-btn
       color="primary"
       size="large"
@@ -75,7 +67,6 @@
        {{ virtualIpEdit ? 'Actualizar VirtualIP' : 'Crear VirtualIP' }}
     </v-btn>
 
-    <!-- BOTÓN CANCELAR -->
     <v-btn
       variant="outlined"
       size="large"

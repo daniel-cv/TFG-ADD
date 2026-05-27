@@ -2,13 +2,18 @@ package com.smartnetwork.backend.Service.switches;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
+import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.Repository.switches.AclRepository;
 import com.smartnetwork.backend.Repository.switches.InterfacesRepository;
 import com.smartnetwork.backend.Repository.switches.VlanRepository;
+import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Log;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Entity.switches.Acl;
 import com.smartnetwork.backend.domain.Entity.switches.Interfaces;
 import com.smartnetwork.backend.domain.Entity.switches.Vlan;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import com.smartnetwork.backend.domain.dtos.switches.interfaz.CrearInterfacesDTO;
 import com.smartnetwork.backend.domain.dtos.switches.interfaz.InterfacesDTO;
 import org.springframework.http.HttpEntity;
@@ -17,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -28,24 +34,27 @@ public class InterfacesService {
     private final DispositivoRepository dispositivoRepository;
     private final VlanRepository vlanRepository;
     private final AclRepository aclRepository;
+    private final LogService logService;
+    private final UsuarioRepository usuarioRepository;
 
     public InterfacesService(
             InterfacesRepository interfacesRepository,
             DispositivoRepository dispositivoRepository,
             VlanRepository vlanRepository,
-            AclRepository aclRepository
+            AclRepository aclRepository,
+            LogService logService,
+            UsuarioRepository usuarioRepository
     ) {
         this.interfacesRepository = interfacesRepository;
         this.dispositivoRepository = dispositivoRepository;
         this.vlanRepository = vlanRepository;
         this.aclRepository = aclRepository;
+        this.logService = logService;
+        this.usuarioRepository = usuarioRepository;
     }
 
-    // 🔹 LISTAR
     public List<InterfacesDTO> listarPorDispositivo(Long id, String username) {
-
         List<Interfaces> interfaces = interfacesRepository.findByDispositivoId(id);
-
         return interfaces.stream().map(i -> {
 
             InterfacesDTO dto = new InterfacesDTO();
@@ -57,34 +66,28 @@ public class InterfacesService {
             dto.setDescripcion(i.getDescripcion());
             dto.setEnabled(i.getEnabled());
 
-            // 🔥 ACL
             if (i.getAclIn() != null) {
                 dto.setAclIn(i.getAclIn().getNombre());
                 dto.setAclDirection(i.getAclDirection());
             }
 
-            // ACCESS VLAN
             if (i.getVlanAccess() != null) {
                 dto.setVlanAccess(i.getVlanAccess().getVlanId());
             }
 
-            // TRUNK VLANS
             if (i.getVlansTrunk() != null) {
-                dto.setVlansTrunk(
-                        i.getVlansTrunk().stream()
-                                .map(Vlan::getVlanId)
-                                .toList()
+                dto.setVlansTrunk(i.getVlansTrunk().stream()
+                        .map(Vlan::getVlanId)
+                        .toList()
                 );
             }
-
             return dto;
-
         }).toList();
     }
 
-    // 🔥 ACTUALIZAR INTERFAZ
     public InterfacesDTO actualizarInterfaz(Long id, CrearInterfacesDTO dto, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Interfaces interfaz = interfacesRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Interfaz no encontrada"));
 
@@ -94,14 +97,12 @@ public class InterfacesService {
 
         interfaz.setDescripcion(dto.getDescripcion());
         interfaz.setMode(dto.getMode());
-
-        // 🔥 VALIDACIÓN MODO
         if (dto.getMode() != null &&
                 !List.of("access", "trunk", "routed").contains(dto.getMode())) {
             throw new RuntimeException("Modo inválido");
         }
 
-        // 🔥 VLAN ACCESS
+
         if (dto.getVlanAccess() != null) {
             Vlan vlan = vlanRepository.findByVlanId(dto.getVlanAccess())
                     .orElseThrow(() -> new RuntimeException("VLAN no encontrada"));
@@ -111,47 +112,36 @@ public class InterfacesService {
             interfaz.setVlanAccess(null);
         }
 
-        // 🔥 VLAN TRUNK
         if (dto.getVlansTrunk() != null) {
 
             if ("access".equals(dto.getMode())) {
                 throw new RuntimeException("No puedes configurar trunk en modo access");
             }
-
             List<Vlan> vlans = dto.getVlansTrunk().stream()
                     .map(vlanId -> vlanRepository.findByVlanId(vlanId)
                             .orElseThrow(() -> new RuntimeException("VLAN no encontrada: " + vlanId)))
                     .collect(Collectors.toList());
-
             interfaz.setVlansTrunk(vlans);
         }
-
-        // 🔥 ACL
         if (dto.getAclIn() != null) {
-
             Acl acl = aclRepository.findByNombreAndDispositivo(dto.getAclIn(), dispositivo)
                     .orElseThrow(() -> new RuntimeException("ACL no encontrada"));
-
             interfaz.setAclIn(acl);
             interfaz.setAclDirection(dto.getAclDirection() != null ? dto.getAclDirection() : "in");
         }
 
-        // 🔥 ELIMINAR ACL
         if (Boolean.TRUE.equals(dto.getEliminarAcl())) {
             interfaz.setAclIn(null);
             interfaz.setAclDirection(null);
         }
-
         interfaz.setEnabled(nuevoEstado);
-
-        interfacesRepository.save(interfaz);
-
+        logs.add(logService.crearLog(usu,dispositivo, TipoAccion.EDITAR,"Se ha EDITADO la Interfaz "+interfaz.getName()));
         configurarInterfaz(dispositivo, interfaz, dto);
-
+        interfacesRepository.save(interfaz);
+        logService.guardarTodos(logs);
         return mapToDTO(interfaz);
     }
 
-    // 🔥 MAP DTO
     private InterfacesDTO mapToDTO(Interfaces interfaz) {
 
         InterfacesDTO dto = new InterfacesDTO();
@@ -183,7 +173,6 @@ public class InterfacesService {
         return dto;
     }
 
-    // 🔥 CONFIGURAR EN SWITCH
     private void configurarInterfaz(Dispositivo dispositivo, Interfaces interfaz, CrearInterfacesDTO dto) {
 
         try {
@@ -195,24 +184,20 @@ public class InterfacesService {
             comandos.add("configure terminal");
             comandos.add("interface " + interfaz.getName());
 
-            // 🔥 MODO
             if ("routed".equals(dto.getMode())) {
                 comandos.add("no switchport");
             } else {
                 comandos.add("switchport");
             }
 
-            // 🔥 DESCRIPCIÓN
             if (dto.getDescripcion() != null) {
                 comandos.add("description " + dto.getDescripcion());
             }
 
-            // 🔥 ESTADO
             if (dto.getEnabled() != null) {
                 comandos.add(dto.getEnabled() ? "no shutdown" : "shutdown");
             }
 
-            // 🔥 VLANS (solo si NO es routed)
             if (!"routed".equals(dto.getMode())) {
 
                 if (dto.getVlanAccess() != null) {
@@ -233,10 +218,8 @@ public class InterfacesService {
                 }
             }
 
-            // 🔥 ACL (SOLO EN ROUTED)
             if ("routed".equals(dto.getMode())) {
 
-                // ❌ ELIMINAR ACL ANTERIOR
                 if (Boolean.TRUE.equals(dto.getEliminarAcl()) && interfaz.getAclIn() != null) {
 
                     String direction = interfaz.getAclDirection() != null
@@ -246,8 +229,6 @@ public class InterfacesService {
                     comandos.add("no ip access-group " +
                             interfaz.getAclIn().getNombre() + " " + direction);
                 }
-
-                // ✅ APLICAR ACL NUEVA
                 if (dto.getAclIn() != null) {
 
                     String direction = dto.getAclDirection() != null
@@ -268,7 +249,6 @@ public class InterfacesService {
         }
     }
 
-    // 🔥 ENVIAR COMANDOS
     private void enviarComandos(Dispositivo dispositivo, String url, List<String> comandos) throws Exception {
 
         String payload = """

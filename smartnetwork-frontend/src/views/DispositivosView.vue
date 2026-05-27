@@ -1,6 +1,5 @@
 <template>
   <v-container fluid class="devices-page">
-    <!-- HEADER -->
     <v-row class="devices-header" align="center">
       <v-col>
         <h1 class="page-title">
@@ -18,7 +17,6 @@
       </v-col>
     </v-row>
 
-    <!-- GRID DISPOSITIVOS -->
     <v-row>
       <v-col
         v-for="d in dispositivos"
@@ -32,29 +30,19 @@
           @click="configurar(d)"
 
         >
-        
-          <!-- NOMBRE -->
           <div class="device-name">
             {{ d.nombre }}
           </div>
-
-          <!-- TIPO -->
           <div class="device-type">
             {{ d.tipo }} · {{ d.fabricante }}
           </div>
-
-          <!-- INFO -->
           <div class="device-info">
             IP: {{ d.ip }}
           </div>
-
-          <!-- STATUS -->
           <div class="device-status">
             <span class="status-dot"></span>
             {{ d.estado }}
           </div>
-
-          <!-- ACTIONS -->
           <div class="device-actions">
             <v-btn
               variant="text"
@@ -124,7 +112,6 @@ min-height:100vh;
 padding:30px;
 }
 
-/* HEADER */
 .devices-header{
 margin-bottom:30px;
 }
@@ -135,7 +122,6 @@ font-weight:600;
 font-size:26px;
 }
 
-/* ADD BUTTON */
 .add-btn{
 background:#22c55e;
 color:white;
@@ -147,7 +133,6 @@ font-weight:500;
 background:#16a34a;
 }
 
-/* DEVICE CARD */
 .device-card{
 background:linear-gradient(135deg,#111827 0%,#1f2937 100%);
 border:1px solid #1f2937;
@@ -163,28 +148,24 @@ border:1px solid #3b82f6;
 box-shadow:0 15px 40px rgba(0,0,0,0.5);
 }
 
-/* NAME */
 .device-name{
 font-size:18px;
 font-weight:600;
 color:#e6edf3;
 }
 
-/* TYPE */
 .device-type{
 color:#9aa4b2;
 font-size:13px;
 margin-top:5px;
 }
 
-/* INFO */
 .device-info{
 margin-top:15px;
 color:#9aa4b2;
 font-size:14px;
 }
 
-/* STATUS */
 .device-status{
 margin-top:15px;
 display:inline-flex;
@@ -203,8 +184,6 @@ height:8px;
 background:#22c55e;
 border-radius:50%;
 }
-
-/* ACTIONS */
 .device-actions{
 margin-top:20px;
 display:flex;

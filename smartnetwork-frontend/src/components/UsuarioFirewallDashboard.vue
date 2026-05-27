@@ -1,7 +1,5 @@
 <template>
   <div class="usuarios-firewall-wrapper">
-
-    <!-- LISTADO -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -31,8 +29,6 @@
             <td class="name">{{ usuario.nombre }}</td>
             <td>{{ usuario.email }}</td>
             <td>{{ usuario.tipo }}</td>
-
-            <!-- IMPLEMENTADO -->
             <td>
               <div v-if="implementaciones[usuario.id]?.length">
                 <v-chip
@@ -86,8 +82,6 @@
         </tbody>
       </v-table>
     </div>
-
-    <!-- FORM -->
     <div v-else class="formulario-inline">
       <UsuarioFirewallForm
         :usuario-edit="usuarioSeleccionado"
@@ -97,10 +91,6 @@
         @cancelar="cerrarFormulario"
       />
     </div>
-
-    <!-- ========================= -->
-    <!-- MODAL EDITAR -->
-    <!-- ========================= -->
     <v-dialog v-model="dialogEditar" max-width="650px">
       <v-card class="apply-card">
 
@@ -167,10 +157,6 @@
 
       </v-card>
     </v-dialog>
-
-    <!-- ========================= -->
-    <!-- MODAL APLICAR -->
-    <!-- ========================= -->
     <v-dialog v-model="dialogAplicar" max-width="650px">
       <v-card class="apply-card">
 
@@ -237,10 +223,6 @@
 
       </v-card>
     </v-dialog>
-
-    <!-- ========================= -->
-    <!-- MODAL ELIMINAR -->
-    <!-- ========================= -->
     <v-dialog v-model="dialogEliminar" max-width="650px">
       <v-card class="apply-card">
 
@@ -330,26 +312,14 @@ const mostrandoFormulario = ref(false)
 
 const usuarioSeleccionado = ref(null)
 
-/* ========================= */
-/* EDITAR */
-/* ========================= */
-
 const dialogEditar = ref(false)
 const usuarioEditar = ref(null)
 const dispositivosEditDisponibles = ref([])
-
-/* ========================= */
-/* APLICAR */
-/* ========================= */
 
 const dialogAplicar = ref(false)
 const usuarioAplicar = ref(null)
 
 const seleccionados = ref([])
-
-/* ========================= */
-/* ELIMINAR */
-/* ========================= */
 
 const dialogEliminar = ref(false)
 const usuarioEliminar = ref(null)
@@ -364,150 +334,86 @@ const props = defineProps({
   }
 })
 
-/* ========================= */
-/* HELPERS */
-/* ========================= */
-
 const obtenerNombreDispositivo = (d) => {
   return d.name || d.nombre || d.hostname || 'Sin nombre'
 }
 
-/* ========================= */
-/* LOAD */
-/* ========================= */
-
 const cargarDatos = async () => {
-
   await Promise.all([
     usuarioFirewallStore.cargarUsuariosPorUsuario(),
     dispositivoStore.getMisDispositivos()
   ])
-
   usuarios.value = usuarioFirewallStore.usuarios
   dispositivos.value = dispositivoStore.dispositivos
-
   await mapearImplementaciones()
 }
-
 const mapearImplementaciones = async () => {
-
   const mapa = {}
-
   for (const disp of dispositivos.value) {
-
     try {
-
-      const usuariosDisp =
-        await usuarioFirewallStore.cargarUsuariosPorDispositivo(disp.id)
-
+      const usuariosDisp =await usuarioFirewallStore.cargarUsuariosPorDispositivo(disp.id)
       if (Array.isArray(usuariosDisp)) {
-
         const nombre = obtenerNombreDispositivo(disp)
-
         usuariosDisp.forEach(usuario => {
-
           if (!mapa[usuario.id]) {
             mapa[usuario.id] = []
           }
-
           if (!mapa[usuario.id].includes(nombre)) {
             mapa[usuario.id].push(nombre)
           }
-
         })
       }
-
     } catch (e) {
-
       console.error(e)
     }
   }
-
   implementaciones.value = mapa
-
   console.log('IMPLEMENTACIONES =>', mapa)
 }
 
 onMounted(cargarDatos)
 
-/* ========================= */
-/* ELIMINAR COMPUTED */
-/* ========================= */
-
 const dispositivosEliminar = computed(() => {
-
   if (!usuarioEliminar.value) return []
-
   const lista = implementaciones.value[usuarioEliminar.value.id] || []
-
   return dispositivos.value.filter(d => {
-
     const nombre = obtenerNombreDispositivo(d)
-
     return lista.includes(nombre)
   })
 })
-
-/* ========================= */
-/* CREAR */
-/* ========================= */
 
 const mostrarCrear = () => {
   usuarioSeleccionado.value = null
   mostrandoFormulario.value = true
 }
 
-/* ========================= */
-/* EDITAR */
-/* ========================= */
-
 const editarUsuario = async (usuario) => {
-
   usuarioEditar.value = usuario
-
   await mapearImplementaciones()
-
   const lista = implementaciones.value[usuario.id] || []
-
   dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
-
     const nombre = obtenerNombreDispositivo(d)
-
     return lista.includes(nombre)
   })
-
   seleccionados.value = dispositivosEditDisponibles.value.map(d => d.id)
-
   dialogEditar.value = true
 }
 
 const confirmarEditar = () => {
-
   usuarioSeleccionado.value = {
     ...usuarioEditar.value,
     dispositivosIds: [...seleccionados.value]
   }
-
   dialogEditar.value = false
   mostrandoFormulario.value = true
 }
 
-/* ========================= */
-/* FORM */
-/* ========================= */
-
 const recargarYCerrar = async () => {
-
   mostrandoFormulario.value = false
-
   await usuarioFirewallStore.cargarUsuariosPorUsuario()
-
   usuarios.value = usuarioFirewallStore.usuarios
-
   usuarioSeleccionado.value = null
-
   seleccionados.value = []
-
   await mapearImplementaciones()
 }
 
@@ -515,23 +421,14 @@ const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
 
-/* ========================= */
-/* APLICAR */
-/* ========================= */
-
 const aplicarUsuarioToDispositivos = (usuario) => {
-
   usuarioAplicar.value = usuario
-
   seleccionados.value = []
-
   dialogAplicar.value = true
 }
 
 const toggleSeleccion = (id) => {
-
   const i = seleccionados.value.indexOf(id)
-
   if (i > -1) {
     seleccionados.value.splice(i, 1)
   } else {
@@ -544,34 +441,21 @@ const aplicarAhora = async () => {
   if (!seleccionados.value.length) {
     return alert('Selecciona al menos un dispositivo')
   }
-
   await usuarioFirewallStore.asignarUsuarioFirewallADispositivos(
     usuarioAplicar.value.id,
     seleccionados.value
   )
-
   dialogAplicar.value = false
-
   await mapearImplementaciones()
 }
 
-/* ========================= */
-/* ELIMINAR */
-/* ========================= */
-
 const abrirEliminar = (usuario) => {
-
   usuarioEliminar.value = usuario
-
   seleccionadosEliminar.value = []
-
   dialogEliminar.value = true
 }
-
 const toggleSeleccionEliminar = (id) => {
-
   const i = seleccionadosEliminar.value.indexOf(id)
-
   if (i > -1) {
     seleccionadosEliminar.value.splice(i, 1)
   } else {
@@ -580,22 +464,16 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-
   if (!seleccionadosEliminar.value.length) {
     return alert('Selecciona al menos un dispositivo')
   }
-
   await usuarioFirewallStore.eliminarUsuarioFirewallEnDispositivos(
     usuarioEliminar.value.id,
     seleccionadosEliminar.value
   )
-
   dialogEliminar.value = false
-
   await usuarioFirewallStore.cargarUsuariosPorUsuario()
-
   usuarios.value = usuarioFirewallStore.usuarios
-
   await mapearImplementaciones()
 }
 </script>
@@ -676,7 +554,6 @@ const eliminarAhora = async () => {
   font-weight: 600;
 }
 
-/* MODAL */
 .apply-card {
   border-radius: 16px;
   padding: 10px 0;
@@ -691,7 +568,6 @@ const eliminarAhora = async () => {
   border-bottom: 1px solid #e2e8f0;
 }
 
-/* LISTA DISPOSITIVOS */
 .device-list {
   display: flex;
   flex-direction: column;

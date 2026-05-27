@@ -1,7 +1,6 @@
 <template>
   <div class="addresses-wrapper">
 
-    <!-- LISTADO -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -69,7 +68,6 @@
       </v-table>
     </div>
 
-    <!-- FORM -->
 <div v-else class="formulario-inline">
   <AddressForm
     :address-edit="addressSeleccionada"
@@ -81,9 +79,6 @@
   />
 </div>
 
-    <!-- ===================== -->
-    <!-- MODAL EDITAR (CON SELECCIÓN) -->
-    <!-- ===================== -->
     <v-dialog v-model="dialogEditar" max-width="650px">
       <v-card class="apply-card">
         <v-card-title class="apply-title">
@@ -126,9 +121,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- ===================== -->
-    <!-- APLICAR -->
-    <!-- ===================== -->
     <v-dialog v-model="dialogAplicar" max-width="650px">
       <v-card class="apply-card">
         <v-card-title class="apply-title">Aplicar Address</v-card-title>
@@ -165,9 +157,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- ===================== -->
-    <!-- ELIMINAR -->
-    <!-- ===================== -->
     <v-dialog v-model="dialogEliminar" max-width="650px">
       <v-card class="apply-card">
         <v-card-title class="apply-title">Eliminar Address</v-card-title>
@@ -232,25 +221,22 @@ const dispositivosEdit = computed(() => {
     seleccionados.value.includes(d.id)
   )
 })
-/* EDITAR */
+
 const dialogEditar = ref(false)
 const addressEditar = ref(null)
 const dispositivosEditDisponibles = ref([])
-/* FORM */
+
 const mostrandoFormulario = ref(false)
 const addressSeleccionada = ref(null)
 
-/* APLICAR */
 const dialogAplicar = ref(false)
 const addressAplicar = ref(null)
 const seleccionados = ref([])
 
-/* ELIMINAR */
 const dialogEliminar = ref(false)
 const addressEliminar = ref(null)
 const seleccionadosEliminar = ref([])
 
-/* CARGA */
 const cargarDatos = async () => {
   await Promise.all([
     addressStore.obtenerMisAddresses(),
@@ -286,7 +272,6 @@ const mapearImplementaciones = async () => {
   implementaciones.value = mapa
 }
 
-/* ELIMINAR COMPUTED */
 const dispositivosEliminar = computed(() => {
   if (!addressEliminar.value) return []
   const lista = implementaciones.value[addressEliminar.value.id] || []
@@ -298,7 +283,6 @@ const dispositivosEliminar = computed(() => {
 
 onMounted(cargarDatos)
 
-/* --- SECCIÓN EDITAR CORREGIDA --- */
 const editarAddress = async (address) => {
   addressEditar.value = address
 
@@ -306,13 +290,11 @@ const editarAddress = async (address) => {
 
   const lista = implementaciones.value[address.id] || []
 
-  // 🔥 SOLO dispositivos donde existe
   dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
     const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
     return lista.includes(nombre)
   })
 
-  // 🔥 preselección inicial
   seleccionados.value = dispositivosEditDisponibles.value.map(d => d.id)
 
   dialogEditar.value = true
@@ -321,7 +303,7 @@ const editarAddress = async (address) => {
 const confirmarEditar = () => {
   addressSeleccionada.value = {
     ...addressEditar.value,
-    dispositivosIds: [...seleccionados.value] // 🔥 CLAVE
+    dispositivosIds: [...seleccionados.value]
   }
 
   dialogEditar.value = false
@@ -338,7 +320,6 @@ const recargarYCerrar = async () => {
 
   await mapearImplementaciones()
 }
-/* -------------------------------- */
 
 const cerrarFormulario = () => {
   mostrandoFormulario.value = false
@@ -475,7 +456,6 @@ const obtenerNombreInterfaz = (id) => {
   color: #64748b;
 }
 
-/* --- LISTA DE DISPOSITIVOS (ANTIGUA) --- */
 .device-list {
   display: flex;
   flex-direction: column;
@@ -499,7 +479,6 @@ const obtenerNombreInterfaz = (id) => {
   background: #eff6ff;
 }
 
-/* --- MODAL APLICAR ADDRESS --- */
 .apply-card {
   border-radius: 16px;
   padding: 10px 0;
@@ -520,7 +499,6 @@ const obtenerNombreInterfaz = (id) => {
   font-size: 15px;
 }
 
-/* --- LISTA DE DISPOSITIVOS MODERNA --- */
 .device-list {
   display: flex;
   flex-direction: column;
@@ -547,7 +525,6 @@ const obtenerNombreInterfaz = (id) => {
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
 }
 
-/* --- INFO DEL DISPOSITIVO --- */
 .device-info {
   display: flex;
   align-items: center;
@@ -565,7 +542,6 @@ const obtenerNombreInterfaz = (id) => {
   color: #64748b;
 }
 
-/* --- ACCIONES DEL MODAL --- */
 .apply-actions {
   padding: 16px 24px;
   border-top: 1px solid #e2e8f0;

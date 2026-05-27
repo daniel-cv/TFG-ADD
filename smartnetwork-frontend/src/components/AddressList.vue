@@ -1,10 +1,8 @@
 <template>
   <div class="service-list">
 
-    <!-- Si NO estamos mostrando el formulario, se muestra la lista -->
     <div v-if="!mostrandoFormulario">
 
-      <!-- HEADER -->
       <div class="table-header">
         <h2>Addresses</h2>
 
@@ -16,8 +14,6 @@
           Añadir Address
         </v-btn>
       </div>
-
-      <!-- TABLA -->
       <v-table class="professional-table">
         <thead>
           <tr>
@@ -63,8 +59,6 @@
         </tbody>
       </v-table>
     </div>
-
-    <!-- FORMULARIO CREAR / EDITAR -->
     <div v-else class="formulario-inline">
       <AddressForm
         :dispositivo-id="dispositivoId"
@@ -146,7 +140,7 @@ const obtenerNombreInterfaz = (interfazId) => {
 </script>
 
 <style scoped>
-/* FORMULARIO EN BLANCO */
+
 .formulario-inline {
   background: white;
   border-radius: 12px;
@@ -155,7 +149,7 @@ const obtenerNombreInterfaz = (interfazId) => {
   margin-bottom: 16px;
 }
 
-/* Mantener el resto del style igual que tu lista */
+
 .service-list { width: 100%; }
 
 .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }

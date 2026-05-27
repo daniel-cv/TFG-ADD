@@ -4,14 +4,18 @@ import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.firewalls.Service.ServiceRepository;
 import com.smartnetwork.backend.Repository.firewalls.Service.DispositivoServiceRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
+import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Log;
 import com.smartnetwork.backend.domain.Entity.firewalls.Service.DispositivoService;
 import com.smartnetwork.backend.domain.Entity.Usuario;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import com.smartnetwork.backend.domain.dtos.firewalls.Services.CrearServiceDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.Services.ServiceDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,14 +28,15 @@ public class ServiceService {
     private final FortiGateService fortiGateService;
     private final UsuarioRepository usuarioRepository;
     private final DispositivoServiceRepository dispositivoServiceRepository;
+    private final LogService logService;
 
-    public ServiceService(ServiceRepository serviceRepository,
-                          DispositivoRepository dispositivoRepository, FortiGateService fortiGateService, UsuarioRepository usuarioRepository, DispositivoServiceRepository dispositivoServiceRepository) {
+    public ServiceService(ServiceRepository serviceRepository, DispositivoRepository dispositivoRepository, FortiGateService fortiGateService, UsuarioRepository usuarioRepository, DispositivoServiceRepository dispositivoServiceRepository,LogService logService) {
         this.serviceRepository = serviceRepository;
         this.dispositivoRepository = dispositivoRepository;
         this.fortiGateService = fortiGateService;
         this.usuarioRepository = usuarioRepository;
         this.dispositivoServiceRepository = dispositivoServiceRepository;
+        this.logService = logService;
     }
 
     @Transactional
@@ -74,7 +79,8 @@ public class ServiceService {
         if (!service.getUsuario().getUsername().equals(username)) {
             throw new RuntimeException("No autorizado");
         }
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         for (Long dispositivoId : dispositivosIds) {
 
             Dispositivo dispositivo = dispositivoRepository.findById(dispositivoId)
@@ -96,8 +102,11 @@ public class ServiceService {
             }
 
             DispositivoService rel = new DispositivoService(dispositivo, service, service.getComentario());
+            logs.add(logService.crearLog(usu,dispositivo, TipoAccion.CREAR,"Se ha CREADO el Service "+service.getNombre()));
+
             dispositivoServiceRepository.save(rel);
         }
+        logService.guardarTodos(logs);
     }
 
     public List<ServiceDTO> listarPorDispositivo(Long dispositivoId, String username) {
@@ -127,9 +136,7 @@ public class ServiceService {
     }
 
 
-    public List<com.smartnetwork.backend.domain.Entity.firewalls.Service.Service> findAllByDispositivo(
-            Long dispositivoId,
-            String username) {
+    public List<com.smartnetwork.backend.domain.Entity.firewalls.Service.Service> findAllByDispositivo(Long dispositivoId, String username) {
 
         Dispositivo dispositivo = dispositivoRepository
                 .findById(dispositivoId)
@@ -142,10 +149,7 @@ public class ServiceService {
         return serviceRepository.findByDispositivoServices_Dispositivo_Id(dispositivoId);
     }
 
-    public Optional<com.smartnetwork.backend.domain.Entity.firewalls.Service.Service> findById(
-            Long serviceId,
-            Long dispositivoId,
-            String username) {
+    public Optional<com.smartnetwork.backend.domain.Entity.firewalls.Service.Service> findById(Long serviceId, Long dispositivoId, String username) {
 
         Dispositivo dispositivo = dispositivoRepository
                 .findById(dispositivoId)
@@ -159,11 +163,7 @@ public class ServiceService {
     }
 
     @Transactional
-    public void eliminarService(
-            Long serviceId,
-            List<Long> dispositivosIds,
-            String username
-    ) {
+    public void eliminarService(Long serviceId, List<Long> dispositivosIds, String username) {
 
         com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service =
                 serviceRepository.findById(serviceId)
@@ -171,7 +171,8 @@ public class ServiceService {
 
         List<DispositivoService> relaciones =
                 dispositivoServiceRepository.findByServiceId(serviceId);
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         for (DispositivoService rel : relaciones) {
 
             Dispositivo dispositivo = rel.getDispositivo();
@@ -189,16 +190,10 @@ public class ServiceService {
             if (!(Boolean) resultado.get("success")) {
                 throw new RuntimeException("Error eliminando service");
             }
-
+            logs.add(logService.crearLog(usu,dispositivo, TipoAccion.ELIMINAR,"Se ha ELIMINADO el Service "+service.getNombre()));
             dispositivoServiceRepository.delete(rel);
         }
-
-        boolean quedan =
-                dispositivoServiceRepository.existsByServiceId(serviceId);
-
-        if (!quedan) {
-            serviceRepository.delete(service);
-        }
+        logService.guardarTodos(logs);
     }
 
     private ServiceDTO toDTO(com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service) {

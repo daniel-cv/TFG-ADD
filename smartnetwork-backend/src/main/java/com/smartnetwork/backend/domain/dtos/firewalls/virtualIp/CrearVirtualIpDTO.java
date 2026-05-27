@@ -9,7 +9,7 @@ public class CrearVirtualIpDTO {
     private String name;
     private String comments;
     private Long interfazId;
-    private String type;        // NAT | VIP | etc.
+    private String type;
     private String externalIp;
     private String internalIp;
     private Long dispositivoId;

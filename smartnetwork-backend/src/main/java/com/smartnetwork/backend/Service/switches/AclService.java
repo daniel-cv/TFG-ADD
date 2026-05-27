@@ -1,9 +1,14 @@
 package com.smartnetwork.backend.Service.switches;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smartnetwork.backend.Repository.UsuarioRepository;
+import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Log;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Entity.switches.Acl;
 import com.smartnetwork.backend.domain.Entity.switches.AclRegla;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import com.smartnetwork.backend.domain.dtos.switches.acls.AclDTO;
 import com.smartnetwork.backend.domain.dtos.switches.acls.AclReglaDTO;
 import com.smartnetwork.backend.domain.dtos.switches.acls.CrearAclDTO;
@@ -27,33 +32,33 @@ public class AclService {
     private final AclRepository aclRepository;
     private final ReglaRepository reglaRepository;
     private final DispositivoRepository dispositivoRepository;
+    private final LogService logService;
+    private final UsuarioRepository usuarioRepository;
 
-    public AclService(AclRepository aclRepository,
-                      ReglaRepository reglaRepository,
-                      DispositivoRepository dispositivoRepository) {
+    public AclService(AclRepository aclRepository, ReglaRepository reglaRepository, DispositivoRepository dispositivoRepository, LogService logService, UsuarioRepository usuarioRepository) {
         this.aclRepository = aclRepository;
         this.reglaRepository = reglaRepository;
         this.dispositivoRepository = dispositivoRepository;
+        this.logService = logService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public Acl crearAcl(CrearAclDTO dto, String username) {
-
         Dispositivo dispositivo = dispositivoRepository.findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
-
         aclRepository.findByNombreAndDispositivo(dto.getNombre(), dispositivo)
                 .ifPresent(a -> {
                     throw new RuntimeException("La ACL ya existe");
                 });
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Acl acl = new Acl();
         acl.setNombre(dto.getNombre());
         acl.setDispositivo(dispositivo);
-
-        aclRepository.save(acl);
-
+        logs.add(logService.crearLog(usu,dispositivo, TipoAccion.CREAR,"Se ha CREADO el ACL "+acl.getNombre()));
         configurarAcl(dispositivo, acl);
-
+        aclRepository.save(acl);
+        logService.guardarTodos(logs);
         return acl;
     }
 
@@ -78,20 +83,21 @@ public class AclService {
     }
 
     public void agregarRegla(Long aclId, CrearReglaDTO dto, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Acl acl = aclRepository.findById(aclId)
                 .orElseThrow(() -> new RuntimeException("ACL no encontrada"));
-
         AclRegla regla = new AclRegla();
         regla.setAccion(dto.getAccion());
         regla.setOrigen(dto.getOrigen());
         regla.setDestino(dto.getDestino());
         regla.setOrden(dto.getOrden());
         regla.setAcl(acl);
-
-        reglaRepository.save(regla);
-
         configurarRegla(acl.getDispositivo(), acl, regla);
+        logs.add(logService.crearLog(usu,acl.getDispositivo(), TipoAccion.EDITAR,"Se ha AÑADIDO al ACL "+acl.getNombre()+" la Regla "+regla.getAccion()+"-"+regla.getOrigen()+"-"+regla.getDestino()));
+        reglaRepository.save(regla);
+        logService.guardarTodos(logs);
+
     }
 
     private void configurarRegla(Dispositivo dispositivo, Acl acl, AclRegla regla) {
@@ -120,13 +126,16 @@ public class AclService {
 
     @Transactional
     public void eliminarRegla(Long reglaId, String username) {
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
 
         AclRegla regla = reglaRepository.findById(reglaId)
                 .orElseThrow(() -> new RuntimeException("Regla no encontrada"));
 
         eliminarReglaSwitch(regla.getAcl().getDispositivo(), regla);
-
+        logs.add(logService.crearLog(usu,regla.getAcl().getDispositivo(), TipoAccion.EDITAR,"Se ha ELIMINADO al ACL "+regla.getAcl()+" la Regla "+regla.getAccion()+"-"+regla.getOrigen()+"-"+regla.getDestino()));
         reglaRepository.delete(regla);
+        logService.guardarTodos(logs);
     }
 
     private void eliminarReglaSwitch(Dispositivo dispositivo, AclRegla regla) {
@@ -155,12 +164,13 @@ public class AclService {
 
     @Transactional
     public void eliminarAcl(Long id, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Acl acl = aclRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ACL no encontrada"));
 
         eliminarAclSwitch(acl.getDispositivo(), acl);
-
+        logs.add(logService.crearLog(usu,acl.getDispositivo(), TipoAccion.ELIMINAR,"Se ha ELIMINADO el ACL "+acl.getNombre()));
         aclRepository.delete(acl);
     }
 

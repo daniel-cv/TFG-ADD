@@ -11,9 +11,7 @@ import java.util.Optional;
 @Repository
 public interface AclRepository extends JpaRepository<Acl, Long> {
 
-    // 🔹 Buscar ACLs por dispositivo
     List<Acl> findByDispositivoId(Long dispositivoId);
 
-    // 🔹 Evitar duplicados
     Optional<Acl> findByNombreAndDispositivo(String nombre, Dispositivo dispositivo);
 }

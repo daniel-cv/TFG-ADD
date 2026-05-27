@@ -6,7 +6,6 @@
 
     <router-link to="/devices">Mis dispositivos</router-link>
 
-    <!-- SISTEMA DE PESTAÑAS -->
     <div class="tabs-container">
       <div
         v-for="tab in tabs"
@@ -19,7 +18,6 @@
       </div>
     </div>
 
-    <!-- CONTENIDO DE CADA PESTAÑA -->
     <div class="tab-content">
       <component :is="currentComponent" />
     </div>

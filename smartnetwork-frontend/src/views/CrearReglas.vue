@@ -9,7 +9,6 @@
 
           <v-form ref="form" @submit.prevent="handleSubmit">
 
-            <!-- Nombre de la política -->
             <v-text-field
               v-model="name"
               label="Nombre de la política"
@@ -17,7 +16,6 @@
               required
             />
 
-            <!-- Interfaces origen y destino -->
             <v-text-field
               v-model="srcInt"
               label="Interfaz origen"
@@ -31,7 +29,6 @@
               required
             />
 
-            <!-- Direcciones origen y destino -->
             <v-text-field
               v-model="srcaddr"
               label="Dirección origen"
@@ -45,7 +42,6 @@
               required
             />
 
-            <!-- Servicios -->
             <v-text-field
               v-model="service"
               label="Servicio"

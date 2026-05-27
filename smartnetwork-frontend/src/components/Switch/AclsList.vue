@@ -1,7 +1,5 @@
 <template>
   <div class="service-list">
-
-    <!-- HEADER -->
     <div class="table-header">
       <h2>ACLs</h2>
 
@@ -9,8 +7,6 @@
         + Nueva ACL
       </button>
     </div>
-
-    <!-- FORM CREAR ACL -->
     <div v-if="mostrarFormulario" class="formulario-inline">
       <input v-model="nuevaAcl.nombre" placeholder="Nombre ACL" class="input-edit" />
 
@@ -18,10 +14,7 @@
         Crear
       </button>
     </div>
-
-    <!-- TABLA ACL -->
     <table class="professional-table">
-
       <thead>
         <tr>
           <th>Nombre</th>
@@ -29,60 +22,40 @@
           <th>Acciones</th>
         </tr>
       </thead>
-
       <tbody>
-
         <template v-for="acl in aclStore.acls" :key="acl.id">
-
-          <!-- ACL ROW -->
           <tr>
-
             <td @click="toggleAcl(acl.id)" style="cursor:pointer">
               <span class="badge blue">
                 {{ acl.nombre }}
               </span>
             </td>
-
             <td>
               {{ acl.reglas?.length || 0 }} reglas
             </td>
-
             <td>
               <button class="btn-guardar" @click="mostrarReglaForm(acl.id)">
                 + Regla
               </button>
-
               <button class="btn-borrar" @click="borrarAcl(acl.id)">
                 Borrar
               </button>
             </td>
-
           </tr>
-
-          <!-- 🔥 REGLAS EXPANDIDAS -->
           <tr v-if="aclExpandida === acl.id">
             <td colspan="3">
-
-              <!-- FORM REGLA -->
               <div v-if="aclSeleccionada === acl.id" class="formulario-inline">
-
                 <select v-model="nuevaRegla.accion" class="input-edit">
                   <option value="permit">permit</option>
                   <option value="deny">deny</option>
                 </select>
-
                 <input v-model="nuevaRegla.origen" placeholder="Origen (any)" class="input-edit" />
                 <input v-model="nuevaRegla.destino" placeholder="Destino (any)" class="input-edit" />
-
                 <button class="btn-guardar" @click="crearRegla">
                   Añadir
                 </button>
-
               </div>
-
-              <!-- LISTA REGLAS -->
               <table class="professional-table nested-table">
-
                 <thead>
                   <tr>
                     <th>#</th>
@@ -92,41 +65,29 @@
                     <th></th>
                   </tr>
                 </thead>
-
                 <tbody>
                   <tr v-for="r in acl.reglas" :key="r.id">
-
                     <td>{{ r.orden }}</td>
-
                     <td>
                       <span :class="r.accion === 'permit' ? 'badge green' : 'badge red'">
                         {{ r.accion }}
                       </span>
                     </td>
-
                     <td>{{ r.origen }}</td>
                     <td>{{ r.destino }}</td>
-
                     <td>
                       <button class="btn-borrar mini" @click="borrarRegla(r.id)">
                         x
                       </button>
                     </td>
-
                   </tr>
                 </tbody>
-
               </table>
-
             </td>
           </tr>
-
         </template>
-
       </tbody>
-
     </table>
-
   </div>
 </template>
 
@@ -153,12 +114,10 @@ const nuevaRegla = ref({
   orden: 10
 })
 
-// 🔥 TOGGLE
 const toggleAcl = (id) => {
   aclExpandida.value = aclExpandida.value === id ? null : id
 }
 
-// 🔥 CREAR ACL
 const crearAcl = async () => {
   await aclStore.crearAcl({
     ...nuevaAcl.value,
@@ -171,19 +130,16 @@ const crearAcl = async () => {
   await aclStore.cargarAcls(dispositivoStore.dispositivo.id)
 }
 
-// 🔥 BORRAR ACL
 const borrarAcl = async (id) => {
   await aclStore.eliminarAcl(id)
   aclStore.cargarAcls(dispositivoStore.dispositivo.id)
 }
 
-// 🔥 FORM REGLA
 const mostrarReglaForm = (aclId) => {
   aclSeleccionada.value = aclId
   aclExpandida.value = aclId
 }
 
-// 🔥 CREAR REGLA
 const crearRegla = async () => {
   await aclStore.agregarRegla(aclSeleccionada.value, nuevaRegla.value)
 
@@ -199,21 +155,17 @@ const crearRegla = async () => {
   await aclStore.cargarAcls(dispositivoStore.dispositivo.id)
 }
 
-// 🔥 BORRAR REGLA
 const borrarRegla = async (id) => {
   await aclStore.eliminarRegla(id)
   aclStore.cargarAcls(dispositivoStore.dispositivo.id)
 }
 
-// 🔥 LOAD
 onMounted(() => {
   aclStore.cargarAcls(dispositivoStore.dispositivo.id)
 })
 </script>
 
 <style scoped>
-
-/* reutilizas TODO lo de VLAN */
 
 .service-list { width: 100%;
 color: black;}
@@ -297,7 +249,6 @@ color: black;}
 .green { background: #dcfce7; }
 .red { background: #fee2e2; }
 
-/* 🔥 tabla interna */
 .nested-table {
   margin-top: 10px;
 }

@@ -2,11 +2,16 @@ package com.smartnetwork.backend.Service.switches;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
+import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.Repository.switches.VlanRepository;
+import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Log;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Entity.switches.Interfaces;
 import com.smartnetwork.backend.Repository.switches.InterfacesRepository;
 import com.smartnetwork.backend.domain.Entity.switches.Vlan;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import com.smartnetwork.backend.domain.dtos.switches.vlan.CrearVlanDTO;
 import com.smartnetwork.backend.domain.dtos.switches.vlan.VlanDTO;
 import org.springframework.http.*;
@@ -22,12 +27,16 @@ public class VlanService {
     private final VlanRepository vlanRepository;
     private final DispositivoRepository dispositivoRepository;
     private final InterfacesRepository interfacesRepository;
+    private final LogService logService;
+    private final UsuarioRepository usuarioRepository;
 
     public VlanService(VlanRepository vlanRepository,
-                       DispositivoRepository dispositivoRepository, InterfacesRepository interfacesRepository) {
+                       DispositivoRepository dispositivoRepository, InterfacesRepository interfacesRepository, LogService logService,UsuarioRepository usuarioRepository) {
         this.vlanRepository = vlanRepository;
         this.dispositivoRepository = dispositivoRepository;
         this.interfacesRepository = interfacesRepository;
+        this.logService = logService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public Vlan getOrCreateVlan(Integer vlanId, Dispositivo dispositivo) {
@@ -50,38 +59,35 @@ public class VlanService {
     }
 
     public VlanDTO crearVlan(CrearVlanDTO dto, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Dispositivo dispositivo = dispositivoRepository.findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
 
-        // 🔥 VALIDAR DUPLICADO
         vlanRepository.findByVlanIdAndDispositivoId(dto.getVlanId(), dispositivo.getId())
                 .ifPresent(v -> {
                     throw new RuntimeException("La VLAN ya existe");
                 });
-
         Vlan vlan = new Vlan();
         vlan.setVlanId(dto.getVlanId());
         vlan.setNombre(dto.getNombre());
         vlan.setDispositivo(dispositivo);
-
-        vlanRepository.save(vlan);
-
+        logs.add(logService.crearLog(usu,dispositivo, TipoAccion.CREAR,"Se ha CREADO la VLAN "+vlan.getNombre()));
         configurarVlan(dispositivo, vlan);
-
+        vlanRepository.save(vlan);
+        logService.guardarTodos(logs);
         return mapToDTO(vlan);
     }
 
     public VlanDTO actualizarVlan(Long id, CrearVlanDTO dto, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Vlan vlan = vlanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("VLAN no encontrada"));
-
         vlan.setNombre(dto.getNombre());
-        vlanRepository.save(vlan);
-
+        logs.add(logService.crearLog(usu,vlan.getDispositivo(), TipoAccion.EDITAR,"Se ha EDITADO la VLAN "+vlan.getNombre()));
         configurarVlan(vlan.getDispositivo(), vlan);
-
+        vlanRepository.save(vlan);
         return mapToDTO(vlan);
     }
 
@@ -92,10 +98,7 @@ public class VlanService {
         dto.setNombre(vlan.getNombre());
         return dto;
     }
-
-    // 🔥 CONFIGURAR VLAN
     private void configurarVlan(Dispositivo dispositivo, Vlan vlan) {
-
         try {
             String url = "http://" + dispositivo.getIp() + "/command-api";
 
@@ -119,7 +122,6 @@ public class VlanService {
         }
     }
 
-    // 🔥 BORRAR VLAN
     private void configurarDeleteVlan(Dispositivo dispositivo, Vlan vlan) {
 
         try {
@@ -141,7 +143,6 @@ public class VlanService {
         }
     }
 
-    // 🔧 ENVÍO COMANDOS
     private void enviarComandos(Dispositivo dispositivo, String url, List<String> comandos) throws Exception {
 
         String payload = """
@@ -168,11 +169,11 @@ public class VlanService {
         new RestTemplate().postForEntity(url, request, String.class);
     }
     public void eliminarVlan(Long id, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Vlan vlan = vlanRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("VLAN no encontrada"));
 
-        // 🔥 1. Quitar VLAN de interfaces (ACCESS)
         List<Interfaces> interfaces = interfacesRepository.findByVlanAccess(vlan);
 
         for (Interfaces i : interfaces) {
@@ -180,8 +181,6 @@ public class VlanService {
         }
 
         interfacesRepository.saveAll(interfaces);
-
-        // 🔥 2. Quitar VLAN de trunks
         List<Interfaces> allInterfaces = interfacesRepository.findAll();
 
         for (Interfaces i : allInterfaces) {
@@ -189,13 +188,9 @@ public class VlanService {
                 i.getVlansTrunk().remove(vlan);
             }
         }
-
-        interfacesRepository.saveAll(allInterfaces);
-
-        // 🔥 3. Borrar del switch
+        logs.add(logService.crearLog(usu,vlan.getDispositivo(), TipoAccion.ELIMINAR,"Se ha ELIMINADO la VLAN "+vlan.getNombre()));
         configurarDeleteVlan(vlan.getDispositivo(), vlan);
-
-        // 🔥 4. Borrar de BD
+        interfacesRepository.saveAll(allInterfaces);
         vlanRepository.delete(vlan);
     }
 

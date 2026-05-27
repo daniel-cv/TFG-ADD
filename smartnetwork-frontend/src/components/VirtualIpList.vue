@@ -52,7 +52,7 @@
 import { ref, onMounted } from 'vue'
 import { useVirtualIpStore } from '@/stores/virtualIpStore'
 import { useDispositivoSeleccionadoStore } from '@/stores/dispositivoSeleccionadoStore'
-import VirtualIpForm from '@/components/VirtualIpForm.vue' // Asegúrate de que el nombre sea correcto
+import VirtualIpForm from '@/components/VirtualIpForm.vue'
 
 const virtualIpStore = useVirtualIpStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
@@ -61,7 +61,6 @@ const dispositivoId = seleccionadoStore.dispositivo.id
 const mostrandoFormulario = ref(false)
 const vipSeleccionada = ref(null)
 
-// ACCIONES
 const eliminarVip = async (id) => {
   if (confirm('¿Estás seguro de eliminar esta Virtual IP?')) {
     try {
@@ -98,7 +97,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* ESTILOS IDÉNTICOS A INTERFACES */
 .formulario-inline { background: white; border-radius: 12px; padding: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); margin-bottom: 16px; }
 .service-list { width: 100%; }
 .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }

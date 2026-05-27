@@ -1,12 +1,9 @@
 <template>
   <div class="service-list">
-
     <div v-if="!mostrandoFormulario">
       <div class="table-header">
         <h2>Interfaces</h2>
-        
       </div>
-
       <v-table class="professional-table">
         <thead>
           <tr>
@@ -15,18 +12,13 @@
             <th>Modo</th>
             <th>VLAN</th>
             <th>Descripción</th>
-            <th>ACL</th> <!-- 🔥 NUEVO -->
+            <th>ACL</th> 
             <th>Acciones</th>
           </tr>
         </thead>
-
         <tbody>
           <tr v-for="interfaz in interfazStore.interfaces" :key="interfaz.id">
-
-            <!-- Nombre -->
             <td>{{ interfaz.name }}</td>
-
-            <!-- Estado -->
             <td>
               <span :class="[
                 'badge',
@@ -39,32 +31,19 @@
                 }}
               </span>
             </td>
-
-            <!-- Modo -->
             <td>{{ interfaz.mode }}</td>
-
-            <!-- VLAN -->
             <td>
-              <!-- ACCESS -->
               <span v-if="interfaz.vlanAccess" class="badge blue">
                 VLAN {{ interfaz.vlanAccess }}
               </span>
-
-              <!-- TRUNK -->
               <span v-else-if="interfaz.vlansTrunk?.length" class="badge gray">
                 {{ interfaz.vlansTrunk.join(', ') }}
               </span>
-
-              <!-- NONE -->
               <span v-else class="badge gray">
                 -
               </span>
             </td>
-
-            <!-- Descripción -->
             <td>{{ interfaz.descripcion }}</td>
-
-            <!-- 🔥 ACL -->
             <td>
               <span v-if="interfaz.aclIn" class="badge purple">
                 {{ interfaz.aclIn }}
@@ -73,22 +52,16 @@
                 -
               </span>
             </td>
-
-            <!-- Acciones -->
             <td>
               <v-btn color="green" size="small" @click="editarInterfaz(interfaz)">
                 EDITAR
               </v-btn>
-
-
             </td>
-
           </tr>
         </tbody>
       </v-table>
     </div>
 
-    <!-- FORM -->
     <div v-else class="formulario-inline">
       <InterfazForm
         :dispositivo-id="dispositivoId"
@@ -107,17 +80,14 @@ import { useInterfazStore } from '@/stores/Switches/interfacesStore'
 import { useDispositivoSeleccionadoStore } from '@/stores/dispositivoSeleccionadoStore'
 import InterfazForm from '@/components/Switch/InterfazForm.vue'
 
-// STORE
 const interfazStore = useInterfazStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 
 const dispositivoId = seleccionadoStore.dispositivo.id
 
-// UI
 const mostrandoFormulario = ref(false)
 const interfazSeleccionada = ref(null)
 
-// ACCIONES
 const eliminarInterfaz = async (id) => {
   await interfazStore.eliminarInterfaz(id)
   await interfazStore.cargarInterfaces(dispositivoId)
@@ -142,7 +112,6 @@ const cerrarFormulario = () => {
   mostrandoFormulario.value = false
 }
 
-// LOAD
 onMounted(() => {
   interfazStore.cargarInterfaces(dispositivoId)
 })

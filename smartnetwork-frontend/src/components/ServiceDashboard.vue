@@ -1,12 +1,8 @@
 <template>
   <div class="services-wrapper">
-
-    <!-- LISTADO -->
     <div v-if="!mostrandoFormulario">
-
       <div class="table-header">
         <h2>Services</h2>
-
         <v-btn
           class="add-btn"
           size="small"
@@ -40,7 +36,6 @@
             <td>{{ service.destinationPort }}</td>
             <td>{{ service.comentario || 'Sin comentario' }}</td>
 
-            <!-- IMPLEMENTADO -->
             <td>
               <div v-if="implementaciones[service.id]?.length">
                 <v-chip
@@ -83,8 +78,6 @@
         </tbody>
       </v-table>
     </div>
-
-    <!-- FORM -->
     <div v-else class="formulario-inline">
       <ServiceForm
         :service-edit="serviceSeleccionado"
@@ -94,9 +87,6 @@
       />
     </div>
 
-    <!-- EDITAR -->
-   
-    <!-- APLICAR -->
     <v-dialog v-model="dialogAplicar" max-width="650px">
       <v-card>
 
@@ -156,7 +146,6 @@
       </v-card>
     </v-dialog>
 
-    <!-- ELIMINAR -->
     <v-dialog v-model="dialogEliminar" max-width="650px">
       <v-card>
 

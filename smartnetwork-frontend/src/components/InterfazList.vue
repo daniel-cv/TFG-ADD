@@ -42,7 +42,6 @@
       </v-table>
     </div>
 
-    <!-- Formulario Inline -->
     <div v-else class="formulario-inline">
       <InterfazForm
         :dispositivo-id="dispositivoId"

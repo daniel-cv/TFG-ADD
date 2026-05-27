@@ -25,9 +25,7 @@ export function actualizarUsuarioFirewall(id, usuarioFirewall) {
 }
 
 export function eliminarUsuarioFirewall(id, dispositivosIds) {
-  return api.delete(
-    `/api/firewalls/usuarioFirewall/delete/${id}`,
-    {
+  return api.delete(`/api/firewalls/usuarioFirewall/delete/${id}`,{
       data: dispositivosIds
     }
   )

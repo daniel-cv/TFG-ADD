@@ -18,145 +18,54 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class ReglaFirewallController {
 
-    private final ReglaFirewallService
-            reglaFirewallService;
-
-    /* ===================================================== */
-    /* GET DEVICE */
-    /* ===================================================== */
+    private final ReglaFirewallService reglaFirewallService;
 
     @GetMapping("/dispositivo/{id}")
     public List<ReglaFirewallDTO>
-    listarPorDispositivo(
-
-            @PathVariable Long id,
-
-            Authentication auth
-
-    ) {
-
-        return reglaFirewallService
-                .listarPorDispositivo(
-                        id,
-                        auth.getName()
-                );
+    listarPorDispositivo(@PathVariable Long id, Authentication auth) {
+        return reglaFirewallService.listarPorDispositivo(id, auth.getName()
+        );
     }
-
-    /* ===================================================== */
-    /* GET USER */
-    /* ===================================================== */
 
     @GetMapping("/usuario")
-    public List<ReglaFirewallDTO>
-    listarUsuario(
-            Authentication auth
-    ) {
-
-        return reglaFirewallService
-                .listarPorUsario(
-                        auth.getName()
-                );
+    public List<ReglaFirewallDTO> listarUsuario(Authentication auth) {
+        return reglaFirewallService.listarPorUsario(auth.getName()
+        );
     }
-
-    /* ===================================================== */
-    /* CREATE SIMPLE */
-    /* ===================================================== */
 
     @PostMapping("/create")
-    public ReglaFirewallDTO crear(
-
-            @RequestBody
-            CrearReglaFirewallDTO dto,
-
-            Authentication auth
-
-    ) {
-
-        return reglaFirewallService
-                .crearReglaFirewall(
-                        dto,
-                        auth.getName()
-                );
+    public ReglaFirewallDTO crear(@RequestBody CrearReglaFirewallDTO dto, Authentication auth) {
+        return reglaFirewallService.crearReglaFirewall(dto, auth.getName()
+        );
     }
-
-    /* ===================================================== */
-    /* CREATE FULL */
-    /* ===================================================== */
 
     @PostMapping("/full")
     public ReglaFirewallDTO crearCompleta(
-
-            @RequestBody
-            CrearReglaFirewallDTO dto,
-
+            @RequestBody CrearReglaFirewallDTO dto,
             Authentication auth
-
     ) {
-
-        return reglaFirewallService
-                .crear(
-                        dto,
-                        auth.getName()
-                );
+        return reglaFirewallService.crear(dto, auth.getName()
+        );
     }
-
-    /* ===================================================== */
-    /* APPLY */
-    /* ===================================================== */
 
     @PostMapping("/{id}/dispositivos")
     public void asignar(
-
             @PathVariable Long id,
-
-            @RequestBody
-            List<Long> dispositivosIds,
-
-            Authentication auth
-
-    ) {
-
-        reglaFirewallService
-                .asignarReglaFirewallADispositivos(
-
-                        id,
-
-                        dispositivosIds,
-
-                        auth.getName()
-                );
+            @RequestBody List<Long> dispositivosIds,
+            Authentication auth) {
+        reglaFirewallService.asignarReglaFirewallADispositivos(id, dispositivosIds, auth.getName()
+        );
     }
-
-    /* ===================================================== */
-    /* EDIT */
-    /* ===================================================== */
 
     @PutMapping("/edit/{id}")
     public ReglaFirewallDTO editar(
-
             @PathVariable Long id,
-
-            @RequestBody
-            CrearReglaFirewallDTO dto,
-
+            @RequestBody CrearReglaFirewallDTO dto,
             Authentication auth
-
     ) {
-
-        return reglaFirewallService
-                .editarReglaFirewall(
-
-                        id,
-
-                        dto,
-
-                        auth.getName()
-                );
+        return reglaFirewallService.editarReglaFirewall(id, dto, auth.getName()
+        );
     }
-
-    /* ===================================================== */
-    /* DELETE */
-    /* ===================================================== */
 
     @DeleteMapping("/delete/{id}")
     public void eliminar(
@@ -166,14 +75,7 @@ public class ReglaFirewallController {
     ) {
         List<Long> dispositivosIds =
                 body.get("dispositivosIds");
-        reglaFirewallService
-                .eliminarRegla(
-
-                        id,
-
-                        dispositivosIds,
-
-                        auth.getName()
-                );
+        reglaFirewallService.eliminarRegla(id, dispositivosIds, auth.getName()
+        );
     }
 }

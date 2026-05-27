@@ -1,7 +1,5 @@
 <template>
   <div class="service-list">
-
-    <!-- LISTA -->
     <div v-if="!mostrandoFormulario">
 
       <div class="table-header">
@@ -54,8 +52,6 @@
         </tbody>
       </v-table>
     </div>
-
-    <!-- FORMULARIO -->
     <div v-else class="formulario-inline">
       <ServiceForm
         :service-edit="serviceSeleccionado"
@@ -129,7 +125,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Igual que tu AddressList */
 .formulario-inline {
   background: white;
   border-radius: 12px;

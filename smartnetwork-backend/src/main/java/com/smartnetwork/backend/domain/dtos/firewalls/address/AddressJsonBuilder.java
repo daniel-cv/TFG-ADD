@@ -15,9 +15,6 @@ public class AddressJsonBuilder {
         };
     }
 
-    // -----------------------------
-    // SUBNET
-    // -----------------------------
     private static String buildSubnet(Address address) {
         return """
         {
@@ -34,9 +31,6 @@ public class AddressJsonBuilder {
         );
     }
 
-    // -----------------------------
-    // SINGLE IP (ipmask)
-    // -----------------------------
     private static String buildIpmask(Address address) {
         return """
     {
@@ -55,9 +49,6 @@ public class AddressJsonBuilder {
         );
     }
 
-    // -----------------------------
-    // IP RANGE
-    // -----------------------------
     private static String buildIpRange(Address address) {
 
         return """

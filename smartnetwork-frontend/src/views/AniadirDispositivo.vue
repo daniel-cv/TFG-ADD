@@ -8,7 +8,6 @@
           </v-card-title>
 
           <v-form @submit.prevent="handleSubmit" ref="form">
-            <!-- Nombre -->
             <v-text-field
               v-model="nombre"
               label="Nombre"
@@ -18,7 +17,6 @@
               required
             />
 
-            <!-- Fabricante -->
             <v-select
               v-model="fabricante"
               :items="fabricantes"
@@ -30,7 +28,6 @@
               required
             />
 
-            <!-- Tipo -->
             <v-select
               v-model="tipo"
               :items="tipos"
@@ -42,7 +39,6 @@
               required
             />
 
-            <!-- IP -->
             <v-text-field
               v-model="ip"
               label="Dirección IP"
@@ -64,7 +60,6 @@
                 v => tipo !== 'FIREWALL' || !!v || 'Token obligatorio'
               ]"
             />
-            <!-- USUARIO (solo SWITCH) -->
             <v-text-field
               v-if="tipo === 'SWITCH'"
               v-model="usuario"
@@ -90,7 +85,6 @@
             ]"
             />
 
-            <!-- Puerto -->
             <v-text-field
               v-model="puerto"
               label="Puerto"
@@ -144,7 +138,6 @@ const ipRules = [
       || "Formato de IP no válido"
 ];
 
-// Limpiar campos al cambiar tipo
 watch(tipo, (nuevoTipo) => {
   if (nuevoTipo === "FIREWALL") {
     usuario.value = "";

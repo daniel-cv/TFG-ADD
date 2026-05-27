@@ -14,10 +14,6 @@ public interface DispositivoReglaFirewallRepository
         Long
         > {
 
-    /* ===================================================== */
-    /* FIND */
-    /* ===================================================== */
-
     List<DispositivoReglaFirewall>
     findByDispositivoId(
             Long dispositivoId
@@ -38,10 +34,6 @@ public interface DispositivoReglaFirewallRepository
             Long reglaFirewallId
     );
 
-    /* ===================================================== */
-    /* EXISTS */
-    /* ===================================================== */
-
     boolean existsByDispositivoIdAndReglaFirewallId(
             Long dispositivoId,
             Long reglaFirewallId
@@ -50,10 +42,6 @@ public interface DispositivoReglaFirewallRepository
     boolean existsByReglaFirewallId(
             Long reglaFirewallId
     );
-
-    /* ===================================================== */
-    /* DELETE */
-    /* ===================================================== */
 
     void deleteByDispositivoIdAndReglaFirewallId(
             Long dispositivoId,

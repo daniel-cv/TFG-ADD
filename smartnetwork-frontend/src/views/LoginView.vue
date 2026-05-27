@@ -78,7 +78,7 @@ const handleLogin = async () => {
 };
 
 const irARegistro = () => {
-  router.push("/register"); // Asegúrate de tener esta ruta creada
+  router.push("/register");
 };
 
 </script>

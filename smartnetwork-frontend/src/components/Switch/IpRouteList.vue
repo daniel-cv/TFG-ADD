@@ -1,7 +1,5 @@
 <template>
   <div class="service-list">
-
-    <!-- HEADER -->
     <div class="table-header">
       <h2>IP Routes</h2>
 
@@ -9,19 +7,12 @@
         + Nueva Route
       </button>
     </div>
-
-    <!-- FORMULARIO CREAR -->
     <div v-if="mostrarFormulario" class="formulario-inline">
-
       <input v-model="nuevaRoute.ipDestino" placeholder="Destino (0.0.0.0)" class="input-edit"/>
       <input v-model="nuevaRoute.mascara" placeholder="Máscara (24)" class="input-edit"/>
       <input v-model="nuevaRoute.gateway" placeholder="Gateway (192.168.1.1)" class="input-edit"/>
-
       <button class="btn-guardar" @click="crear">Crear</button>
-
     </div>
-
-    <!-- TABLA -->
     <table class="professional-table">
       <thead>
         <tr>
@@ -75,7 +66,6 @@ const nuevaRoute = ref({
   gateway: ''
 })
 
-// 🔥 CREAR
 const crear = async () => {
 
   const payload = {
@@ -98,18 +88,15 @@ const crear = async () => {
   await ipRouteStore.cargarIpRoutes(dispositivoStore.dispositivo.id)
 }
 
-// 🔥 EDITAR
 const guardar = async (route) => {
   await ipRouteStore.actualizarIpRoute(route.id, route)
 }
 
-// 🔥 BORRAR
 const borrar = async (id) => {
   await ipRouteStore.eliminarIpRoute(id)
   await ipRouteStore.cargarIpRoutes(dispositivoStore.dispositivo.id)
 }
 
-// 🔥 CARGAR (IGUAL QUE VLAN)
 onMounted(() => {
   console.log("ROUTE dispositivo:", dispositivoStore.dispositivo)
   if (dispositivoStore.dispositivo?.id) {
@@ -119,7 +106,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* reutiliza exactamente tu mismo style */
 .service-list {
   width: 100%;
 }

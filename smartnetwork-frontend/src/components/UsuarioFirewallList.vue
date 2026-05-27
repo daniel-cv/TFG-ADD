@@ -1,13 +1,8 @@
 <template>
   <div class="service-list">
-
-    <!-- SI NO MOSTRAMOS FORMULARIO, MOSTRAMOS LISTA -->
     <div v-if="!mostrandoFormulario">
-
-      <!-- HEADER -->
       <div class="table-header">
         <h2>Usuarios de Firewall</h2>
-
         <v-btn
           class="add-btn"
           size="small"
@@ -16,8 +11,6 @@
           Añadir Usuario
         </v-btn>
       </div>
-
-      <!-- TABLA -->
       <v-table class="professional-table">
         <thead>
           <tr>
@@ -58,8 +51,6 @@
       </v-table>
 
     </div>
-
-    <!-- FORMULARIO CREAR / EDITAR -->
     <div v-else class="formulario-inline">
       <UsuarioFirewallForm
         :dispositivo-id="dispositivoId"
@@ -93,26 +84,12 @@ const props = defineProps({
     default: 'simple'
   }
 })
-
 const eliminarUsuario = async (id) => {
-
   try {
-
-    await usuarioFirewallStore.eliminarUsuarioFirewall(
-      id,
-      [dispositivoId]
-    )
-
-    await usuarioFirewallStore.cargarUsuariosPorDispositivo(
-      dispositivoId
-    )
-
+    await usuarioFirewallStore.eliminarUsuarioFirewall(id,[dispositivoId])
+    await usuarioFirewallStore.cargarUsuariosPorDispositivo(dispositivoId)
   } catch (error) {
-
-    console.error(
-      "Error eliminando usuario",
-      error
-    )
+    console.error("Error eliminando usuario",error)
   }
 }
 
@@ -141,7 +118,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* FORMULARIO EN BLANCO */
+
 .formulario-inline {
   background: white;
   border-radius: 12px;
@@ -150,7 +127,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-/* Mantener estilos de lista */
 .service-list { width: 100%; }
 
 .table-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }

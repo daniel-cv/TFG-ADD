@@ -1,7 +1,6 @@
 <template>
   <v-form ref="form" @submit.prevent="handleSubmit">
 
-    <!-- NAME -->
     <v-text-field
       v-model="name"
       label="Nombre"
@@ -12,7 +11,6 @@
       required
     />
 
-    <!-- TYPE -->
     <v-select
       v-model="type"
       :items="['subnet', 'iprange', 'ipmask']"
@@ -23,7 +21,6 @@
       required
     />
 
-    <!-- IP -->
     <v-text-field
       v-model="ip"
       label="Dirección IP"
@@ -34,7 +31,6 @@
       required
     />
 
-    <!-- IP DESTINO / MÁSCARA -->
     <v-text-field
       v-if="type === 'iprange'"
       v-model="ipdestino"
@@ -57,7 +53,6 @@
       required
     />
 
-    <!-- INTERFAZ -->
     <v-select
       v-model="interfazId"
       :items="interfaces"
@@ -70,7 +65,6 @@
       clearable
     />
 
-    <!-- COMENTARIO -->
     <v-textarea
       v-model="comentario"
       label="Comentario"
@@ -129,8 +123,6 @@ const mensaje = ref("")
 
 const isEdit = computed(() => !!props.addressEdit)
 
-/* ---------------- VALIDACIONES ---------------- */
-
 const isValidIp = (value) => {
   if (!value) return false
   const parts = value.split('.')
@@ -142,7 +134,6 @@ const isValidIp = (value) => {
   })
 }
 
-// máscara real: bits 1 seguidos de 0s (ej: 1111111100000000)
 const isValidMask = (mask) => {
   if (!isValidIp(mask)) return false
 
@@ -154,12 +145,9 @@ const isValidMask = (mask) => {
   return /^1*0*$/.test(binary)
 }
 
-/* Vuetify rules */
 const requiredRule = v => !!v || "Campo obligatorio"
 const ipRule = v => isValidIp(v) || "IP inválida"
 const maskRule = v => isValidMask(v) || "Máscara inválida"
-
-/* ---------------- INIT ---------------- */
 
 onMounted(async () => {
   try {
@@ -218,8 +206,6 @@ onMounted(async () => {
     console.error('Error cargando interfaces', error);
   }
 })
-
-/* ---------------- SUBMIT ---------------- */
 
 const handleSubmit = async () => {
   const result = await form.value.validate()

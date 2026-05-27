@@ -1,13 +1,8 @@
 <template>
   <div class="layout">
-
-    <!-- SIDEBAR -->
     <aside class="sidebar">
       <h2>CONFIGURACIÓN</h2>
-
       <ul>
-
-        <!-- FIREWALL -->
         <template v-if="esFirewall">
           <li :class="{ active: selectedForm === 'policy' }" @click="selectSection('policy')">
             Policies
@@ -26,7 +21,6 @@
           </li>
         </template>
 
-        <!-- 🔥 SWITCH -->
         <template v-if="esSwitch">
           <li class="menu-title">Interfaces</li>
           <li :class="{ active: selectedForm === 'interfaces' }" @click="selectSection('interfaces')">
@@ -53,17 +47,13 @@
         </template>
       </ul>
     </aside>
-
-    <!-- CONTENIDO -->
     <main class="content" v-if="seleccionadoStore.dispositivo">
-
       <div class="device-header">
         <h1>{{ seleccionadoStore.dispositivo.nombre }}</h1>
         <span class="device-subinfo">
           {{ seleccionadoStore.dispositivo.fabricante }} ·
           <span :class="['status',
-            seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline'
-          ]">
+            seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline']">
             {{ seleccionadoStore.dispositivo.estado }}
           </span>
         </span>
@@ -170,7 +160,6 @@ const currentComponent = computed(() => {
 
 const componentMap: Record<string, any> = {
 
-  // FIREWALL
   policy: {
     list: ReglaFirewallList,
     create: ReglaFirewallForm

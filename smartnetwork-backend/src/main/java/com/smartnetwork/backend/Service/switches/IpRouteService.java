@@ -2,8 +2,13 @@ package com.smartnetwork.backend.Service.switches;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
+import com.smartnetwork.backend.Repository.UsuarioRepository;
+import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.Log;
+import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Entity.switches.IpRoute;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import com.smartnetwork.backend.domain.dtos.switches.IpRoute.CrearIpRouteDTO;
 import com.smartnetwork.backend.domain.dtos.switches.IpRoute.IpRouteDTO;
 import org.springframework.http.HttpEntity;
@@ -21,15 +26,19 @@ import java.util.List;
 public class IpRouteService {
     private final IpRouteRepository ipRouteRepository;
     private final DispositivoRepository dispositivoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final LogService logService;
 
-    public IpRouteService(IpRouteRepository ipRouteRepository, DispositivoRepository dispositivoRepository) {
+    public IpRouteService(IpRouteRepository ipRouteRepository, DispositivoRepository dispositivoRepository, LogService logService, UsuarioRepository usuarioRepository) {
         this.ipRouteRepository = ipRouteRepository;
         this.dispositivoRepository = dispositivoRepository;
+        this.logService = logService;
+        this.usuarioRepository = usuarioRepository;
     }
 
-
     public IpRouteDTO crearIpRoute(CrearIpRouteDTO dto, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         Dispositivo dispositivo = dispositivoRepository.findById(dto.getDispositivoId())
                 .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
 
@@ -47,10 +56,10 @@ public class IpRouteService {
         ipRoute.setMascara(dto.getMascara());
         ipRoute.setGateway(dto.getGateway());
         ipRoute.setDispositivo(dispositivo);
-
-        ipRouteRepository.save(ipRoute);
-
+        logs.add(logService.crearLog(usu,dispositivo, TipoAccion.CREAR,"Se ha CREADO IpRoute destino "+ipRoute.getIpDestino()+" y gateway "+ipRoute.getGateway()));
         configurarIpRoute(dispositivo, ipRoute);
+        ipRouteRepository.save(ipRoute);
+        logService.guardarTodos(logs);
 
         return mapToDTO(ipRoute);
     }
@@ -79,8 +88,6 @@ public class IpRouteService {
             List<String> comandos = new ArrayList<>();
             comandos.add("enable");
             comandos.add("configure terminal");
-
-            // 🔥 COMANDO ROUTE
             comandos.add("ip route "
                     + route.getIpDestino() + "/" + route.getMascara() + " "
                     + route.getGateway());
@@ -119,15 +126,15 @@ public class IpRouteService {
     }
     @Transactional
     public void eliminarIpRoute(Long id, String username) {
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
 
         IpRoute route = ipRouteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("IpRoute no encontrada"));
-
-        // 🔥 1. Borrar del switch
+        logs.add(logService.crearLog(usu,route.getDispositivo(), TipoAccion.ELIMINAR,"Se ha ELIMINADO el IpRoute destino "+route.getIpDestino()+" y gateway "+route.getGateway()));
         configurarDeleteIpRoute(route.getDispositivo(), route);
-
-        // 🔥 2. Borrar de BD
         ipRouteRepository.delete(route);
+        logService.guardarTodos(logs);
     }
 
     private void enviarComandos(Dispositivo dispositivo, String url, List<String> comandos) throws Exception {
@@ -156,19 +163,18 @@ public class IpRouteService {
         new RestTemplate().postForEntity(url, request, String.class);
     }
     public IpRouteDTO actualizarIpRoute(Long id, CrearIpRouteDTO dto, String username) {
-
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         IpRoute route = ipRouteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Route no encontrada"));
 
         route.setIpDestino(dto.getIpDestino());
         route.setMascara(dto.getMascara());
         route.setGateway(dto.getGateway());
-
-        ipRouteRepository.save(route);
-
-        // 🔥 APLICAR EN SWITCH
+        logs.add(logService.crearLog(usu,route.getDispositivo(), TipoAccion.EDITAR,"Se ha EDITADO el IpRoute  destino "+route.getIpDestino()+" y gateway "+route.getGateway()));
         configurarIpRoute(route.getDispositivo(), route);
-
+        ipRouteRepository.save(route);
+        logService.guardarTodos(logs);
         return mapToDTO(route);
     }
 }

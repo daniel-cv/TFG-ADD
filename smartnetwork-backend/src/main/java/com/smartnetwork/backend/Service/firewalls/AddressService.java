@@ -4,10 +4,12 @@ import com.smartnetwork.backend.Repository.firewalls.Address.AddressRepository;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.firewalls.Address.DispositivoAddressRepository;
 import com.smartnetwork.backend.Repository.firewalls.Interfaz.InterfazRepository;
+import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.firewalls.Address.DispositivoAddress;
 import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.address.CrearAddressDTO;
 import com.smartnetwork.backend.Repository.*;
@@ -15,6 +17,7 @@ import com.smartnetwork.backend.domain.Entity.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -27,11 +30,12 @@ public class AddressService {
     private final FortiGateService fortiGateService;
     private final DispositivoAddressRepository dispositivoAddressRepo;
     private final UsuarioRepository usuarioRepository;
+    private final LogService logService;
 
     public AddressService(
             AddressRepository addressRepo,
             InterfazRepository interfazRepo,
-            DispositivoRepository dispositivoRepo, FortiGateService fortiGateService, DispositivoAddressRepository dispositivoAddressRepo, UsuarioRepository usuarioRepository
+            DispositivoRepository dispositivoRepo, FortiGateService fortiGateService, DispositivoAddressRepository dispositivoAddressRepo, UsuarioRepository usuarioRepository, LogService logService
     ) {
         this.addressRepo = addressRepo;
         this.interfazRepo = interfazRepo;
@@ -39,6 +43,7 @@ public class AddressService {
         this.fortiGateService = fortiGateService;
         this.dispositivoAddressRepo = dispositivoAddressRepo;
         this.usuarioRepository = usuarioRepository;
+        this.logService = logService;
     }
 
     @Transactional
@@ -69,10 +74,8 @@ public class AddressService {
             address.setIpdestino(dto.getIpdestino().trim());
         }
 
-        // --- Lógica unificada para Interfaz ---
         if (dto.getInterfazId() != null) {
             if (dto.getInterfazId() < 0) {
-                // Manejo de puertos por defecto (Igual que en editarAddress)
                 String nombrePort = switch (dto.getInterfazId().intValue()) {
                     case -1 -> "port1";
                     case -2 -> "port2";
@@ -91,7 +94,6 @@ public class AddressService {
                         });
                 address.setInterfaz(interfaz);
             } else {
-                // Manejo de interfaces personalizadas por ID
                 Interfaz interfaz = interfazRepo.findById(dto.getInterfazId())
                         .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
                 address.setInterfaz(interfaz);
@@ -114,6 +116,8 @@ public class AddressService {
             throw new RuntimeException("No autorizado");
         }
 
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         for (Long dispositivoId : dispositivosIds) {
 
             Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
@@ -134,14 +138,16 @@ public class AddressService {
                 throw new RuntimeException("Error creando address en FortiGate: " + resultado);
             }
 
-
             DispositivoAddress rel = new DispositivoAddress();
             rel.setDispositivo(dispositivo);
             rel.setAddress(address);
             rel.setComentario(address.getComentario());
 
             dispositivoAddressRepo.save(rel);
+
+            logs.add(logService.crearLog(usu,dispositivo, TipoAccion.CREAR,"Se ha CREADO el Address "+address.getName()));
         }
+        logService.guardarTodos(logs);
     }
 
 
@@ -220,7 +226,6 @@ public class AddressService {
             throw new RuntimeException("No existen relaciones para este Address");
         }
 
-        // 🔥 Relaciones que realmente se eliminarán
         List<DispositivoAddress> relacionesABorrar = relaciones.stream()
                 .filter(rel -> dispositivosIds.contains(rel.getDispositivo().getId()))
                 .toList();
@@ -228,8 +233,8 @@ public class AddressService {
         if (relacionesABorrar.isEmpty()) {
             throw new RuntimeException("No hay dispositivos válidos para eliminar");
         }
-
-        // 🔥 Validar y eliminar en FortiGate
+        Usuario usu = usuarioRepository.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         for (DispositivoAddress rel : relacionesABorrar) {
 
             Dispositivo dispositivo = rel.getDispositivo();
@@ -247,21 +252,12 @@ public class AddressService {
                                 dispositivo.getNombre() + "): " + resultado
                 );
             }
+            logs.add(logService.crearLog(usu,dispositivo, TipoAccion.ELIMINAR,"Se ha ELIMINADO el Address "+address.getName()));
         }
 
-        // 🔥 Borrar relaciones SOLO después del loop
         dispositivoAddressRepo.deleteAll(relacionesABorrar);
-
-        // 🔥 Forzar sincronización con BD
         dispositivoAddressRepo.flush();
-
-        // 🔥 Borrar Address solo si ya no tiene relaciones
-        boolean quedanRelaciones = dispositivoAddressRepo
-                .existsByAddressId(addressId);
-
-        if (!quedanRelaciones) {
-            addressRepo.delete(address);
-        }
+        logService.guardarTodos(logs);
     }
 
     @Transactional
@@ -276,7 +272,6 @@ public class AddressService {
 
         Address original = relaciones.get(0).getAddress();
 
-        // 🔒 validar usuario
         for (DispositivoAddress rel : relaciones) {
             if (!rel.getDispositivo().getUsuario().getUsername().equals(username)) {
                 throw new RuntimeException("No autorizado");
@@ -298,10 +293,8 @@ public class AddressService {
 
         Usuario user = usuarioRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
 
-        // =========================
-        // 🔵 EDICIÓN TOTAL
-        // =========================
         if (edicionTotal) {
 
             aplicarCambiosAddress(original, dto, user);
@@ -318,17 +311,14 @@ public class AddressService {
                             "Error editando Address en FortiGate (" + dispositivo.getNombre() + "): " + resultado
                     );
                 }
+                logs.add(logService.crearLog(user,dispositivo, TipoAccion.EDITAR,"Se ha EDITADO el Address "+original.getName()));
             }
 
             Address saved = addressRepo.save(original);
+            logService.guardarTodos(logs);
             return toAddressDTO(saved);
         }
 
-        // =========================
-        // 🔴 EDICIÓN PARCIAL
-        // =========================
-
-        // 1. Crear nueva address
         Address nueva = new Address();
         nueva.setName(original.getName());
         nueva.setUsuario(original.getUsuario());
@@ -337,7 +327,6 @@ public class AddressService {
 
         Address nuevaGuardada = addressRepo.save(nueva);
 
-        // 2. Procesar SOLO los dispositivos seleccionados
         for (DispositivoAddress rel : relaciones) {
 
             Long dispId = rel.getDispositivo().getId();
@@ -346,7 +335,6 @@ public class AddressService {
 
             Dispositivo dispositivo = rel.getDispositivo();
 
-            // 🔥 1. eliminar antigua en Fortigate
             Map<String, Object> eliminar = fortiGateService
                     .eliminarAddress(dispositivo, original.getName());
 
@@ -354,25 +342,23 @@ public class AddressService {
                 throw new RuntimeException("Error eliminando address antigua en Fortigate");
             }
 
-            // 🔥 2. eliminar relación BD
             dispositivoAddressRepo.delete(rel);
 
-            // 🔥 3. aplicar nueva correctamente (USANDO TU LÓGICA BUENA)
             asignarAddressADispositivos(
                     nuevaGuardada.getId(),
                     List.of(dispId),
                     username
             );
+            logs.add(logService.crearLog(user,dispositivo, TipoAccion.EDITAR,"Se ha CREADO el Address "+original.getName()));
         }
 
-        // 🔥 3. limpiar original si ya no se usa
         boolean quedanRelaciones = dispositivoAddressRepo
                 .existsByAddressId(original.getId());
 
         if (!quedanRelaciones) {
             addressRepo.delete(original);
         }
-
+        logService.guardarTodos(logs);
         return toAddressDTO(nuevaGuardada);
     }
 

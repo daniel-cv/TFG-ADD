@@ -10,7 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping ("/api/usuario")
-@CrossOrigin(origins = "http://localhost:5173") // Permite el frontend
+@CrossOrigin(origins = "http://localhost:5173")
 public class UsuarioController {
 
     @Autowired

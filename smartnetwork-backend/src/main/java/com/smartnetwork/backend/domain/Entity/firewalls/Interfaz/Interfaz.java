@@ -49,7 +49,7 @@ public class Interfaz {
     private List<DispositivoInterfaz> dispositivoInterfaz = new ArrayList<>();
 
     @OneToMany(mappedBy = "interfaz", cascade = CascadeType.ALL)
-    private List<Address> addresses; // Relación con addresses
+    private List<Address> addresses;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)

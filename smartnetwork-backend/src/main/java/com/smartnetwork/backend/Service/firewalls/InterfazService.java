@@ -1,8 +1,11 @@
 package com.smartnetwork.backend.Service.firewalls;
 import com.smartnetwork.backend.Repository.firewalls.Interfaz.DispositivoInterfazRepository;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
+import com.smartnetwork.backend.Service.LogService;
+import com.smartnetwork.backend.domain.Entity.Log;
 import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.DispositivoInterfaz;
 import com.smartnetwork.backend.domain.Entity.Usuario;
+import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
@@ -13,6 +16,7 @@ import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.CrearInterfazDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.InterfazDTO;
 
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,24 +28,24 @@ public class InterfazService {
     private final DispositivoInterfazRepository dispositivoInterfazRepo;
     private final FortiGateService fortiGateService;
     private final UsuarioRepository usuarioRepo;
+    private final LogService logService;
 
     public InterfazService(
             InterfazRepository interfazRepo,
             DispositivoRepository dispositivoRepo,
             DispositivoInterfazRepository dispositivoInterfazRepo,
             FortiGateService fortiGateService,
-            UsuarioRepository usuarioRepo
+            UsuarioRepository usuarioRepo,
+            LogService logService
     ) {
         this.interfazRepo = interfazRepo;
         this.dispositivoRepo = dispositivoRepo;
         this.dispositivoInterfazRepo = dispositivoInterfazRepo;
         this.fortiGateService = fortiGateService;
         this.usuarioRepo = usuarioRepo;
+        this.logService = logService;
     }
 
-    // =========================
-    // CREATE COMPLETO
-    // =========================
     @Transactional
     public InterfazDTO crear(CrearInterfazDTO dto, String username) {
 
@@ -54,9 +58,6 @@ public class InterfazService {
         return interfaz;
     }
 
-    // =========================
-    // CREATE BÁSICO
-    // =========================
     public InterfazDTO crearInterfaz(CrearInterfazDTO dto, String username) {
 
         Usuario usuario = usuarioRepo.findByUsername(username)
@@ -69,15 +70,13 @@ public class InterfazService {
         return toInterfazDTO(interfazRepo.save(interfaz));
     }
 
-    // =========================
-    // ASIGNAR
-    // =========================
     @Transactional
     public void asignarInterfazADispositivos(Long interfazId, List<Long> dispositivosIds, String username) {
 
         Interfaz interfaz = interfazRepo.findById(interfazId)
                 .orElseThrow(() -> new RuntimeException("Interfaz no existe"));
-
+        Usuario usu = usuarioRepo.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
         for (Long dispositivoId : dispositivosIds) {
 
             Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
@@ -103,12 +102,12 @@ public class InterfazService {
             rel.setInterfaz(interfaz);
 
             dispositivoInterfazRepo.save(rel);
+
+            logs.add(logService.crearLog(usu,dispositivo, TipoAccion.CREAR,"Se ha CREADO la Interfaz  "+interfaz.getName()));
         }
+        logService.guardarTodos(logs);
     }
 
-    // =========================
-    // LISTAR
-    // =========================
     public List<InterfazDTO> listarPorDispositivo(Long dispositivoId, String username) {
 
         Dispositivo dispositivo = dispositivoRepo.findById(dispositivoId)
@@ -135,9 +134,6 @@ public class InterfazService {
                 .toList();
     }
 
-    // =========================
-    // 🔥 ELIMINAR MULTI
-    // =========================
     @Transactional
     public void eliminarInterfaz(Long interfazId, List<Long> dispositivosIds, String username) {
 
@@ -146,6 +142,8 @@ public class InterfazService {
 
         List<DispositivoInterfaz> relaciones =
                 dispositivoInterfazRepo.findByIdInterfazId(interfazId);
+        Usuario usu = usuarioRepo.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
 
         for (DispositivoInterfaz rel : relaciones) {
 
@@ -161,19 +159,12 @@ public class InterfazService {
             }
 
             dispositivoInterfazRepo.delete(rel);
-        }
 
-        boolean quedan =
-                dispositivoInterfazRepo.existsByIdInterfazId(interfazId);
-
-        if (!quedan) {
-            interfazRepo.delete(interfaz);
+            logs.add(logService.crearLog(usu,d, TipoAccion.ELIMINAR,"Se ha ELIMINADO la Interfaz "+interfaz.getName()));
         }
+        logService.guardarTodos(logs);
     }
 
-    // =========================
-    // 🔥 EDITAR (TOTAL vs PARCIAL)
-    // =========================
     @Transactional
     public InterfazDTO editarInterfaz(Long interfazId, CrearInterfazDTO dto, String username) {
 
@@ -196,12 +187,10 @@ public class InterfazService {
             throw new RuntimeException("Debes enviar dispositivosIds");
         }
 
-        boolean edicionTotal =
-                actuales.containsAll(editar) && editar.containsAll(actuales);
+        boolean edicionTotal = actuales.containsAll(editar) && editar.containsAll(actuales);
+        Usuario usu = usuarioRepo.findByUsername(username).orElseThrow(()->new RuntimeException("Usuario no encontrado"));
+        List<Log> logs = new ArrayList<Log>();
 
-        // =========================
-        // 🔵 TOTAL
-        // =========================
         if (edicionTotal) {
 
             aplicarCambios(original, dto);
@@ -214,14 +203,12 @@ public class InterfazService {
                 if (!(Boolean) res.get("success")) {
                     throw new RuntimeException("Error editando interfaz");
                 }
+                logs.add(logService.crearLog(usu,rel.getDispositivo(), TipoAccion.EDITAR,"Se ha EDITADO la Interfaz "+original.getName()));
             }
-
+            logService.guardarTodos(logs);
             return toInterfazDTO(interfazRepo.save(original));
         }
 
-        // =========================
-        // 🔴 PARCIAL
-        // =========================
         Interfaz nueva = new Interfaz();
         nueva.setName(original.getName());
         nueva.setUsuario(original.getUsuario());
@@ -247,6 +234,7 @@ public class InterfazService {
                     List.of(dispId),
                     username
             );
+            logs.add(logService.crearLog(usu,rel.getDispositivo(), TipoAccion.EDITAR,"Se ha EDITADO la Interfaz "+original.getName()));
         }
 
         boolean quedan =
@@ -255,13 +243,10 @@ public class InterfazService {
         if (!quedan) {
             interfazRepo.delete(original);
         }
-
+        logService.guardarTodos(logs);
         return toInterfazDTO(nuevaGuardada);
     }
 
-    // =========================
-    // HELPERS
-    // =========================
     private void aplicarCambios(Interfaz interfaz, CrearInterfazDTO dto) {
 
         interfaz.setName(dto.getName());

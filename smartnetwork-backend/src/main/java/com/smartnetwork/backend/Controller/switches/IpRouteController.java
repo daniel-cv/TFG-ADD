@@ -18,13 +18,11 @@ public class IpRouteController {
         this.IpRouteService = IpRouteService;
     }
 
-    // 🔥 LISTAR
     @GetMapping("/dispositivo/{id}")
     public List<IpRouteDTO> listar(@PathVariable Long id) {
         return IpRouteService.listarPorDispositivo(id, "test");
     }
 
-    // 🔥 CREAR
     @PostMapping("/create")
     public IpRouteDTO crear(
             @RequestBody CrearIpRouteDTO dto,
@@ -42,7 +40,6 @@ public class IpRouteController {
            return IpRouteService.actualizarIpRoute(id, dto, auth.getName());
     }
 
-    // 🔥 ELIMINAR
     @DeleteMapping("/{id}")
     public void eliminar(
             @PathVariable Long id,

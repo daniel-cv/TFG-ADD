@@ -18,7 +18,6 @@ public class InterfacesController {
         this.interfacesService = interfacesService;
     }
 
-    // 🔥 LISTAR POR DISPOSITIVO
     @GetMapping("/dispositivo/{id}")
     public List<InterfacesDTO> listar(
             @PathVariable Long id,

@@ -19,18 +19,12 @@ public class UsuarioFirewallController {
         this.usuarioFirewallService = usuarioFirewallService;
     }
 
-    /**
-     * Crear un UsuarioFirewall
-     */
     @PostMapping("/create")
     public ResponseEntity<UsuarioFirewallDTO> create(@RequestBody CreaUsuarioFirewallDTO dto, Authentication auth) {
         UsuarioFirewallDTO created = usuarioFirewallService.crear(dto, auth.getName());
         return ResponseEntity.ok(created);
     }
 
-    /**
-     * Listar todos los UsuarioFirewall de un dispositivo
-     */
     @GetMapping("/dispositivo/{id}")
     public ResponseEntity<List<UsuarioFirewallDTO>> getAllByDispositivo(@PathVariable Long id, Authentication auth) {
         List<UsuarioFirewallDTO> usuarios = usuarioFirewallService.listarPorDispositivo(id, auth.getName());

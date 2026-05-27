@@ -1,7 +1,6 @@
 <template>
   <div class="service-list">
 
-    <!-- HEADER -->
     <div class="table-header">
       <h2>VLANs</h2>
 
@@ -10,7 +9,6 @@
       </button>
     </div>
 
-    <!-- FORMULARIO CREAR -->
     <div v-if="mostrarFormulario" class="formulario-inline">
       <input v-model="nuevaVlan.vlanId" placeholder="VLAN ID" class="input-edit" type="number" />
       <input v-model="nuevaVlan.nombre" placeholder="Nombre" class="input-edit" />
@@ -20,7 +18,6 @@
       </button>
     </div>
 
-    <!-- TABLA -->
     <table class="professional-table">
 
       <thead>
@@ -34,19 +31,14 @@
       <tbody>
         <tr v-for="vlan in vlanStore.vlans" :key="vlan.id">
 
-          <!-- VLAN ID -->
           <td>
             <span class="badge blue">
               {{ vlan.vlanId }}
             </span>
           </td>
-
-          <!-- NOMBRE -->
           <td>
             <input v-model="vlan.nombre" class="input-edit" />
           </td>
-
-          <!-- ACCIONES -->
           <td>
             <button class="btn-guardar" @click="guardar(vlan)">
               Editar
@@ -79,8 +71,6 @@ const nuevaVlan = ref({
   vlanId: null,
   nombre: ''
 })
-
-// 🔥 CREAR
 const crear = async () => {
   await vlanStore.crearVlan({
     ...nuevaVlan.value,
@@ -91,17 +81,14 @@ const crear = async () => {
   mostrarFormulario.value = false
 }
 
-// 🔥 EDITAR
 const guardar = async (vlan) => {
   await vlanStore.actualizarVlan(vlan.id, vlan)
 }
 
-// 🔥 BORRAR
 const borrar = async (id) => {
   await vlanStore.eliminarVlan(id)
 }
 
-// 🔥 CARGAR
 onMounted(() => {
   if (dispositivoStore.dispositivo?.id) {
     vlanStore.cargarVlans(dispositivoStore.dispositivo.id)
@@ -109,12 +96,12 @@ onMounted(() => {
 })
 </script>
 <style scoped>
-/* CONTENEDOR */
+
 .service-list {
   width: 100%;
 }
 
-/* HEADER */
+
 .table-header {
   display: flex;
   justify-content: space-between;
@@ -122,7 +109,7 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-/* BOTÓN AÑADIR */
+
 .add-btn {
   background: #3b82f6;
   color: white;
@@ -169,7 +156,6 @@ onMounted(() => {
   background: #f8fafc;
 }
 
-/* FORMULARIO */
 .formulario-inline {
   display: flex;
   gap: 12px;
@@ -181,7 +167,6 @@ onMounted(() => {
   margin-bottom: 16px;
 }
 
-/* INPUT */
 .input-edit {
   width: 100%;
   padding: 6px 10px;
@@ -196,7 +181,6 @@ onMounted(() => {
   border-color: #3b82f6;
 }
 
-/* BOTONES */
 .btn-guardar {
   background: #22c55e;
   color: white;
@@ -224,7 +208,6 @@ onMounted(() => {
   background: #dc2626;
 }
 
-/* BADGES */
 .badge {
   padding: 4px 10px;
   border-radius: 10px;

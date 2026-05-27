@@ -1,4 +1,4 @@
-// stores/Switches/aclStore.ts
+
 import { defineStore } from 'pinia'
 import {
   obtenerAclsPorDispositivo,
@@ -6,7 +6,7 @@ import {
   eliminarAcl as apiEliminarAcl,
   agregarRegla as apiAgregarRegla,
   eliminarRegla as apiEliminarRegla
-} from '@/services/Switches/AclService'
+} from '@/services/Switches/aclService'
 
 export const useAclStore = defineStore('acl', {
   state: () => ({

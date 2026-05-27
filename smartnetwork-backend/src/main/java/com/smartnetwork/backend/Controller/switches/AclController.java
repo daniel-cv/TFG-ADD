@@ -20,13 +20,11 @@ public class AclController {
         this.aclService = aclService;
     }
 
-    // 🔥 LISTAR
     @GetMapping("/dispositivo/{id}")
     public List<AclDTO> listar(@PathVariable Long id) {
         return aclService.listarPorDispositivo(id);
     }
 
-    // 🔥 CREAR
     @PostMapping("/create")
     public Acl crear(
             @RequestBody CrearAclDTO dto,
@@ -35,7 +33,6 @@ public class AclController {
         return aclService.crearAcl(dto, auth.getName());
     }
 
-    // 🔥 AÑADIR REGLA
     @PostMapping("/{aclId}/reglas")
     public void agregarRegla(
             @PathVariable Long aclId,
@@ -45,7 +42,6 @@ public class AclController {
         aclService.agregarRegla(aclId, dto, auth.getName());
     }
 
-    // 🔥 ELIMINAR REGLA
     @DeleteMapping("/reglas/{reglaId}")
     public void eliminarRegla(
             @PathVariable Long reglaId,
@@ -54,7 +50,6 @@ public class AclController {
         aclService.eliminarRegla(reglaId, auth.getName());
     }
 
-    // 🔥 ELIMINAR ACL
     @DeleteMapping("/{id}")
     public void eliminar(
             @PathVariable Long id,

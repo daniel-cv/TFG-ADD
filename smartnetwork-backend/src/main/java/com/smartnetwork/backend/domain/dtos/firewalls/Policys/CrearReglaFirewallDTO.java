@@ -9,7 +9,6 @@ import java.util.List;
 @Setter
 public class CrearReglaFirewallDTO {
 
-
     private String nombre;
     private String origen;
     private String destino;

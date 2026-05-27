@@ -1,7 +1,5 @@
 <template>
   <v-form @submit.prevent="handleSubmit">
-
-    <!-- NAME -->
     <v-text-field
       v-model="name"
       label="Nombre"
@@ -12,7 +10,6 @@
       required
     />
 
-    <!-- TIPO -->
     <v-select
       v-model="tipo"
       :items="['vlan']"
@@ -23,7 +20,6 @@
       :disabled="interfazEdit"
       required
     />
-<!-- INTERFAZ PADRE -->
     <v-select
       v-if="tipo === 'vlan'"
       v-model="interfacePadre"
@@ -34,7 +30,7 @@
       clearable
       :disabled="interfazEdit"
     />
-<!--VLAN ID-->
+
     <v-text-field
       v-if="tipo === 'vlan'"
       v-model="vlanid"
@@ -46,7 +42,6 @@
       :disabled="interfazEdit"
     />
 
-    <!-- VDOM -->
     <v-text-field
       v-model="vdom"
       label="VDOM"
@@ -55,7 +50,6 @@
       disabled
     />
 
-    <!-- MODE -->
     <v-select
       v-model="mode"
       :items="['dhcp']"
@@ -65,7 +59,6 @@
       required
     />
 
-    <!-- IP -->
     <v-text-field
       v-if="mode === 'static'"
       v-model="ip"
@@ -75,7 +68,6 @@
       required
     />
 
-    <!-- ALLOW ACCESS -->
     <v-select
       v-model="allowaccess"
       :items="['ping', 'https', 'ssh']"
@@ -84,7 +76,6 @@
       class="mb-3"
     />
 
-    <!-- ROLE -->
     <v-select
       v-model="role"
       :items="['lan', 'wan', 'dmz']"
@@ -94,7 +85,6 @@
       required
     />
 
-    <!-- DESCRIPTION -->
     <v-textarea
       v-model="description"
       label="Descripción"
@@ -151,7 +141,6 @@ const interfacesDisponibles = ref([])
 
 onMounted(async () => {
 
-  // 🔥 RELLENAR FORMULARIO EN EDIT
   if (props.interfazEdit) {
 
     name.value = props.interfazEdit.name || ''
@@ -207,7 +196,6 @@ const handleSubmit = async () => {
 
   try {
 
-    // ================= EDITAR =================
     if (props.interfazEdit) {
 
       if (props.interfazEdit.dispositivosId?.length) {
@@ -225,7 +213,6 @@ const handleSubmit = async () => {
       mensaje.value = "Actualizada"
     }
 
-    // ================= CREAR =================
     else {
 
       if (props.modo === 'full') {
