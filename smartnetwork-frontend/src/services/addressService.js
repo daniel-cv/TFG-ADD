@@ -12,7 +12,6 @@ export function crearAddress(address) {
   })
 }
 export function eliminarAddress(addressId, dispositivosIds) {
-  console.log(dispositivosIds)
   return api.delete('/api/firewalls/addresses/delete/' + addressId, {
     data: dispositivosIds
   })
@@ -28,4 +27,11 @@ export function aplicarAddressToDispositivos(addressId, dispositivosIds) {
 }
 export function crearAddressCompleto(address) {
   return api.post('/api/firewalls/addresses/full', address)
+}
+
+export function actualizarSinImplementacionService(id, address){
+  return api.put('/api/firewalls/addresses/preedit' + address.id, address)
+}
+export function preeliminarAddress(addressId) {
+  return api.delete('/api/firewalls/addresses/predelete/' + addressId)
 }

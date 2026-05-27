@@ -231,7 +231,11 @@ const handleSubmit = async () => {
         payload.dispositivosIds = [props.dispositivoId]
       }
 
-      await addressStore.actualizarAddress(props.addressEdit.id, payload)
+      if (props.addressEdit.sinImplementacion) {
+        await addressStore.actualizarAddressSinImplementar(props.addressEdit.id,payload)
+      } else {
+        await addressStore.actualizarAddress( props.addressEdit.id,payload)
+      }
       mensaje.value = "Address actualizada correctamente"
     } else {
       if (props.modo === 'full' && props.dispositivoId) {
@@ -240,7 +244,6 @@ const handleSubmit = async () => {
       } else {
         await addressStore.crearAddress(payload)
       }
-
       mensaje.value = "Address creada correctamente"
     }
 

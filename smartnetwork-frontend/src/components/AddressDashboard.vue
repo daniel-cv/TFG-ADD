@@ -290,6 +290,16 @@ const editarAddress = async (address) => {
 
   const lista = implementaciones.value[address.id] || []
 
+  if (!lista.length) {
+
+    addressSeleccionada.value = {
+      ...address,
+      sinImplementacion: true
+    }
+
+    mostrandoFormulario.value = true
+    return
+  }
   dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
     const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
     return lista.includes(nombre)
@@ -303,7 +313,8 @@ const editarAddress = async (address) => {
 const confirmarEditar = () => {
   addressSeleccionada.value = {
     ...addressEditar.value,
-    dispositivosIds: [...seleccionados.value]
+    dispositivosIds: [...seleccionados.value],
+    sinImplementacion: false
   }
 
   dialogEditar.value = false

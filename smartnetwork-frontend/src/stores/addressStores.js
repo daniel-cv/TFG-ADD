@@ -9,6 +9,7 @@ import {
   crearAddressCompleto,
   eliminarAddress as eliminarAddressService,
   actualizarAddress as actualizarAddressService
+  actualizarSinImplementacion as actualizarSinImplementacionService
 } from '@/services/addressService'
 
 export const useAddressStore = defineStore('address', {
@@ -126,6 +127,21 @@ export const useAddressStore = defineStore('address', {
   } catch (error) {
     console.error("Error eliminando address", error)
     this.mensaje = "Error al eliminar la address"
+    throw error
+  }
+},
+async actualizarAddressSinImplementar(id, address) {
+  try {
+    const res = await actualizarSinImplementacionService(id, address)
+    const index = this.addresses.findIndex(a => a.id === id)
+    if (index !== -1) {
+      this.addresses[index] = res.data
+    }
+    this.mensaje = "Address actualizada sin implementación"
+    return res.data
+  } catch (error) {
+    console.error("Error actualizando address sin implementar", error)
+    this.mensaje = "Error al actualizar Address"
     throw error
   }
 }

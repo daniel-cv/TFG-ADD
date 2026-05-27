@@ -405,4 +405,29 @@ public class AddressService {
             address.setInterfaz(null);
         }
     }
+
+    @Transactional
+    public AddressDTO preeditarAddress(Long addressId, CrearAddressDTO dto, String username) {
+
+        Address address = addressRepo.findById(addressId)
+                .orElseThrow(() -> new RuntimeException("Address no encontrada"));
+        if (!address.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        Usuario user = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        aplicarCambiosAddress(address, dto, user);
+        Address saved = addressRepo.save(address);
+        return toAddressDTO(saved);
+    }
+
+    @Transactional
+    public void preeliminarAddress(Long id, String username ) {
+        Address address = addressRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Address no encontrada"));
+        if (!address.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        addressRepo.delete(address);
+    }
 }

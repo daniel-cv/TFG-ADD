@@ -80,4 +80,19 @@ public class AddressController {
     ) {
         return addressService.editarAddress(id, dto, auth.getName());
     }
+    @PutMapping("/preedit/{id}")
+    public AddressDTO preeditar(
+            @PathVariable Long id,
+            @RequestBody CrearAddressDTO dto,
+            Authentication auth
+    ) {
+        return addressService.preeditarAddress(id,dto, auth.getName());
+    }
+    @DeleteMapping("/predelete/{addressId}")
+    public void preeliminar(
+            @PathVariable Long addressId,
+            Authentication auth
+    ) {
+        addressService.preeliminarAddress(addressId, auth.getName());
+    }
 }
