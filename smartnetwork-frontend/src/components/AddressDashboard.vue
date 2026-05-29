@@ -203,6 +203,7 @@ import { useAddressStore } from '@/stores/addressStores'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
 import { useInterfazStore } from '@/stores/interfazStore'
 import AddressForm from '@/components/AddressForm.vue'
+import { preeliminarAddress } from '@/services/addressService'
 
 const route = useRoute()
 const dispositivoId = Number(route.params.id)
@@ -285,18 +286,13 @@ onMounted(cargarDatos)
 
 const editarAddress = async (address) => {
   addressEditar.value = address
-
   await mapearImplementaciones()
-
   const lista = implementaciones.value[address.id] || []
-
   if (!lista.length) {
-
     addressSeleccionada.value = {
       ...address,
       sinImplementacion: true
     }
-
     mostrandoFormulario.value = true
     return
   }
@@ -304,9 +300,7 @@ const editarAddress = async (address) => {
     const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
     return lista.includes(nombre)
   })
-
   seleccionados.value = dispositivosEditDisponibles.value.map(d => d.id)
-
   dialogEditar.value = true
 }
 
@@ -373,7 +367,7 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
+  if (!seleccionadosEliminar.value.length) return preeliminarAddress(addressEliminar.value.id)
   await addressStore.eliminarAddressEnDispositivos(addressEliminar.value.id, seleccionadosEliminar.value)
   dialogEliminar.value = false
   await addressStore.obtenerMisAddresses()

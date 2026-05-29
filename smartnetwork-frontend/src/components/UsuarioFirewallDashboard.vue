@@ -391,6 +391,14 @@ const editarUsuario = async (usuario) => {
   usuarioEditar.value = usuario
   await mapearImplementaciones()
   const lista = implementaciones.value[usuario.id] || []
+
+   if (!lista.length) {
+    usuarioSeleccionado.value = {
+      ...usuario,
+      sinImplementacion: true
+    }
+    mostrandoFormulario.value = true
+    return}
   dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
     const nombre = obtenerNombreDispositivo(d)
     return lista.includes(nombre)
@@ -465,7 +473,7 @@ const toggleSeleccionEliminar = (id) => {
 
 const eliminarAhora = async () => {
   if (!seleccionadosEliminar.value.length) {
-    return alert('Selecciona al menos un dispositivo')
+     return preeliminarUsuarioFirewall(usuarioEliminar.value.id)
   }
   await usuarioFirewallStore.eliminarUsuarioFirewallEnDispositivos(
     usuarioEliminar.value.id,

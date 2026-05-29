@@ -81,11 +81,15 @@ public class ServiceController {
             @RequestBody List<Long> dispositivosIds,
             Authentication auth
     ) {
-        serviceService.eliminarService(
-                serviceId,
-                dispositivosIds,
-                auth.getName()
-        );
+        serviceService.eliminarService(serviceId,dispositivosIds, auth.getName());
+    }
+
+    @DeleteMapping("/predelete/{serviceId}")
+    public void preeliminar(
+            @PathVariable Long serviceId,
+            Authentication auth
+    ) {
+        serviceService.preeliminarService(serviceId, auth.getName());
     }
 }
 

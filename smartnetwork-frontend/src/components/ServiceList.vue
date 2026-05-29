@@ -80,7 +80,6 @@ const props = defineProps({
   }
 })
 
-console.log("MODO EN SERVICE LIST:", props.modo)
 const serviceStore = useServiceStore()
 const seleccionadoStore = useDispositivoSeleccionadoStore()
 

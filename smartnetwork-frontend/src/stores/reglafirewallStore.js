@@ -157,6 +157,22 @@ defineStore('reglaFirewall', {
           "Error asignando regla"
         throw error
       }
+    },
+
+    async actualizarReglaSinImplementar(id, regla) {
+      try {
+        const res = await actualizarSinImplementacionService(id, regla)
+        const index = this.reglas.findIndex(a => a.id === id)
+        if (index !== -1) {
+          this.reglas[index] = res.data
+        }
+        this.mensaje = "Regla actualizada sin implementación"
+        return res.data
+      } catch (error) {
+        console.error("Error actualizando regla sin implementar", error)
+        this.mensaje = "Error al actualizar regla"
+        throw error
+      }
     }
   }
 })

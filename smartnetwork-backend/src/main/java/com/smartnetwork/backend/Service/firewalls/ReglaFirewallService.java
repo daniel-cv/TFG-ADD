@@ -5,6 +5,7 @@ import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.firewalls.ReglaFirewall.ReglaFirewallRepository;
 import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.DispositivoReglaFirewall;
 import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.ReglaFirewall;
 import com.smartnetwork.backend.domain.Enum.TipoAccion;
@@ -13,6 +14,8 @@ import com.smartnetwork.backend.domain.dtos.firewalls.Policys.ReglaFirewallDTO;
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.domain.Entity.*;
 
+import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.CrearInterfazDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.interfaz.InterfazDTO;
 import jakarta.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
@@ -245,5 +248,29 @@ public class ReglaFirewallService {
         dto.setAction(regla.getAction());
 
         return dto;
+    }
+
+    @Transactional
+    public ReglaFirewallDTO preeditarReglaFirewall(Long id, CrearReglaFirewallDTO dto, String username) {
+        ReglaFirewall regla = reglaRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Address no encontrada"));
+        if (!regla.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        Usuario user = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        aplicarCambios(regla, dto);
+        ReglaFirewall saved = reglaRepo.save(regla);
+        return toReglaFirewallDTO(saved);
+    }
+
+    @Transactional
+    public void preeliminarRegla(Long id, String username ) {
+        ReglaFirewall regla = reglaRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Interfaz no encontrada"));
+        if (!regla.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        reglaRepo.delete(regla);
     }
 }

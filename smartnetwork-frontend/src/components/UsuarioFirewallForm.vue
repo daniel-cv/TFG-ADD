@@ -124,12 +124,14 @@ const handleSubmitUsuario = async () => {
         payload.dispositivosIds =props.usuarioEdit.dispositivosIds
       }
       else if (props.dispositivoId) {
-        payload.dispositivosIds = [
-          props.dispositivoId
-        ]
+        payload.dispositivosIds = [ props.dispositivoId]
       }
-      console.log('PAYLOAD EDIT =>', payload)
-      await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id,payload)
+
+      if (props.usuarioEdit.sinImplementacion){
+        await useUsuarioFirewallStore.actualizarUsuarioSinImplementar(props.usuarioEdit.id,payload)
+      } else {
+        await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id,payload)
+      }
       mensaje.value ="Usuario actualizado correctamente"
     }
 

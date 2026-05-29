@@ -30,3 +30,11 @@ export function eliminarUsuarioFirewall(id, dispositivosIds) {
     }
   )
 }
+
+export function preeliminarUsuarioFirewall(id) {
+  return api.delete(`/api/firewalls/usuarioFirewall/predelete/${id}`)
+}
+
+export function actualizarSinImplementacion(id,usuarioFirewall){
+   return api.put(`/api/firewalls/usuarioFirewall/preedit/${usuarioFirewall.id}`, usuarioFirewall)
+}

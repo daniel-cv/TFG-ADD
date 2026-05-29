@@ -242,12 +242,10 @@ const dispositivosEditar = ref([])
 onMounted(cargarDatos)
 
 async function cargarDatos() {
-
   await Promise.all([
     serviceStore.cargarServicesUsuario(),
     dispositivoStore.getMisDispositivos()
   ])
-
   services.value = serviceStore.services
   dispositivos.value = dispositivoStore.dispositivos
 
@@ -255,25 +253,17 @@ async function cargarDatos() {
 }
 
 async function mapearImplementaciones() {
-
-  const mapa = {}
-
+const mapa = {}
   for (const disp of dispositivos.value) {
-
     const res = await serviceStore.cargarServices(disp.id)
-
     const lista = serviceStore.services
-
     lista.forEach(service => {
-
       if (!mapa[service.id]) {
         mapa[service.id] = []
       }
-
       mapa[service.id].push(disp.nombre)
     })
   }
-
   implementaciones.value = mapa
 }
 
@@ -283,27 +273,18 @@ function mostrarCrear() {
 }
 
 function editarService(service) {
-
   serviceEditar.value = service
-
   const lista = implementaciones.value[service.id] || []
-
-  dispositivosEditar.value = dispositivos.value.filter(
-    d => lista.includes(d.nombre)
-  )
-
+  dispositivosEditar.value = dispositivos.value.filter(d => lista.includes(d.nombre))
   seleccionados.value = dispositivosEditar.value.map(d => d.id)
-
   dialogEditar.value = true
 }
 
 function confirmarEditar() {
-
   serviceSeleccionado.value = {
     ...serviceEditar.value,
     dispositivosIds: [...seleccionados.value]
   }
-
   dialogEditar.value = false
   mostrandoFormulario.value = true
 }
@@ -315,9 +296,7 @@ function aplicarService(service) {
 }
 
 function toggleSeleccion(id) {
-
   const i = seleccionados.value.indexOf(id)
-
   if (i > -1) {
     seleccionados.value.splice(i, 1)
   } else {
@@ -326,40 +305,28 @@ function toggleSeleccion(id) {
 }
 
 async function aplicarAhora() {
-
   await serviceStore.asignarService(
     serviceAplicar.value.id,
     seleccionados.value
   )
-
   dialogAplicar.value = false
-
   await mapearImplementaciones()
 }
 
 function abrirEliminar(service) {
-
   serviceEliminar.value = service
-
   seleccionadosEliminar.value = []
   dialogEliminar.value = true
 }
 
 const dispositivosEliminar = computed(() => {
-
   if (!serviceEliminar.value) return []
-
   const lista = implementaciones.value[serviceEliminar.value.id] || []
-
-  return dispositivos.value.filter(
-    d => lista.includes(d.nombre)
-  )
+  return dispositivos.value.filter(d => lista.includes(d.nombre))
 })
 
 function toggleSeleccionEliminar(id) {
-
   const i = seleccionadosEliminar.value.indexOf(id)
-
   if (i > -1) {
     seleccionadosEliminar.value.splice(i, 1)
   } else {
@@ -368,24 +335,16 @@ function toggleSeleccionEliminar(id) {
 }
 
 async function eliminarAhora() {
-
-  await serviceStore.eliminarServiceEnDispositivos(
-    serviceEliminar.value.id,
-    seleccionadosEliminar.value
-  )
-
+  if (!seleccionadosEliminar.value.length) return preeliminarService(serviceEliminar.value.id)
+  await serviceStore.eliminarServiceEnDispositivos(serviceEliminar.value.id,seleccionadosEliminar.value)
   dialogEliminar.value = false
-
   await cargarDatos()
 }
 
 async function recargarYCerrar() {
-
   mostrandoFormulario.value = false
-
   await cargarDatos()
 }
-
 function cerrarFormulario() {
   mostrandoFormulario.value = false
 }

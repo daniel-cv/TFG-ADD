@@ -62,11 +62,7 @@ public class UsuarioFirewallController {
             @RequestBody List<Long> dispositivosIds,
             Authentication auth
     ) {
-        usuarioFirewallService.eliminarUsuarioFirewall(
-                id,
-                dispositivosIds,
-                auth.getName()
-        );
+        usuarioFirewallService.eliminarUsuarioFirewall(id, dispositivosIds, auth.getName());
     }
     @PutMapping("/edit/{id}")
     public UsuarioFirewallDTO editar(
@@ -75,5 +71,22 @@ public class UsuarioFirewallController {
             Authentication auth
     ) {
         return usuarioFirewallService.actualizar(id, dto, auth.getName());
+    }
+
+    @PutMapping("/preedit/{id}")
+    public UsuarioFirewallDTO preeditar(
+            @PathVariable Long id,
+            @RequestBody CreaUsuarioFirewallDTO dto,
+            Authentication auth
+    ) {
+        return usuarioFirewallService.preactualizar(id, dto, auth.getName());
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void preeliminar(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        usuarioFirewallService.preeliminarUsuarioFirewall(id, auth.getName());
     }
 }

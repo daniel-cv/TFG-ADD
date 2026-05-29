@@ -65,12 +65,29 @@ public class InterfazController {
         interfazService.eliminarInterfaz(id, dispositivosIds, auth.getName());
     }
 
-    @PutMapping("/edit/{interfazId}")
+    @PutMapping("/preedit/{interfazId}")
     public InterfazDTO actualizar(
             @PathVariable Long interfazId,
             @RequestBody CrearInterfazDTO dto,
             Authentication auth
     ) {
-        return interfazService.editarInterfaz(interfazId, dto, auth.getName());
+        return interfazService.preeditarInterfaz(interfazId, dto, auth.getName());
+    }
+
+    @DeleteMapping("/predelete/{interfazId}")
+    public void preeliminar(
+            @PathVariable Long interfazId,
+            Authentication auth
+    ) {
+        interfazService.preeliminarInterfaz(interfazId, auth.getName());
+    }
+
+    @PutMapping("/edit/{interfazId}")
+    public InterfazDTO preeditar(
+            @PathVariable Long interfazId,
+            @RequestBody CrearInterfazDTO dto,
+            Authentication auth
+    ) {
+        return interfazService.preeditarInterfaz(interfazId, dto, auth.getName());
     }
 }

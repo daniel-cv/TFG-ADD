@@ -403,296 +403,154 @@
 </template>
 
 <script setup>
-import {
-  ref,
-  onMounted,
-  computed
-} from 'vue'
-
-import {
-  useReglaFirewallStore
-} from '@/stores/reglafirewallStore'
-
-import {
-  useDispositivoStore
-} from '@/stores/dispositivoStore'
-
-import ReglaFirewallForm
-from '@/components/ReglaFirewallForm.vue'
+import {ref,onMounted,computed} from 'vue'
+import { useReglaFirewallStore} from '@/stores/reglafirewallStore'
+import { useDispositivoStore} from '@/stores/dispositivoStore'
+import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
 
 const reglaStore = useReglaFirewallStore()
 const dispositivoStore = useDispositivoStore()
-
 const reglas = ref([])
 const dispositivos = ref([])
-
 const implementaciones = ref({})
-
-
 const mostrandoFormulario = ref(false)
-
 const reglaSeleccionada = ref(null)
-
 const dialogEditar = ref(false)
-
 const reglaEditar = ref(null)
-
-const dispositivosEditDisponibles =
-  ref([])
-
-
+const dispositivosEditDisponibles =ref([])
 const dialogAplicar = ref(false)
-
 const reglaAplicar = ref(null)
-
 const seleccionados = ref([])
-
-
 const dialogEliminar = ref(false)
-
 const reglaEliminar = ref(null)
-
 const seleccionadosEliminar = ref([])
 
-
 const dispositivosEliminar = computed(() => {
-
   if (!reglaEliminar.value) return []
-
-  const lista =
-    implementaciones.value[
-      reglaEliminar.value.id
-    ] || []
-
+  const lista =implementaciones.value[reglaEliminar.value.id] || []
   return dispositivos.value.filter(d => {
-
-    const nombre =
-      d.name ||
-      d.nombre ||
-      d.hostname ||
-      'Sin nombre'
-
+    const nombre =d.name ||d.nombre ||d.hostname ||'Sin nombre'
     return lista.includes(nombre)
   })
 })
 
 
 const cargarDatos = async () => {
-
   await Promise.all([
-
     reglaStore.cargarReglasUsuario(),
-
     dispositivoStore.getMisDispositivos()
-
   ])
-
   reglas.value = reglaStore.reglas
-
-  dispositivos.value =
-    dispositivoStore.dispositivos
-
+  dispositivos.value =dispositivoStore.dispositivos
   await mapearImplementaciones()
 }
 
 const mapearImplementaciones = async () => {
-
   const mapa = {}
-
   for (const disp of dispositivos.value) {
-
     try {
-
-      const res =
-        await reglaStore
-          .obtenerReglasDispositivo(disp.id)
-
+      const res =await reglaStore.obtenerReglasDispositivo(disp.id)
       const reglasDisp = res || []
-
       reglasDisp.forEach(regla => {
-
         if (!mapa[regla.id]) {
           mapa[regla.id] = []
         }
-
-        const nombre =
-          disp.name ||
-          disp.nombre ||
-          disp.hostname ||
-          'Sin nombre'
-
-        if (
-          !mapa[regla.id]
-            .includes(nombre)
-        ) {
-
-          mapa[regla.id]
-            .push(nombre)
+        const nombre =disp.name || disp.nombre ||disp.hostname ||'Sin nombre'
+        if (!mapa[regla.id].includes(nombre)) {
+          mapa[regla.id].push(nombre)
         }
       })
-
     } catch (e) {
-
       console.error(e)
     }
   }
-
   implementaciones.value = mapa
 }
 
 onMounted(cargarDatos)
 
 const mostrarCrear = () => {
-
   reglaSeleccionada.value = null
-
   mostrandoFormulario.value = true
 }
 
 const recargarYCerrar = async () => {
-
   mostrandoFormulario.value = false
-
   await cargarDatos()
-
   reglaSeleccionada.value = null
-
   seleccionados.value = []
 }
 
 const cerrarFormulario = () => {
-
   mostrandoFormulario.value = false
 }
-
-
 const editarRegla = async (regla) => {
-
   reglaEditar.value = regla
-
   await mapearImplementaciones()
-
-  const lista =
-    implementaciones.value[
-      regla.id
-    ] || []
-
-  dispositivosEditDisponibles.value =
-    dispositivos.value.filter(d => {
-
-      const nombre =
-        d.name ||
-        d.nombre ||
-        d.hostname ||
-        'Sin nombre'
-
+  const lista =implementaciones.value[regla.id] || []
+  if (!lista.length) {
+    reglaSeleccionada.value = {
+      ...regla,
+      sinImplementacion: true
+    }
+    mostrandoFormulario.value = true
+    return}
+  dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
+      const nombre =d.name || d.nombre || d.hostname ||'Sin nombre'
       return lista.includes(nombre)
     })
-
-  seleccionados.value =
-    dispositivosEditDisponibles.value
-      .map(d => d.id)
-
+  seleccionados.value = dispositivosEditDisponibles.value.map(d => d.id)
   dialogEditar.value = true
 }
 
 const confirmarEditar = () => {
-
   reglaSeleccionada.value = {
-
     ...reglaEditar.value,
-
     dispositivosIds: [
       ...seleccionados.value
     ]
   }
-
   dialogEditar.value = false
-
   mostrandoFormulario.value = true
 }
 
-
-const aplicarReglaToDispositivos = (
-  regla
-) => {
-
+const aplicarReglaToDispositivos = (regla) => {
   reglaAplicar.value = regla
-
   seleccionados.value = []
-
   dialogAplicar.value = true
 }
 
 const toggleSeleccion = (id) => {
-
-  const i =
-    seleccionados.value.indexOf(id)
-
+  const i = seleccionados.value.indexOf(id)
   if (i > -1) {
-
     seleccionados.value.splice(i, 1)
-
   } else {
-
     seleccionados.value.push(id)
   }
 }
-
 const aplicarAhora = async () => {
-
-  await reglaStore.asignarRegla(
-    reglaAplicar.value.id,
-    seleccionados.value
-  )
-
+ await reglaStore.asignarRegla( reglaAplicar.value.id, seleccionados.value)
   dialogAplicar.value = false
-
   await mapearImplementaciones()
 }
 
-
 const abrirEliminar = (regla) => {
-
   reglaEliminar.value = regla
-
   seleccionadosEliminar.value = []
-
   dialogEliminar.value = true
 }
-
-const toggleSeleccionEliminar = (
-  id
-) => {
-
-  const i =
-    seleccionadosEliminar.value
-      .indexOf(id)
-
+const toggleSeleccionEliminar = (id) => {
+  const i = seleccionadosEliminar.value.indexOf(id)
   if (i > -1) {
-
-    seleccionadosEliminar.value
-      .splice(i, 1)
-
+    seleccionadosEliminar.value.splice(i, 1)
   } else {
-
-    seleccionadosEliminar.value
-      .push(id)
+    seleccionadosEliminar.value.push(id)
   }
 }
-
 const eliminarAhora = async () => {
-
-  await reglaStore
-    .eliminarReglaEnDispositivos(
-
-      reglaEliminar.value.id,
-
-      seleccionadosEliminar.value
-    )
-
+  if (!seleccionadosEliminar.value.length) return preeliminarRegla(reglaEliminar.value.id)
+  await reglaStore.eliminarReglaEnDispositivos( reglaEliminar.value.id,seleccionadosEliminar.value )
   dialogEliminar.value = false
-
   await cargarDatos()
 }
 </script>

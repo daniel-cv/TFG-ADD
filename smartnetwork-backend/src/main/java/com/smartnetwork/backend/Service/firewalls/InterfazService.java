@@ -3,9 +3,12 @@ import com.smartnetwork.backend.Repository.firewalls.Interfaz.DispositivoInterfa
 import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Log;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.Address;
 import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.DispositivoInterfaz;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Enum.TipoAccion;
+import com.smartnetwork.backend.domain.dtos.firewalls.address.AddressDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.address.CrearAddressDTO;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import com.smartnetwork.backend.Repository.DispositivoRepository;
@@ -250,7 +253,6 @@ public class InterfazService {
     private void aplicarCambios(Interfaz interfaz, CrearInterfazDTO dto) {
 
         interfaz.setName(dto.getName());
-
         interfaz.setTipo(dto.getTipo());
         interfaz.setInterfacePadre(dto.getInterfacePadre());
         interfaz.setVlanid(dto.getVlanid());
@@ -282,5 +284,30 @@ public class InterfazService {
         dto.setRole(i.getRole());
         dto.setDescription(i.getDescription());
         return dto;
+    }
+
+    @Transactional
+    public void preeliminarInterfaz(Long id, String username ) {
+        Interfaz interfaz = interfazRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Interfaz no encontrada"));
+        if (!interfaz.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        interfazRepo.delete(interfaz);
+    }
+
+    @Transactional
+    public InterfazDTO preeditarInterfaz(Long interfazId, CrearInterfazDTO dto, String username) {
+
+        Interfaz interfaz = interfazRepo.findById(interfazId)
+                .orElseThrow(() -> new RuntimeException("Address no encontrada"));
+        if (!interfaz.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        Usuario user = usuarioRepo.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        aplicarCambios(interfaz, dto);
+        Interfaz saved = interfazRepo.save(interfaz);
+        return toInterfazDTO(saved);
     }
 }

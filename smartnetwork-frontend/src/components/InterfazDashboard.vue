@@ -281,7 +281,14 @@ const editarInterfaz = async (interfaz) => {
   await mapearImplementaciones()
 
   const lista = implementaciones.value[interfaz.id] || []
-
+  if (!lista.length) {
+    interfazSeleccionada.value = {
+      ...interfaz,
+      sinImplementacion: true
+    }
+    mostrandoFormulario.value = true
+    return
+  }
   dispositivosEditDisponibles.value = dispositivos.value.filter(d => {
     const nombre = d.name || d.nombre || d.hostname || 'Sin nombre'
     return lista.includes(nombre)
@@ -350,7 +357,7 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos uno')
+  if (!seleccionadosEliminar.value.length) return preeliminarInterfaz(interfazEliminar.value.id)
 
   await interfazStore.eliminarInterfazEnDispositivos(
     interfazEliminar.value.id,

@@ -35,3 +35,7 @@ export function eliminarService(serviceId, dispositivosIds) {
     }
   )
 }
+
+export function preeliminarService(serviceId) {
+  return api.delete(`/api/firewalls/services/predelete/${serviceId}`)
+}

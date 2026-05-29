@@ -4,9 +4,12 @@ import com.smartnetwork.backend.Repository.DispositivoRepository;
 import com.smartnetwork.backend.Repository.firewalls.UsuarioFirewall.UsuarioFirewallRepository;
 import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.ReglaFirewall;
 import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.DispositivoUsuarioFirewall;
 import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.UsuarioFirewall;
 import com.smartnetwork.backend.domain.Enum.TipoAccion;
+import com.smartnetwork.backend.domain.dtos.firewalls.Policys.CrearReglaFirewallDTO;
+import com.smartnetwork.backend.domain.dtos.firewalls.Policys.ReglaFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.usuarioFirewall.CreaUsuarioFirewallDTO;
 import com.smartnetwork.backend.domain.dtos.firewalls.usuarioFirewall.UsuarioFirewallDTO;
 import com.smartnetwork.backend.Repository.firewalls.UsuarioFirewall.DispositivoUsuarioFirewallRepository;
@@ -274,6 +277,30 @@ public class UsuarioFirewallService {
         if (dto.getPassword() != null && !dto.getPassword().isBlank()) {
             usuario.setPassword(dto.getPassword());
         }
+    }
+
+    @Transactional
+    public UsuarioFirewallDTO preactualizar(Long id,CreaUsuarioFirewallDTO dto, String username) {
+        UsuarioFirewall usuario = usuarioFirewallRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (!usuario.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        Usuario user = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        aplicarCambios(usuario, dto);
+        UsuarioFirewall saved = usuarioFirewallRepository.save(usuario);
+        return toUsuarioDTO(saved);
+    }
+
+    @Transactional
+    public void preeliminarUsuarioFirewall(Long id, String username ) {
+        UsuarioFirewall usuario = usuarioFirewallRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        if (!usuario.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        usuarioFirewallRepository.delete(usuario);
     }
 }
 

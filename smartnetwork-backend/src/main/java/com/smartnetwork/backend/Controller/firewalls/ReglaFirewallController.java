@@ -78,4 +78,21 @@ public class ReglaFirewallController {
         reglaFirewallService.eliminarRegla(id, dispositivosIds, auth.getName()
         );
     }
+
+    @PutMapping("/preedit/{id}")
+    public ReglaFirewallDTO preeditar(
+            @PathVariable Long id,
+            @RequestBody CrearReglaFirewallDTO dto,
+            Authentication auth
+    ) {
+        return reglaFirewallService.preeditarReglaFirewall(id, dto, auth.getName());
+    }
+
+    @DeleteMapping("/predelete/{id}")
+    public void preeliminar(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        reglaFirewallService.preeliminarRegla(id,auth.getName());
+    }
 }

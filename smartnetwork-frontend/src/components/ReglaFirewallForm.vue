@@ -289,7 +289,11 @@ async () => {
       else if (props.modo === 'full' &&props.dispositivoId) {
         payload.dispositivosId = [ props.dispositivoId]
       }
-      await store.actualizarRegla(props.reglaEdit.id,payload)
+      if (props.reglaEdit.sinImplementacion){
+        await useReglaFirewallStore.actualizarReglaSinImplementar(props.reglaEdit.id,payload)
+      } else {
+        await useReglaFirewallStore.actualizarRegla( props.reglaEdit.id,payload)
+      }
       mensaje.value ='Regla actualizada correctamente'
     }
     else {

@@ -7,6 +7,7 @@ import com.smartnetwork.backend.Repository.UsuarioRepository;
 import com.smartnetwork.backend.Service.LogService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
 import com.smartnetwork.backend.domain.Entity.Log;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.Interfaz;
 import com.smartnetwork.backend.domain.Entity.firewalls.Service.DispositivoService;
 import com.smartnetwork.backend.domain.Entity.Usuario;
 import com.smartnetwork.backend.domain.Enum.TipoAccion;
@@ -211,6 +212,16 @@ public class ServiceService {
         ServiceDTO dto = toDTO(service);
         dto.setDispositivoId(dispositivoId);
         return dto;
+    }
+
+    @Transactional
+    public void preeliminarService(Long id, String username ) {
+        com.smartnetwork.backend.domain.Entity.firewalls.Service.Service service = serviceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Interfaz no encontrada"));
+        if (!service.getUsuario().getUsername().equals(username)) {
+            throw new RuntimeException("No autorizado");
+        }
+        serviceRepository.delete(service);
     }
 
 }

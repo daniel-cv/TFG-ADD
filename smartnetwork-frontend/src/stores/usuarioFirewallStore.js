@@ -8,7 +8,8 @@ import {
   crearUsuarioFirewallCompleto,
   asignarUsuarioFirewallADispositivos,
   eliminarUsuarioFirewall as apiEliminarUsuarioFirewall,
-  actualizarUsuarioFirewall as apiActualizarUsuarioFirewall
+  actualizarUsuarioFirewall as apiActualizarUsuarioFirewall,
+  actualizarSinImplementacion as actualizarSinImplementacionUsuario
 } from '@/services/usuarioFirewallService'
 
 export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
@@ -134,6 +135,19 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
           this.mensaje = "Error eliminando usuario"
           throw error
         }
+    },
+    async actualizarUsuarioSinImplementar(id, payload) {
+      try {
+        const res = await actualizarSinImplementacionUsuario(id, payload)
+        const index = this.usuarios.findIndex(u => u.id === id)
+        if (index !== -1) this.usuarios[index] = res.data
+        this.mensaje = "Usuario Firewall actualizado correctamente"
+        return res.data
+      } catch (error) {
+        console.error("Error actualizando usuario firewall:", error)
+        this.mensaje = "Error al actualizar usuario firewall"
+        throw error
+      }
     }
   }
 })

@@ -8,7 +8,8 @@ import {
   crearInterfazBasica as apiCrearInterfazBasica,
   actualizarInterfaz as apiActualizarInterfaz,
   eliminarInterfaz as apiEliminarInterfaz,
-  asignarInterfaz as apiAsignarInterfaz
+  asignarInterfaz as apiAsignarInterfaz,
+  actualizarSinImplementacion as actualizarSinImplementacionService
 } from '@/services/interfazService'
 
 export const useInterfazStore = defineStore('interfaz', {
@@ -133,6 +134,22 @@ async eliminarInterfazEnDispositivos(interfazId, dispositivosIds) {
   } catch (error) {
     console.error("Error eliminando interfaz", error)
     this.mensaje = "Error al eliminar la interfaz"
+    throw error
+  }
+},
+
+async actualizarInterfazSinImplementar(id, interfaz) {
+  try {
+    const res = await actualizarSinImplementacionService(id, interfaz)
+    const index = this.interfaces.findIndex(a => a.id === id)
+    if (index !== -1) {
+      this.interfaces[index] = res.data
+    }
+    this.mensaje = "Interfaz actualizada sin implementación"
+    return res.data
+  } catch (error) {
+    console.error("Error actualizando interfaz sin implementar", error)
+    this.mensaje = "Error al actualizar Interfaz"
     throw error
   }
 }

@@ -195,37 +195,32 @@ const handleSubmit = async () => {
   }
 
   try {
-
     if (props.interfazEdit) {
-
       if (props.interfazEdit.dispositivosId?.length) {
         payload.dispositivosId = props.interfazEdit.dispositivosId
       }
       else if (props.modo === 'full') {
         payload.dispositivosId = [props.dispositivoId]
       }
-
       await interfazStore.actualizarInterfaz(
         props.interfazEdit.id,
         payload
       )
-
+      if (props.interfazEdit.sinImplementacion){
+        await interfazStore.actualizarInterfazSinImplementar(props.interfazEdit.id,payload)
+      } else {
+        await interfazStore.actualizarInterfaz( props.addressEdit.id,payload)
+      }
       mensaje.value = "Actualizada"
     }
-
     else {
-
       if (props.modo === 'full') {
         payload.dispositivosId = [props.dispositivoId]
       }
-
       await interfazStore.crearInterfaz(payload)
-
       mensaje.value = "Creada"
     }
-
     emit('creada')
-
   } catch (e) {
     console.error(e)
     mensaje.value = "Error"
