@@ -51,11 +51,48 @@
             >
               Configurar
             </v-btn>
+            <v-btn
+              variant="text"
+              class="action-btn delete-btn"
+              @click.stop="abrirDialogoEliminar(d)"
+            >
+              Eliminar
+            </v-btn>
 
           </div>
         </v-card>
       </v-col>
     </v-row>
+
+    <!-- Diálogo de confirmación de eliminación -->
+    <v-dialog v-model="mostrarDialogoEliminar" max-width="450">
+      <v-card class="dialog-card">
+        <v-card-title class="dialog-title">
+          <v-icon class="warning-icon">mdi-alert-circle</v-icon>
+          Confirmar eliminación
+        </v-card-title>
+        <v-divider class="dialog-divider"></v-divider>
+        <v-card-text class="dialog-text">
+          ¿Estás seguro de que deseas eliminar <strong>{{ dispositivoAEliminar?.nombre }}</strong>? Esta acción no se puede deshacer.
+        </v-card-text>
+        <v-card-actions class="dialog-actions">
+          <v-btn
+            variant="text"
+            @click="cerrarDialogoEliminar"
+            class="cancel-btn"
+          >
+            Cancelar
+          </v-btn>
+          <v-btn
+            variant="elevated"
+            @click="confirmarEliminar"
+            class="confirm-delete-btn"
+          >
+            Eliminar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -71,6 +108,8 @@ import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionad
 const dispositivos = ref([]);
 const mensaje = ref("");
 const seleccionadoStore = useDispositivoSeleccionadoStore();
+const mostrarDialogoEliminar = ref(false);
+const dispositivoAEliminar = ref(null);
 
 const dispositivoStore = useDispositivoStore();
 const userStore = useUserStore();
@@ -79,6 +118,30 @@ const router = useRouter();
 function configurar(dispositivo) {
   seleccionadoStore.seleccionar(dispositivo);
   router.push(`/device/${dispositivo.id}`);
+}
+
+function abrirDialogoEliminar(dispositivo) {
+  dispositivoAEliminar.value = dispositivo;
+  mostrarDialogoEliminar.value = true;
+}
+
+function cerrarDialogoEliminar() {
+  mostrarDialogoEliminar.value = false;
+  dispositivoAEliminar.value = null;
+}
+
+async function confirmarEliminar() {
+  if (!dispositivoAEliminar.value) return;
+
+  try {
+    await dispositivoStore.eliminarDispositivo(dispositivoAEliminar.value.id);
+    dispositivos.value = dispositivoStore.dispositivos;
+    mensaje.value = dispositivoStore.mensaje;
+    cerrarDialogoEliminar();
+  } catch (error) {
+    mensaje.value = "Error al eliminar el dispositivo";
+    console.error(error);
+  }
 }
 
 onMounted(async () => {
@@ -194,11 +257,78 @@ gap:15px;
 color:#3b82f6;
 }
 
+.action-btn:hover{
+color:#60a5fa;
+}
+
+.delete-btn{
+color:#ef4444;
+}
+
+.delete-btn:hover{
+color:#f87171;
+}
+
 .action-btn-secondary{
 color:#9aa4b2;
 }
 
 .action-btn-secondary:hover{
 color:white;
+}
+
+/* Estilos del diálogo */
+.dialog-card{
+background:linear-gradient(135deg,#111827 0%,#1f2937 100%);
+border:1px solid #3b82f6;
+border-radius:16px;
+overflow:hidden;
+}
+
+.dialog-divider{
+border-color:#3b82f6 !important;
+opacity:0.3;
+}
+
+.dialog-title{
+color:#e6edf3;
+font-size:18px;
+font-weight:600;
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.warning-icon{
+color:#ef4444;
+font-size:24px;
+}
+
+.dialog-text{
+color:#9aa4b2;
+font-size:14px;
+line-height:1.6;
+}
+
+.dialog-actions{
+gap:12px;
+padding:16px;
+}
+
+.cancel-btn{
+color:#9aa4b2;
+}
+
+.cancel-btn:hover{
+color:#e6edf3;
+}
+
+.confirm-delete-btn{
+background:#ef4444;
+color:white;
+}
+
+.confirm-delete-btn:hover{
+background:#dc2626;
 }
 </style>

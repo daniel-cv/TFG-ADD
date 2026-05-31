@@ -12,6 +12,7 @@ import com.smartnetwork.backend.domain.Entity.switches.IpRoute;
 import com.smartnetwork.backend.domain.Entity.switches.Vlan;
 import com.smartnetwork.backend.Service.switches.VlanService;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
@@ -171,6 +172,25 @@ public class DispositivoService {
 
         return dispositivoRepository.findById(id);
     }
+
+    @Transactional
+    public Dispositivo eliminarDispositivo(Long id, String username) {
+
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        Dispositivo dispositivo = dispositivoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
+
+        if (!dispositivo.getUsuario().getId().equals(usuario.getId())) {
+            throw new RuntimeException("No tienes permiso para eliminar este dispositivo");
+        }
+
+        dispositivoRepository.delete(dispositivo);
+
+        return dispositivo;
+    }
+
 
     private void guardarInterfaces(String json, Dispositivo dispositivo) {
 

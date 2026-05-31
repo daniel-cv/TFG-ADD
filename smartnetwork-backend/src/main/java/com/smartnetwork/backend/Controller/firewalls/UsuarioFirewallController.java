@@ -82,7 +82,7 @@ public class UsuarioFirewallController {
         return usuarioFirewallService.preactualizar(id, dto, auth.getName());
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/predelete/{id}")
     public void preeliminar(
             @PathVariable Long id,
             Authentication auth

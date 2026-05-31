@@ -9,7 +9,7 @@ import {
   actualizarInterfaz as apiActualizarInterfaz,
   eliminarInterfaz as apiEliminarInterfaz,
   asignarInterfaz as apiAsignarInterfaz,
-  actualizarSinImplementacion as actualizarSinImplementacionService
+  actualizarSinImplementacionService
 } from '@/services/interfazService'
 
 export const useInterfazStore = defineStore('interfaz', {

@@ -8,8 +8,8 @@ import {
   aplicarAddressToDispositivos,
   crearAddressCompleto,
   eliminarAddress as eliminarAddressService,
-  actualizarAddress as actualizarAddressService
-  actualizarSinImplementacion as actualizarSinImplementacionService
+  actualizarAddress as actualizarAddressService,
+  actualizarSinImplementacionService
 } from '@/services/addressService'
 
 export const useAddressStore = defineStore('address', {

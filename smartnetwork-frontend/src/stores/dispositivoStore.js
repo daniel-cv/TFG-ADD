@@ -82,5 +82,23 @@ export const useDispositivoStore = defineStore("dispositivo", {
         return null;
       }
     },
-    },
+
+    async eliminarDispositivo(id) {
+      try {
+        const userStore = useUserStore();
+        
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+        await api.delete(`/api/dispositivos/delete/${id}`);
+        this.dispositivos = this.dispositivos.filter(d => d.id !== id);
+        this.mensaje = "Dispositivo eliminado correctamente";
+      } catch (error) {
+        console.error(error);
+        this.mensaje = "Error al eliminar el dispositivo";
+        throw error;
+      }
+    }
+  }
 });
