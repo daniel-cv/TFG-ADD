@@ -8,6 +8,7 @@
           </v-card-title>
 
           <v-form @submit.prevent="handleSubmit" ref="form">
+
             <v-text-field
               v-model="nombre"
               label="Nombre"
@@ -17,6 +18,7 @@
               required
             />
 
+            <!-- FABRICANTE PRIMERO -->
             <v-select
               v-model="fabricante"
               :items="fabricantes"
@@ -28,6 +30,7 @@
               required
             />
 
+            <!-- TIPO DEPENDE DEL FABRICANTE -->
             <v-select
               v-model="tipo"
               :items="tipos"
@@ -36,6 +39,7 @@
               variant="outlined"
               class="mb-3"
               :rules="[v => !!v || 'Selecciona un tipo']"
+              :disabled="!fabricante"
               required
             />
 
@@ -56,10 +60,9 @@
               prepend-inner-icon="mdi-key"
               variant="outlined"
               class="mb-3"
-              :rules="[
-                v => tipo !== 'FIREWALL' || !!v || 'Token obligatorio'
-              ]"
+              :rules="[v => tipo !== 'FIREWALL' || !!v || 'Token obligatorio']"
             />
+
             <v-text-field
               v-if="tipo === 'SWITCH'"
               v-model="usuario"
@@ -67,9 +70,7 @@
               prepend-inner-icon="mdi-account"
               variant="outlined"
               class="mb-3"
-              :rules="[
-                v => tipo !== 'SWITCH' || !!v || 'Usuario obligatorio'
-              ]"
+              :rules="[v => tipo !== 'SWITCH' || !!v || 'Usuario obligatorio']"
             />
 
             <v-text-field
@@ -80,9 +81,7 @@
               prepend-inner-icon="mdi-lock"
               variant="outlined"
               class="mb-3"
-              :rules="[
-                v => tipo !== 'SWITCH' || !!v || 'Contraseña obligatoria'
-            ]"
+              :rules="[v => tipo !== 'SWITCH' || !!v || 'Contraseña obligatoria']"
             />
 
             <v-text-field
@@ -102,6 +101,7 @@
             <p v-if="mensaje" class="mt-3 text-center">
               {{ mensaje }}
             </p>
+
           </v-form>
         </v-card>
       </v-col>
@@ -110,14 +110,15 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
 import { useRouter } from "vue-router";
 
 const dispositivoStore = useDispositivoStore();
+const router = useRouter();
+
 const form = ref(null);
 const mensaje = ref("");
-const router = useRouter();
 
 const nombre = ref("");
 const fabricante = ref("");
@@ -128,8 +129,13 @@ const tooken = ref("");
 const usuario = ref("");
 const password = ref("");
 
-const fabricantes = ["FORTINET", "CISCO", "ARISTA"];
-const tipos = ["FIREWALL", "SWITCH"];
+const fabricantes = ["FORTINET", "ARISTA"];
+
+const tipos = computed(() => {
+  if (fabricante.value === "FORTINET") return ["FIREWALL"];
+  if (fabricante.value === "ARISTA") return ["SWITCH"];
+  return [];
+});
 
 const ipRules = [
   v => !!v || "La IP es obligatoria",
@@ -137,14 +143,11 @@ const ipRules = [
     /^(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)\.(25[0-5]|2[0-4]\d|[01]?\d\d?)$/.test(v)
       || "Formato de IP no válido"
 ];
-
-watch(tipo, (nuevoTipo) => {
-  if (nuevoTipo === "FIREWALL") {
-    usuario.value = "";
-    password.value = "";
-  } else if (nuevoTipo === "SWITCH") {
-    tooken.value = "";
-  }
+watch(fabricante, () => {
+  tipo.value = "";
+  usuario.value = "";
+  password.value = "";
+  tooken.value = "";
 });
 
 const handleSubmit = async () => {

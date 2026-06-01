@@ -27,7 +27,7 @@
 
         <tbody>
           <tr v-for="address in addresses" :key="address.id">
-            <td>{{ address.name }}</td>
+            <td class="name">{{ address.name }}</td>
             <td>{{ address.type }}</td>
             <td>{{ address.ip }}</td>
             <td>{{ obtenerNombreInterfaz(address.interfazId) }}</td>
@@ -204,6 +204,7 @@ import { useDispositivoStore } from '@/stores/dispositivoStore'
 import { useInterfazStore } from '@/stores/interfazStore'
 import AddressForm from '@/components/AddressForm.vue'
 import { preeliminarAddress } from '@/services/addressService'
+import { errorMessages } from 'vue/compiler-sfc'
 
 const route = useRoute()
 const dispositivoId = Number(route.params.id)
@@ -271,6 +272,7 @@ const mapearImplementaciones = async () => {
     }
   }
   implementaciones.value = mapa
+
 }
 
 const dispositivosEliminar = computed(() => {
@@ -283,7 +285,9 @@ const dispositivosEliminar = computed(() => {
 })
 
 onMounted(cargarDatos)
-
+const tieneImplementaciones = (addressId) => {
+  return (implementaciones.value[addressId] || []).length > 0
+}
 const editarAddress = async (address) => {
   addressEditar.value = address
   await mapearImplementaciones()
@@ -305,6 +309,11 @@ const editarAddress = async (address) => {
 }
 
 const confirmarEditar = () => {
+  if (!seleccionados.value.length) {
+    alert('Debes seleccionar al menos un dispositivo para continuar la edición')
+    return
+  }
+
   addressSeleccionada.value = {
     ...addressEditar.value,
     dispositivosIds: [...seleccionados.value],
@@ -352,9 +361,16 @@ const aplicarAhora = async () => {
   await addressStore.aplicarAddressToDispositivos(addressAplicar.value.id, seleccionados.value)
   dialogAplicar.value = false
   await mapearImplementaciones()
+  await cargarDatos()
 }
 
-const abrirEliminar = (address) => {
+const abrirEliminar = async (address) => {
+  if (!tieneImplementaciones(address.id)) {
+    await preeliminarAddress(address.id)
+    await cargarDatos()
+    return
+  }
+
   addressEliminar.value = address
   seleccionadosEliminar.value = []
   dialogEliminar.value = true
@@ -367,12 +383,14 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return preeliminarAddress(addressEliminar.value.id)
+  console.log(seleccionadosEliminar.value.length)
+  if (!seleccionadosEliminar.value.length || seleccionadosEliminar.value.length==0) alert('Selecciona al menos un dispositivo')
   await addressStore.eliminarAddressEnDispositivos(addressEliminar.value.id, seleccionadosEliminar.value)
   dialogEliminar.value = false
   await addressStore.obtenerMisAddresses()
   addresses.value = addressStore.addresses
   await mapearImplementaciones()
+  await cargarDatos()
 }
 
 const obtenerNombreInterfaz = (id) => {
@@ -559,5 +577,8 @@ const obtenerNombreInterfaz = (id) => {
   font-weight: 600;
   padding: 8px 18px;
   border-radius: 8px;
+}
+.name {
+  font-weight: 600;
 }
 </style>

@@ -30,10 +30,10 @@
             v-for="service in services"
             :key="service.id"
           >
-            <td>{{ service.nombre }}</td>
+            <td class="name">{{ service.nombre }}</td>
             <td>{{ service.tipoProtocolo }}</td>
-            <td>{{ service.ip }}</td>
-            <td>{{ service.destinationPort }}</td>
+            <td>{{ service.ip || "-"}}</td>
+            <td>{{ service.destinationPort || "-"}}</td>
             <td>{{ service.comentario || 'Sin comentario' }}</td>
 
             <td>
@@ -213,6 +213,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useServiceStore } from '@/stores/serviceStore'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
 import ServiceForm from '@/components/ServiceForm.vue'
+import { preeliminarService } from '@/services/serviceService'
 
 const serviceStore = useServiceStore()
 const dispositivoStore = useDispositivoStore()
@@ -312,13 +313,20 @@ async function aplicarAhora() {
   dialogAplicar.value = false
   await mapearImplementaciones()
 }
+function tieneImplementaciones(serviceId) {
+  return (implementaciones.value[serviceId] || []).length > 0
+}
+async function abrirEliminar(service) {
+  if (!tieneImplementaciones(service.id)) {
+    await preeliminarService(service.id)
+    await cargarDatos()
+    return
+  }
 
-function abrirEliminar(service) {
   serviceEliminar.value = service
   seleccionadosEliminar.value = []
   dialogEliminar.value = true
 }
-
 const dispositivosEliminar = computed(() => {
   if (!serviceEliminar.value) return []
   const lista = implementaciones.value[serviceEliminar.value.id] || []
@@ -335,7 +343,7 @@ function toggleSeleccionEliminar(id) {
 }
 
 async function eliminarAhora() {
-  if (!seleccionadosEliminar.value.length) return preeliminarService(serviceEliminar.value.id)
+  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
   await serviceStore.eliminarServiceEnDispositivos(serviceEliminar.value.id,seleccionadosEliminar.value)
   dialogEliminar.value = false
   await cargarDatos()
@@ -456,5 +464,9 @@ function cerrarFormulario() {
 .device-item.selected {
   border-color: #3b82f6;
   background: #eff6ff;
+}
+
+.name {
+  font-weight: 600;
 }
 </style>

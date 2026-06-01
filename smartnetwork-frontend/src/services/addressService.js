@@ -1,4 +1,4 @@
-import api from './api' 
+import api from './api'
 
 export function obtenerAddressesPorDispositivo(dispositivoId) {
   return api.get('/api/firewalls/addresses/dispositivo/' + dispositivoId)
@@ -29,8 +29,8 @@ export function crearAddressCompleto(address) {
   return api.post('/api/firewalls/addresses/full', address)
 }
 
-export function actualizarSinImplementacionService(id, address){
-  return api.put('/api/firewalls/addresses/preedit' + address.id, address)
+export function actualizarSinImplementacion(id, address){
+  return api.put(`/api/firewalls/addresses/preedit/${id}`, address)
 }
 export function preeliminarAddress(addressId) {
   return api.delete('/api/firewalls/addresses/predelete/' + addressId)

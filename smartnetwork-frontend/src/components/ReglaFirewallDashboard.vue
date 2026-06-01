@@ -407,7 +407,7 @@ import {ref,onMounted,computed} from 'vue'
 import { useReglaFirewallStore} from '@/stores/reglafirewallStore'
 import { useDispositivoStore} from '@/stores/dispositivoStore'
 import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
-
+import {preeliminarregla} from '@/services/reglaFirewallService';
 const reglaStore = useReglaFirewallStore()
 const dispositivoStore = useDispositivoStore()
 const reglas = ref([])
@@ -504,12 +504,16 @@ const editarRegla = async (regla) => {
 }
 
 const confirmarEditar = () => {
+  if (!seleccionados.value.length) {
+    alert('Debes seleccionar al menos un dispositivo para continuar la edición')
+    return
+  }
+
   reglaSeleccionada.value = {
     ...reglaEditar.value,
-    dispositivosIds: [
-      ...seleccionados.value
-    ]
+    dispositivosIds: [...seleccionados.value]
   }
+
   dialogEditar.value = false
   mostrandoFormulario.value = true
 }
@@ -534,7 +538,16 @@ const aplicarAhora = async () => {
   await mapearImplementaciones()
 }
 
-const abrirEliminar = (regla) => {
+const tieneImplementaciones = (reglaId) => {
+  return (implementaciones.value[reglaId] || []).length > 0
+}
+const abrirEliminar = async (regla) => {
+  if (!tieneImplementaciones(regla.id)) {
+    await preeliminarregla(regla.id)
+    await cargarDatos()
+    return
+  }
+
   reglaEliminar.value = regla
   seleccionadosEliminar.value = []
   dialogEliminar.value = true
@@ -548,7 +561,7 @@ const toggleSeleccionEliminar = (id) => {
   }
 }
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return preeliminarRegla(reglaEliminar.value.id)
+  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
   await reglaStore.eliminarReglaEnDispositivos( reglaEliminar.value.id,seleccionadosEliminar.value )
   dialogEliminar.value = false
   await cargarDatos()
@@ -699,7 +712,7 @@ const eliminarAhora = async () => {
 
 .device-name {
   font-weight: 600;
-  color: #ffffff;
+  color: #000000;
   font-size: 15px;
 }
 

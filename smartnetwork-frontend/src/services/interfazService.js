@@ -31,9 +31,9 @@ export function eliminarInterfaz(id, dispositivosIds) {
 }
 
 export function preeliminarInterfaz(interfazId) {
-  return api.delete('/api/firewalls/interfaz/predelete/' + interfazId)
+  return api.delete('/api/firewall/interfaz/predelete/' + interfazId)
 }
 
-export function actualizarSinImplementacionService(id, interfaz){
-  return api.put('/api/firewalls/interfaz/preedit' + address.id, interfaz)
+export function actualizarSinImplementacion(id, interfaz){
+  return api.put('/api/firewall/interfaz/preedit/' + id, interfaz)
 }

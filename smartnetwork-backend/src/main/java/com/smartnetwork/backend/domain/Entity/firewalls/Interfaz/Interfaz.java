@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "interfaces")
+@Table(name = "interfaces_fw")
 public class Interfaz {
 
     @Id

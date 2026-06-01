@@ -110,7 +110,7 @@ import {
 } from 'vue'
 
 import {
-  useReglaFirewallStore
+  useReglaFirewallStore,
 } from '@/stores/reglafirewallStore'
 
 import {
@@ -289,17 +289,17 @@ async () => {
       else if (props.modo === 'full' &&props.dispositivoId) {
         payload.dispositivosId = [ props.dispositivoId]
       }
-      if (props.reglaEdit.sinImplementacion){
-        await useReglaFirewallStore.actualizarReglaSinImplementar(props.reglaEdit.id,payload)
+      if (props.reglaEdit.sinImplementacion) {
+        await store.actualizarReglaSinImplementar(props.reglaEdit.id,payload)
       } else {
-        await useReglaFirewallStore.actualizarRegla( props.reglaEdit.id,payload)
+      await store.actualizarRegla(props.reglaEdit.id,payload)
       }
       mensaje.value ='Regla actualizada correctamente'
     }
     else {
       if (props.modo === 'full'&& props.dispositivoId) {
         payload.dispositivosId = [ props.dispositivoId]
-        await store  .crearReglaCompleta(payload)
+        await store.crearReglaCompleta(payload)
       } else {
         await store.crearRegla(payload)
       }

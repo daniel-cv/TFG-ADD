@@ -45,10 +45,10 @@ export function asignarReglaADispositivos(reglaId,dispositivosIds) {
   return api.post(`/api/firewalls/reglas/${reglaId}/dispositivos`,dispositivosIds)
 }
 
-export function actualizarSinImplementacionService(id, regla){
-  return api.put('/api/firewalls/reglas/preedit' + regla.id, regla)
+export function actualizarSinImplementacion(id, regla){
+  return api.put('/api/firewalls/reglas/preedit/' + id, regla)
 }
 
-export function preeliminarInterfaz(relaId) {
+export function preeliminarregla(reglaId) {
   return api.delete('/api/firewalls/reglas/predelete/' + reglaId)
 }

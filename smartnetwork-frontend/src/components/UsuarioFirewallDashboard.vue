@@ -298,7 +298,7 @@ import { ref, computed, onMounted } from 'vue'
 
 import { useUsuarioFirewallStore } from '@/stores/usuarioFirewallStore'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
-
+import { preeliminarUsuarioFirewall } from '@/services/usuarioFirewallService'
 import UsuarioFirewallForm from '@/components/UsuarioFirewallForm.vue'
 
 const usuarioFirewallStore = useUsuarioFirewallStore()
@@ -408,10 +408,16 @@ const editarUsuario = async (usuario) => {
 }
 
 const confirmarEditar = () => {
+  if (!seleccionados.value.length) {
+    alert('Debes seleccionar al menos un dispositivo para continuar la edición')
+    return
+  }
+
   usuarioSeleccionado.value = {
     ...usuarioEditar.value,
     dispositivosIds: [...seleccionados.value]
   }
+
   dialogEditar.value = false
   mostrandoFormulario.value = true
 }
@@ -456,8 +462,17 @@ const aplicarAhora = async () => {
   dialogAplicar.value = false
   await mapearImplementaciones()
 }
-
-const abrirEliminar = (usuario) => {
+const tieneImplementaciones = (usuarioId) => {
+  return (implementaciones.value[usuarioId] || []).length > 0
+}
+const abrirEliminar = async (usuario) => {
+  if (!tieneImplementaciones(usuario.id)) {
+    await preeliminarUsuarioFirewall(usuario.id)
+    await usuarioFirewallStore.cargarUsuariosPorUsuario()
+    usuarios.value = usuarioFirewallStore.usuarios
+    await mapearImplementaciones()
+    return
+  }
   usuarioEliminar.value = usuario
   seleccionadosEliminar.value = []
   dialogEliminar.value = true
@@ -472,13 +487,8 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) {
-     return preeliminarUsuarioFirewall(usuarioEliminar.value.id)
-  }
-  await usuarioFirewallStore.eliminarUsuarioFirewallEnDispositivos(
-    usuarioEliminar.value.id,
-    seleccionadosEliminar.value
-  )
+  if (!seleccionadosEliminar.value.length) {return alert('Selecciona al menos un dispositivo')}
+  await usuarioFirewallStore.eliminarUsuarioFirewallEnDispositivos(usuarioEliminar.value.id, seleccionadosEliminar.value)
   dialogEliminar.value = false
   await usuarioFirewallStore.cargarUsuariosPorUsuario()
   usuarios.value = usuarioFirewallStore.usuarios
@@ -571,7 +581,7 @@ const eliminarAhora = async () => {
 .apply-title {
   font-size: 20px;
   font-weight: 600;
-  color: #0f172a;
+  color: #ffffff;
   padding: 20px 24px;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -610,7 +620,7 @@ const eliminarAhora = async () => {
 
 .device-name {
   font-weight: 600;
-  color: #0f172a;
+  color: #000000;
   font-size: 15px;
 }
 

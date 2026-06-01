@@ -4,6 +4,11 @@
       <h2>CONFIGURACIÓN</h2>
       <ul>
         <template v-if="esFirewall">
+          <div class="device-type">
+  <div :class="['device-badge', esFirewall ? 'firewall' : 'switch']">
+    {{ esFirewall ? 'FIREWALL' : 'SWITCH' }}
+  </div>
+</div>
           <li :class="{ active: selectedForm === 'policy' }" @click="selectSection('policy')">
             Policies
           </li>
@@ -50,15 +55,27 @@
     </aside>
     <main class="content" v-if="seleccionadoStore.dispositivo">
       <div class="device-header">
-        <h1>{{ seleccionadoStore.dispositivo.nombre }}</h1>
-        <span class="device-subinfo">
-          {{ seleccionadoStore.dispositivo.fabricante }} ·
-          <span :class="['status',
-            seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline']">
-            {{ seleccionadoStore.dispositivo.estado }}
-          </span>
-        </span>
-      </div>
+  <div class="device-title-row">
+    <h1 class="device-name">
+      {{ seleccionadoStore.dispositivo.nombre }}
+    </h1>
+
+    <span :class="['status status-pill',
+      seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline']">
+      {{ seleccionadoStore.dispositivo.estado }}
+    </span>
+  </div>
+
+  <div class="device-meta">
+    <span class="device-brand">
+      {{ seleccionadoStore.dispositivo.fabricante }}
+    </span>
+
+    <span class="device-ip">
+      {{ seleccionadoStore.dispositivo.ip }}
+    </span>
+  </div>
+</div>
 
       <div class="card configuration-view">
         <h2>Información del dispositivo</h2>
@@ -200,72 +217,185 @@ function selectSection(section: string) {
 <style scoped>
 .layout {
   display: flex;
-  height: 100vh;
-  background: #f1f5f9;
+  min-height: 100vh;
+  background: #f6f7fb;
+  font-family: Inter, system-ui, sans-serif;
 }
 
 .sidebar {
   position: fixed;
-  top: 1;
   left: 0;
-  width: 250px;
+  top: 0;
+  width: 260px;
   height: 100vh;
-  background: linear-gradient(180deg, #0f172a, #1e293b);
+  background: linear-gradient(180deg, #0b1220, #111a2e);
   color: white;
-  padding-top: 20px;
+  padding: 24px 0;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
 }
 
 .sidebar h2 {
-  padding-left: 24px;
-  font-size: 13px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
   color: #64748b;
+  padding: 0 24px 12px;
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 0;
+  padding: 0 0 20px;
+  margin: 0;
 }
 
 .sidebar ul li {
-  padding: 12px 24px;
+  padding: 14px 24px;
+  margin: 4px 12px;
   cursor: pointer;
   color: #cbd5e1;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+  border-radius: 10px;
 }
 
 .sidebar ul li:hover {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.06);
+  color: white;
+  padding-left: 28px;
 }
 
 .sidebar ul li.active {
   background: rgba(59, 130, 246, 0.15);
   border-left: 3px solid #3b82f6;
   color: white;
+  font-weight: 500;
 }
 
 .menu-title {
-  padding: 10px 24px;
-  font-size: 12px;
+  margin-top: 24px;
+  padding: 14px 24px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
   color: #64748b;
-  font-weight: bold;
-}
-
-.submenu-title {
-  padding: 8px 24px;
-  font-size: 13px;
-  color: #94a3b8;
+  letter-spacing: 1px;
 }
 
 .content {
-  flex: 1;
   margin-left: 260px;
-  color: black;
+  padding: 32px;
+  width: 100%;
+  color: #0f172a;
+}
+
+.device-header {
+  margin-bottom: 20px;
+}
+
+.device-name {
+  font-size: 48px !important;
+  font-weight: 600;
+  letter-spacing: -1px;
+  margin: 0;
+  line-height: 1.1;
+  color: #0f172a;
+}
+
+.device-subinfo {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.status {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.status.offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
 .card {
   background: white;
+  border-radius: 14px;
   padding: 20px;
-  border-radius: 12px;
   margin-bottom: 20px;
-  color: black;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid #eef2f7;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.info-item label {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.info-item span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.device-type {
+  padding: 10px 24px 24px;
+}
+
+.device-badge {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.device-badge.firewall {
+  background: rgba(37, 99, 235, 0.10);
+  color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+
+.device-badge.switch {
+  background: rgba(79, 70, 229, 0.10);
+  color: #6366f1;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.25);
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.badge.firewall {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.badge.switch {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
 }
 </style>

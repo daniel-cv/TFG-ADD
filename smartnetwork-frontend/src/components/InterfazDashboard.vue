@@ -17,7 +17,6 @@
             <th>Tipo</th>
             <th>VlanId</th>
             <th>VDOM</th>
-            <th>Modo</th>
             <th>Interfaz Padre</th>
             <th>AllowAccess</th>
             <th>Rol</th>
@@ -29,15 +28,14 @@
 
         <tbody>
           <tr v-for="interfaz in interfaces" :key="interfaz.id">
-            <td>{{ interfaz.name }}</td>
+            <td class="name">{{ interfaz.name }}</td>
             <td>{{ interfaz.tipo }}</td>
-            <td>{{ interfaz.vlanid }}</td>
+            <td>{{ interfaz.vlanid || "-" }}</td>
             <td>{{ interfaz.vdom }}</td>
-            <td>{{ interfaz.mode }}</td>
-            <td>{{ interfaz.interfacePadre }}</td>
-            <td>{{ interfaz.allowaccess }}</td>
-            <td>{{ interfaz.role }}</td>
-            <td>{{ interfaz.description }}</td>
+            <td>{{ interfaz.interfacePadre || "-"}}</td>
+            <td>{{ interfaz.allowaccess || "-"}}</td>
+            <td>{{ interfaz.role || "-"}}</td>
+            <td>{{ interfaz.description || "-"}}</td>
 
             <td>
               <div v-if="implementaciones[interfaz.id]?.length">
@@ -210,7 +208,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useInterfazStore } from '@/stores/interfazStore'
 import { useDispositivoStore } from '@/stores/dispositivoStore'
 import InterfazForm from '@/components/InterfazForm.vue'
-
+import { preeliminarInterfaz } from '@/services/interfazService'
 const interfazStore = useInterfazStore()
 const dispositivoStore = useDispositivoStore()
 
@@ -300,6 +298,11 @@ const editarInterfaz = async (interfaz) => {
 }
 
 const confirmarEditar = () => {
+  if (!seleccionados.value.length) {
+    alert('Debes seleccionar al menos un dispositivo para continuar')
+    return
+  }
+
   interfazSeleccionada.value = {
     ...interfazEditar.value,
     dispositivosId: [...seleccionados.value]
@@ -344,12 +347,19 @@ const dispositivosEliminar = computed(() => {
   })
 })
 
-const abrirEliminar = (interfaz) => {
+const abrirEliminar = async (interfaz) => {
+  if (!tieneImplementaciones(interfaz.id)) {
+    await preeliminarInterfaz(interfaz.id)
+    await cargar()
+    return
+  }
   interfazEliminar.value = interfaz
   seleccionadosEliminar.value = []
   dialogEliminar.value = true
 }
-
+const tieneImplementaciones = (interfazId) => {
+  return (implementaciones.value[interfazId] || []).length > 0
+}
 const toggleSeleccionEliminar = (id) => {
   const i = seleccionadosEliminar.value.indexOf(id)
   if (i > -1) seleccionadosEliminar.value.splice(i, 1)
@@ -357,13 +367,8 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return preeliminarInterfaz(interfazEliminar.value.id)
-
-  await interfazStore.eliminarInterfazEnDispositivos(
-    interfazEliminar.value.id,
-    seleccionadosEliminar.value
-  )
-
+  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
+  await interfazStore.eliminarInterfazEnDispositivos(interfazEliminar.value.id,seleccionadosEliminar.value)
   dialogEliminar.value = false
   await cargar()
 }
@@ -564,5 +569,8 @@ const cerrarFormulario = () => {
   font-weight: 600;
   padding: 8px 18px;
   border-radius: 8px;
+}
+.name {
+  font-weight: 600;
 }
 </style>

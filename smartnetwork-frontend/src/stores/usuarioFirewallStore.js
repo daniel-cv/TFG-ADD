@@ -136,7 +136,7 @@ export const useUsuarioFirewallStore = defineStore('usuarioFirewall', {
           throw error
         }
     },
-    async actualizarUsuarioSinImplementar(id, payload) {
+    async actualizarUsuarioFirewallSinImplementar(id, payload) {
       try {
         const res = await actualizarSinImplementacionUsuario(id, payload)
         const index = this.usuarios.findIndex(u => u.id === id)

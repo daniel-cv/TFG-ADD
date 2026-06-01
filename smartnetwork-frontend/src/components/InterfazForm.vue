@@ -33,13 +33,18 @@
 
     <v-text-field
       v-if="tipo === 'vlan'"
-      v-model="vlanid"
+      v-model.number="vlanid"
       label="VLAN ID"
       type="number"
+      min="1"
       variant="outlined"
       class="mb-3"
       required
       :disabled="interfazEdit"
+      :rules="[
+        v => !!v || 'El VLAN ID es obligatorio',
+        v => v > 0 || 'El VLAN ID debe ser un número positivo'
+      ]"
     />
 
     <v-text-field
@@ -202,10 +207,6 @@ const handleSubmit = async () => {
       else if (props.modo === 'full') {
         payload.dispositivosId = [props.dispositivoId]
       }
-      await interfazStore.actualizarInterfaz(
-        props.interfazEdit.id,
-        payload
-      )
       if (props.interfazEdit.sinImplementacion){
         await interfazStore.actualizarInterfazSinImplementar(props.interfazEdit.id,payload)
       } else {

@@ -9,7 +9,8 @@ import {
   crearReglaFirewallCompleta,
   eliminarReglaFirewall,
   actualizarReglaFirewall,
-  asignarReglaADispositivos
+  asignarReglaADispositivos,
+  actualizarSinImplementacion
 } from '@/services/reglaFirewallService'
 
 export const useReglaFirewallStore =
@@ -161,7 +162,7 @@ defineStore('reglaFirewall', {
 
     async actualizarReglaSinImplementar(id, regla) {
       try {
-        const res = await actualizarSinImplementacionService(id, regla)
+        const res = await actualizarSinImplementacion(id, regla)
         const index = this.reglas.findIndex(a => a.id === id)
         if (index !== -1) {
           this.reglas[index] = res.data

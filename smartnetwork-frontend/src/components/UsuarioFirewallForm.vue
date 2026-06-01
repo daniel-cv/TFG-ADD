@@ -128,7 +128,7 @@ const handleSubmitUsuario = async () => {
       }
 
       if (props.usuarioEdit.sinImplementacion){
-        await useUsuarioFirewallStore.actualizarUsuarioSinImplementar(props.usuarioEdit.id,payload)
+        await userStore.actualizarUsuarioFirewallSinImplementar(props.usuarioEdit.id,payload)
       } else {
         await userStore.actualizarUsuarioFirewall(props.usuarioEdit.id,payload)
       }

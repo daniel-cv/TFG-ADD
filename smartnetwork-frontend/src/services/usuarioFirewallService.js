@@ -36,5 +36,5 @@ export function preeliminarUsuarioFirewall(id) {
 }
 
 export function actualizarSinImplementacion(id,usuarioFirewall){
-   return api.put(`/api/firewalls/usuarioFirewall/preedit/${usuarioFirewall.id}`, usuarioFirewall)
+   return api.put(`/api/firewalls/usuarioFirewall/preedit/${id}`, usuarioFirewall)
 }
