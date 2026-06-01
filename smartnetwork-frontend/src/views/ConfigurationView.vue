@@ -1,105 +1,92 @@
 <template>
   <div class="layout">
-    <!-- SIDEBAR -->
     <aside class="sidebar">
       <h2>CONFIGURACIÓN</h2>
       <ul>
-        <li
-          :class="{ active: selectedForm === 'policy' }"
-          @click="selectSection('policy')"
-        >
-          Policies
-        </li>
-        <li
-          :class="{ active: selectedForm === 'address' }"
-          @click="selectSection('address')"
-        >
-          Addresses
-        </li>
-        <li
-          :class="{ active: selectedForm === 'service' }"
-          @click="selectSection('service')"
-        >
-          Services
-        </li>
-        <li
-          :class="{ active: selectedForm === 'vip' }"
-          @click="selectSection('vip')"
-        >
-          Virtual IPs
-        </li>
-        <li
-          :class="{ active: selectedForm === 'user' }"
-          @click="selectSection('user')"
-        >
-          Users
-        </li>
-        <li
-          :class="{ active: selectedForm === 'interface' }"
-          @click="selectSection('interface')"
-        >
-          Interfaces
-        </li>
-        <li>
-          Routing
-        </li>
-        <li>
-          Logs
-        </li>
+        <div class="device-type">
+          <div :class="['device-badge', esFirewall ? 'firewall' : 'switch']">
+            {{ esFirewall ? 'FIREWALL' : 'SWITCH' }}
+          </div>
+        </div>
+        <template v-if="esFirewall">
+          
+          <li :class="{ active: selectedForm === 'policy' }" @click="selectSection('policy')">
+            Policies
+          </li>
+          <li :class="{ active: selectedForm === 'address' }" @click="selectSection('address')">
+            Addresses
+          </li>
+          <li :class="{ active: selectedForm === 'service' }" @click="selectSection('service')">
+            Services</li>
+          <li :class="{ active: selectedForm === 'vip' }" @click="selectSection('vip')">Virtual IPs
+          </li>
+          <li :class="{ active: selectedForm === 'interfaces' }" @click="selectSection('interface')">
+            Interfaces
+          </li>
+          <li :class="{ active: selectedForm === 'user' }" @click="selectSection('user')">
+            Users
+          </li>
+          <li :class="{ active: selectedForm === 'logs' }" @click="selectSection('logs')">
+            Logs
+          </li>
+        </template>
+
+        <template v-if="esSwitch">
+          <li :class="{ active: selectedForm === 'interfaces' }" @click="selectSection('interfaces')">
+            Interfaces
+          </li>
+          <li :class="{ active: selectedForm === 'vlans' }" @click="selectSection('vlans')">
+            VLANs
+          </li>
+          <li :class="{ active: selectedForm === 'security' }" @click="selectSection('security')">
+            ACLs
+          </li>
+          <li :class="{ active: selectedForm === 'logs' }" @click="selectSection('logs')">
+            Logs
+          </li>
+        </template>
       </ul>
     </aside>
-
-
-
-    <!-- CONTENIDO PRINCIPAL -->
     <main class="content" v-if="seleccionadoStore.dispositivo">
       <div class="device-header">
-        <h1>
-          {{ seleccionadoStore.dispositivo.nombre }}
-        </h1>
-        <span class="device-subinfo">
-          {{ seleccionadoStore.dispositivo.fabricante }}
-          ·
-          <span
-            :class="[
-            'status',
-            seleccionadoStore.dispositivo.estado === 'ONLINE'
-            ? 'online'
-            : 'offline'
-            ]"
-          >
-            {{ seleccionadoStore.dispositivo.estado }}
-          </span>
-        </span>
-      </div>
+  <div class="device-title-row">
+    <h1 class="device-name">
+      {{ seleccionadoStore.dispositivo.nombre }}
+    </h1>
+
+    <span :class="['status status-pill',
+      seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline']">
+      {{ seleccionadoStore.dispositivo.estado }}
+    </span>
+  </div>
+
+  <div class="device-meta">
+    <span class="device-brand">
+      {{ seleccionadoStore.dispositivo.fabricante }}
+    </span>
+
+    <span class="device-ip">
+      {{ seleccionadoStore.dispositivo.ip }}
+    </span>
+  </div>
+</div>
 
       <div class="card configuration-view">
         <h2>Información del dispositivo</h2>
         <div class="info-grid">
           <div class="info-item">
-            <label>IP</label>
-            <span>
-              {{ seleccionadoStore.dispositivo.ip }}
-            </span>
+            <label>IP: </label>
+            <span>{{ seleccionadoStore.dispositivo.ip }}</span>
           </div>
-
           <div class="info-item">
-            <label>Fabricante</label>
-            <span>
-              {{ seleccionadoStore.dispositivo.fabricante }}
-            </span>
+            <label>Fabricante: </label>
+            <span>{{ seleccionadoStore.dispositivo.fabricante }}</span>
           </div>
-
           <div class="info-item">
-            <label>Estado</label>
-            <span
-              :class="[
-              'status',
-              seleccionadoStore.dispositivo.estado === 'ONLINE'
-              ? 'online'
-              : 'offline'
-              ]"
-            >
+            <label>Estado: </label>
+            <span :class="['status',
+              seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline'
+            ]">
               {{ seleccionadoStore.dispositivo.estado }}
             </span>
           </div>
@@ -110,22 +97,23 @@
         <component
           :is="currentComponent"
           :device-id="dispositivoId"
+          :modo="modo"
           @crear="currentMode = 'create'"
           @creada="currentMode = 'list'"
           @cancelar="currentMode = 'list'"
         />
       </div>
+
     </main>
   </div>
 </template>
- 
+
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue";
 import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionadoStore";
 import { useRoute } from "vue-router";
 import { useDispositivoStore } from "@/stores/dispositivoStore";
 
-// Formularios
 import ReglaFirewallList from "@/components/ReglaFirewallList.vue"
 import ReglaFirewallForm from "@/components/ReglaFirewallForm.vue"
 
@@ -144,12 +132,28 @@ import VirtualIpForm from "@/components/VirtualIpForm.vue"
 import InterfazList from "@/components/InterfazList.vue"
 import InterfazForm from "@/components/InterfazForm.vue"
 
+import InterfazFormS from "@/components/Switch/InterfazForm.vue"
+import InterfazListS from "@/components/Switch/InterfazList.vue"
+
+import VlanList from "@/components/Switch/VlanList.vue"
+import AclList from "@/components/Switch/AclsList.vue";
+import LogList from "@/components/LogList.vue"
 
 
 const route = useRoute();
 const seleccionadoStore = useDispositivoSeleccionadoStore();
 const dispositivoStore = useDispositivoStore();
 const dispositivoId = route.params.id;
+
+const modo ="full";
+
+const esFirewall = computed(() =>
+  seleccionadoStore.dispositivo?.tipo === "FIREWALL"
+);
+
+const esSwitch = computed(() =>
+  seleccionadoStore.dispositivo?.tipo === "SWITCH"
+);
 
 onMounted(async () => {
   const dispositivo = await dispositivoStore.getDispositivo(dispositivoId);
@@ -161,11 +165,11 @@ const currentMode = ref<'list' | 'create'>('list')
 
 const currentComponent = computed(() => {
   if (!selectedForm.value) return null
-
   return componentMap[selectedForm.value]?.[currentMode.value] || null
 })
 
 const componentMap: Record<string, any> = {
+
   policy: {
     list: ReglaFirewallList,
     create: ReglaFirewallForm
@@ -189,7 +193,13 @@ const componentMap: Record<string, any> = {
   interface: {
     list: InterfazList,
     create: InterfazForm
-  }
+  },
+  vlans: { list: VlanList },
+  logs: { list: LogList },
+  interfaces:{ list: InterfazListS},
+  "interface-config": { list: InterfazFormS },
+
+  security: { list: AclList }
 }
 
 function selectSection(section: string) {
@@ -201,130 +211,185 @@ function selectSection(section: string) {
 <style scoped>
 .layout {
   display: flex;
-  height: 100vh;
-  background: #f1f5f9;
-  font-family: Inter, system-ui;
+  min-height: 100vh;
+  background: #f6f7fb;
+  font-family: Inter, system-ui, sans-serif;
 }
 
 .sidebar {
-  width: 250px;
-  background: linear-gradient(
-  180deg,
-  #0f172a,
-  #1e293b
-  );
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0b1220, #111a2e);
   color: white;
-  padding-top: 20px;
+  padding: 24px 0;
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.25);
+  overflow-y: auto;
 }
 
 .sidebar h2 {
-  padding-left: 24px;
-  font-size: 13px;
+  font-size: 11px;
+  letter-spacing: 1.5px;
   color: #64748b;
-  margin-bottom: 10px;
-  letter-spacing: 1px;
+  padding: 0 24px 12px;
 }
 
 .sidebar ul {
   list-style: none;
-  padding: 0;
+  padding: 0 0 20px;
+  margin: 0;
 }
 
 .sidebar ul li {
   padding: 14px 24px;
+  margin: 4px 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 14px;
   color: #cbd5e1;
+  font-size: 14px;
+  transition: all 0.2s ease;
   border-left: 3px solid transparent;
+  border-radius: 10px;
 }
 
 .sidebar ul li:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255, 255, 255, 0.06);
   color: white;
+  padding-left: 28px;
 }
 
 .sidebar ul li.active {
-  background: rgba(59,130,246,0.15);
+  background: rgba(59, 130, 246, 0.15);
   border-left: 3px solid #3b82f6;
   color: white;
+  font-weight: 500;
+}
+
+.menu-title {
+  margin-top: 24px;
+  padding: 14px 24px 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 1px;
 }
 
 .content {
-  flex: 1;
-  padding: 30px;
-  overflow-y: auto;
-  color: black;
+  margin-left: 260px;
+  padding: 32px;
+  width: 100%;
+  color: #0f172a;
 }
 
 .device-header {
   margin-bottom: 20px;
 }
 
-.device-header h1 {
+.device-name {
+  font-size: 48px !important;
+  font-weight: 600;
+  letter-spacing: -1px;
   margin: 0;
-  font-size: 26px;
+  line-height: 1.1;
   color: #0f172a;
 }
 
 .device-subinfo {
+  font-size: 13px;
   color: #64748b;
-  font-size: 14px;
+}
+
+.status {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status.online {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.status.offline {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
 .card {
   background: white;
-  padding: 25px;
-  border-radius: 12px;
-  box-shadow:
-  0 4px 12px rgba(0,0,0,0.05),
-  0 1px 2px rgba(0,0,0,0.05);
+  border-radius: 14px;
+  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid #eef2f7;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.1);
 }
 
 .info-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-  margin-top: 15px;
-}
-
-.info-item {
-  background: #f8fafc;
-  padding: 15px;
-  border-radius: 8px;
+  gap: 16px;
 }
 
 .info-item label {
   display: block;
   font-size: 12px;
   color: #64748b;
-  margin-bottom: 5px;
 }
 
 .info-item span {
-  font-weight: 600;
-  color: #0f172a;
+  font-size: 14px;
+  font-weight: 500;
 }
 
-.status {
+.device-type {
+  padding: 10px 24px 24px;
+}
+
+.device-badge {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 14px 16px;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.device-badge.firewall {
+  background: rgba(37, 99, 235, 0.10);
+  color: #3b82f6;
+  box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+}
+
+.device-badge.switch {
+  background: rgba(79, 70, 229, 0.10);
+  color: #6366f1;
+  box-shadow: 0 0 0 1px rgba(79, 70, 229, 0.25);
+}
+
+.badge {
+  display: inline-block;
   padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
+  border-radius: 999px;
+  font-size: 11px;
   font-weight: 600;
 }
 
-.status.online {
-  background: #dcfce7;
-  color: #166534;
+.badge.firewall {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
 }
 
-.status.offline {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.form-container {
-  min-height: 300px;
+.badge.switch {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
 }
 </style>

@@ -1,51 +1,52 @@
 <template>
-  <v-form @submit.prevent="handleCrearInterfaz">
-
-    <!-- NAME -->
+  <v-form @submit.prevent="handleSubmit">
     <v-text-field
       v-model="name"
       label="Nombre"
       prepend-inner-icon="mdi-lan"
       variant="outlined"
       class="mb-3"
+      :disabled="interfazEdit"
       required
     />
 
-    <!-- TIPO -->
     <v-select
       v-model="tipo"
-      :items="['fisica', 'vlan']"
+      :items="['vlan']"
       label="Tipo"
       variant="outlined"
       class="mb-3"
+      clearable
+      :disabled="interfazEdit"
       required
     />
-
-    <!-- INTERFAZ PADRE (solo VLAN) -->
     <v-select
       v-if="tipo === 'vlan'"
       v-model="interfacePadre"
-      :items="['port1']"
-      item-title="name"
-      item-value="name"
+      :items="interfacesDisponibles"
       label="Interfaz padre"
       variant="outlined"
       class="mb-3"
-      required
+      clearable
+      :disabled="interfazEdit"
     />
 
-    <!-- VLAN ID (solo VLAN) -->
     <v-text-field
       v-if="tipo === 'vlan'"
-      v-model="vlanid"
+      v-model.number="vlanid"
       label="VLAN ID"
       type="number"
+      min="1"
       variant="outlined"
       class="mb-3"
       required
+      :disabled="interfazEdit"
+      :rules="[
+        v => !!v || 'El VLAN ID es obligatorio',
+        v => v > 0 || 'El VLAN ID debe ser un número positivo'
+      ]"
     />
 
-    <!-- VDOM (fijo) -->
     <v-text-field
       v-model="vdom"
       label="VDOM"
@@ -54,17 +55,15 @@
       disabled
     />
 
-    <!-- MODE -->
     <v-select
       v-model="mode"
-      :items="['static', 'dhcp']"
+      :items="['dhcp']"
       label="Modo IP"
       variant="outlined"
       class="mb-3"
       required
     />
 
-    <!-- IP (solo static) -->
     <v-text-field
       v-if="mode === 'static'"
       v-model="ip"
@@ -74,15 +73,14 @@
       required
     />
 
-    <!-- ALLOW ACCESS -->
-    <v-text-field
+    <v-select
       v-model="allowaccess"
-      label="Allow Access (ping https ssh)"
+      :items="['ping', 'https', 'ssh']"
+      label="Allow Access"
       variant="outlined"
       class="mb-3"
     />
 
-    <!-- ROLE -->
     <v-select
       v-model="role"
       :items="['lan', 'wan', 'dmz']"
@@ -92,7 +90,6 @@
       required
     />
 
-    <!-- DESCRIPTION -->
     <v-textarea
       v-model="description"
       label="Descripción"
@@ -101,7 +98,7 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear Interfaz
+      {{ interfazEdit ? 'Actualizar Interfaz' : 'Crear Interfaz' }}
     </v-btn>
 
     <v-btn
@@ -109,7 +106,7 @@
       size="large"
       block
       class="mt-2"
-      @click="cancelar()"
+      @click="$emit('cancelar')"
     >
       Cancelar
     </v-btn>
@@ -120,70 +117,120 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
-import { useInterfazStore } from "@/stores/interfazStore";
+import { ref, onMounted } from 'vue'
+import { useInterfazStore } from '@/stores/interfazStore'
+import { obtenerInterfacesUsuario } from '@/services/interfazService'
 
-const route = useRoute();
+const props = defineProps({
+  dispositivoId: Number,
+  interfazEdit: Object,
+  modo: { type: String, default: 'simple' }
+})
+
 const emit = defineEmits(['creada', 'cancelar'])
+const interfazStore = useInterfazStore()
 
-const interfazStore = useInterfazStore();
+const name = ref('')
+const tipo = ref('')
+const interfacePadre = ref(null)
+const vlanid = ref(null)
+const vdom = ref('root')
+const mode = ref('')
+const ip = ref('')
+const allowaccess = ref('')
+const role = ref('')
+const description = ref('')
+const mensaje = ref('')
 
-const name = ref("");
-const tipo = ref("fisica");
-const interfacePadre = ref(null);
-const vlanid = ref(null);
-const vdom = ref("root");
-const mode = ref("dhcp");
-const ip = ref(null);
-const allowaccess = ref("ping");
-const role = ref("lan");
-const description = ref("");
+const interfacesDisponibles = ref([])
 
-const mensaje = ref("");
-const interfaces = ref([]);
-const dispositivoId = Number(route.params.id);
+onMounted(async () => {
 
+  if (props.interfazEdit) {
 
-
-// Limpiar campos si cambian tipo o modo
-watch(tipo, (t) => {
-  if (t !== "vlan") {
-    interfacePadre.value = null;
-    vlanid.value = null;
+    name.value = props.interfazEdit.name || ''
+    tipo.value = props.interfazEdit.tipo || ''
+    interfacePadre.value = props.interfazEdit.interfacePadre || null
+    vlanid.value = props.interfazEdit.vlanid || null
+    vdom.value = props.interfazEdit.vdom || 'root'
+    mode.value = props.interfazEdit.mode || ''
+    ip.value = props.interfazEdit.ip || ''
+    allowaccess.value = props.interfazEdit.allowaccess || ''
+    role.value = props.interfazEdit.role || ''
+    description.value = props.interfazEdit.description || ''
   }
-});
-watch(mode, (m) => {
-  if (m !== "static") {
-    ip.value = null;
-  }
-});
 
-const handleCrearInterfaz = async () => {
+  const res = await obtenerInterfacesUsuario()
+
+const puertosBase = [
+  { title: 'Port1', value: 'port1' },
+  { title: 'Port2', value: 'port2' },
+  { title: 'Port3', value: 'port3' },
+  { title: 'Port4', value: 'port4' }
+]
+
+const nombresBase = new Set(
+  puertosBase.map(p => p.value.toLowerCase())
+)
+
+interfacesDisponibles.value = [
+  ...puertosBase,
+  ...res.data
+    .filter(i => !nombresBase.has(i.name.toLowerCase()))
+    .map(i => ({
+      title: i.name,
+      value: i.name
+    }))
+]
+})
+
+const handleSubmit = async () => {
+
+  const payload = {
+    name: name.value,
+    tipo: tipo.value,
+    interfacePadre: interfacePadre.value,
+    vlanid: vlanid.value,
+    vdom: vdom.value,
+    mode: mode.value,
+    ip: ip.value,
+    allowaccess: allowaccess.value,
+    role: role.value,
+    description: description.value,
+  }
+
   try {
-    const payload = {
-      name: name.value,
-      tipo: tipo.value,
-      interfacePadre: interfacePadre.value,
-      vlanid: vlanid.value,
-      vdom: vdom.value,
-      mode: mode.value,
-      ip: ip.value,
-      allowaccess: allowaccess.value,
-      role: role.value,
-      description: description.value,
-      dispositivoId: dispositivoId
-    };
-
-    await interfazStore.crearInterfaz(payload);
-    mensaje.value = "Interfaz creada correctamente";
-    emit("creada");
-  } catch (error) {
-    mensaje.value = "Error al crear la interfaz";
+    if (props.interfazEdit) {
+      if (props.interfazEdit.dispositivosId?.length) {
+        payload.dispositivosId = props.interfazEdit.dispositivosId
+      }
+      else if (props.modo === 'full') {
+        payload.dispositivosId = [props.dispositivoId]
+      }
+      if (props.interfazEdit.sinImplementacion){
+  await interfazStore.actualizarInterfazSinImplementar(
+    props.interfazEdit.id,
+    payload
+  )
+} else {
+  await interfazStore.actualizarInterfaz(
+    props.interfazEdit.id,
+    payload
+  )
+}
+      mensaje.value = "Actualizada"
+    }
+    else {
+      if (props.modo === 'full') {
+        payload.dispositivosId = [props.dispositivoId]
+      }
+      await interfazStore.crearInterfaz(payload)
+      mensaje.value = "Creada"
+    }
+    emit('creada')
+  } catch (e) {
+    console.error(e)
+    mensaje.value = "Error"
   }
-};
-
-function cancelar() {
-  emit('cancelar')
 }
 </script>

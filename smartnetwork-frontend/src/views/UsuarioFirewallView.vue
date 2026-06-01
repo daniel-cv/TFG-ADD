@@ -11,7 +11,7 @@
           <v-card-text>
             <UsuarioFirewallForm
               :dispositivo-id="dispositivoId"
-              @creada="recargar"
+              @creado="recargar"
             />
           </v-card-text>
         </v-card>
@@ -24,7 +24,7 @@
 import UsuarioFirewallForm from "@/components/UsuarioFirewallForm.vue";
 import { ref } from "vue";
 
-const dispositivoId = ref(1); // o el que recibas por props/route
+const dispositivoId = ref(1); 
 
 const recargar = () => {
   console.log("Usuario creado, recargando lista...");

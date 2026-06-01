@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/dispositivos")
@@ -46,6 +45,22 @@ public class DispositivoController {
         return dispositivoService.getDispositivo(id, username)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public Dispositivo eliminarDispositivo(
+            @PathVariable Long id,
+            Authentication auth
+    ) {
+        return dispositivoService.eliminarDispositivo(id, auth.getName());
+    }
+    @PutMapping("/{id}")
+    public Dispositivo editarDispositivo(
+            @PathVariable Long id,
+            @RequestBody Dispositivo datos,
+            Authentication auth
+    ) {
+        return dispositivoService.editarDispositivo(id, datos, auth.getName());
     }
 }
 

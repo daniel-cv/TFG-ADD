@@ -20,7 +20,7 @@ public class Configuracion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String tipoConfiguracion; // VLAN, ACL, INTERFAZ...
+    private String tipoConfiguracion;
 
     @Lob
     private String contenido;

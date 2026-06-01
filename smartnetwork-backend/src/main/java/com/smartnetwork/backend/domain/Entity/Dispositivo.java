@@ -2,6 +2,12 @@ package com.smartnetwork.backend.domain.Entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.smartnetwork.backend.domain.Entity.firewalls.*;
+import com.smartnetwork.backend.domain.Entity.firewalls.Address.DispositivoAddress;
+import com.smartnetwork.backend.domain.Entity.firewalls.Interfaz.DispositivoInterfaz;
+import com.smartnetwork.backend.domain.Entity.firewalls.ReglaFirewall.DispositivoReglaFirewall;
+import com.smartnetwork.backend.domain.Entity.firewalls.Service.DispositivoService;
+import com.smartnetwork.backend.domain.Entity.firewalls.UsuarioFirewall.DispositivoUsuarioFirewall;
 import com.smartnetwork.backend.domain.Enum.EstadoDispositivo;
 import com.smartnetwork.backend.domain.Enum.Fabricante;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
@@ -18,16 +24,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {
-        "usuario",
-        "credencial",
-        "configuraciones",
-        "reglasFirewall",
-        "addresses",
-        "services",
-        "virtualaddress",
-        "usuarioFirewall"
-})
+@ToString(exclude = {"usuario", "credencial", "configuraciones", "reglasFirewall", "virtualaddress", "usuarioFirewall"})
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Dispositivo {
 
@@ -39,8 +36,14 @@ public class Dispositivo {
     @Column(nullable = false)
     private String nombre;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String token;
+
+    @Column(nullable = true)
+    private String usuarioConexion;
+
+    @Column(nullable = true)
+    private String passwordConexion;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -74,15 +77,20 @@ public class Dispositivo {
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL)
     @JsonIgnore
-    private List<ReglaFirewall> reglasFirewall = new ArrayList<>();
+    private List<DispositivoReglaFirewall> reglasFirewall = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Address> addresses = new ArrayList<>();
+    private List<DispositivoAddress> dispositivoAddresses = new ArrayList<>();
+
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<Service> services = new ArrayList<>();
+    private List<DispositivoService> dispositivoServices = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoInterfaz>  dispositivoInterfaz = new ArrayList<>();
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
@@ -90,6 +98,10 @@ public class Dispositivo {
 
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
-    private List<UsuarioFirewall> usuarioFirewall = new ArrayList<>();
+    private List<Log> logs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<DispositivoUsuarioFirewall> dispositivoUsuarioFirewalls = new ArrayList<>();
 }
 

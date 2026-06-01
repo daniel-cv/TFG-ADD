@@ -1,15 +1,54 @@
-import api from './api' // tu axios configurado
+
+import api from './api'
 
 export function obtenerReglasPorDispositivo(dispositivoId) {
-  return api.get('/api/firewalls/reglas/dispositivo/' + dispositivoId)
+  return api.get(
+    `/api/firewalls/reglas/dispositivo/${dispositivoId}`
+  )
+}
+export function obtenerReglasUsuario() { return api.get('/api/firewalls/reglas/usuario')
 }
 
-export function crearReglaFirewall(regla) {
-  return api.post('/api/firewalls/reglas', {
-    ...regla
-  })
+export function crearReglaFirewall( regla) {
+  return api.post('/api/firewalls/reglas/create',{
+      ...regla
+    }
+  )
 }
-// 🔥 ELIMINAR regla simplificado: solo reglaId
-export function eliminarReglaFirewall(reglaId) {
-  return api.delete(`/api/firewalls/reglas/${reglaId}`)
+export function crearReglaFirewallCompleta( regla) {
+  return api.post('/api/firewalls/reglas/full',{
+      ...regla
+    }
+  )
+}
+
+export function eliminarReglaFirewall(id,dispositivosIds) {
+  return api.delete( `/api/firewalls/reglas/delete/${id}`, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      data: {
+        dispositivosIds
+      }
+    }
+  )
+}
+
+export function actualizarReglaFirewall(id,regla) {
+  return api.put(`/api/firewalls/reglas/edit/${id}`,{
+      ...regla
+    }
+  )
+}
+
+export function asignarReglaADispositivos(reglaId,dispositivosIds) {
+  return api.post(`/api/firewalls/reglas/${reglaId}/dispositivos`,dispositivosIds)
+}
+
+export function actualizarSinImplementacion(id, regla){
+  return api.put('/api/firewalls/reglas/preedit/' + id, regla)
+}
+
+export function preeliminarregla(reglaId) {
+  return api.delete('/api/firewalls/reglas/predelete/' + reglaId)
 }
