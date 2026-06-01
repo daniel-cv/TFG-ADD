@@ -1,56 +1,317 @@
 <template>
-  <v-card class="pa-4 mb-4">
-    <v-card-title>Nueva regla</v-card-title>
+  <v-form @submit.prevent="handleSubmit">
 
-    <v-text-field v-model="regla.nombre" label="Nombre" />
-
-    <v-text-field v-model="regla.origen" label="Origen" />
-    <v-text-field v-model="regla.destino" label="Destino" />
-    <v-text-field v-model="regla.ipOrigen" label="ipOrigen" />
-    <v-text-field v-model="regla.ipDestino" label="ipDestino" />
-    <v-select
-      v-model="regla.servicio"
-      :items="['HTTP', 'HTTPS', 'ALL']"
-      label="Servicio"
+    <v-text-field
+      v-model="nombre"
+      label="Nombre / ID"
+      prepend-inner-icon="mdi-label"
+      variant="outlined"
+      class="mb-3"
+      :disabled="!!props.reglaEdit"
+      required
     />
+
     <v-select
-      v-model="regla.nat"
+      v-model="origen"
+      :items="interfaces"
+      label="Interfaz Origen"
+      prepend-inner-icon="mdi-login-variant"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <v-select
+      v-model="destino"
+      :items="interfaces"
+      label="Interfaz Destino"
+      prepend-inner-icon="mdi-logout-variant"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <v-select
+      v-model="ipOrigen"
+      :items="direcciones"
+      label="Objeto Dirección Origen"
+      prepend-inner-icon="mdi-ip-network"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <v-select
+      v-model="ipDestino"
+      :items="direcciones"
+      label="Objeto Dirección Destino"
+      prepend-inner-icon="mdi-ip-network-outline"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <v-select
+      v-model="servicio"
+      :items="['HTTP', 'HTTPS', 'ALL', 'SSH', 'DNS']"
+      label="Servicio"
+      prepend-inner-icon="mdi-server"
+      variant="outlined"
+      class="mb-3"
+    />
+
+    <v-select
+      v-model="nat"
       :items="['disable', 'enable']"
       label="NAT"
+      prepend-inner-icon="mdi-network"
+      variant="outlined"
+      class="mb-3"
+      :disabled="!!props.reglaEdit"
     />
-    <v-btn color="primary" @click="guardar">Guardar</v-btn>
-  </v-card>
+
+    <v-select
+      v-model="action"
+      :items="['accept', 'deny']"
+      label="Acción"
+      prepend-inner-icon="mdi-shield-check"
+      variant="outlined"
+      class="mb-3"
+      :disabled="!!props.reglaEdit"
+    />
+
+    <v-btn
+      color="primary"
+      size="large"
+      block
+      type="submit"
+    >
+      {{ reglaEdit ? 'Actualizar Regla' : 'Crear Regla' }}
+    </v-btn>
+
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="emit('cancelar')"
+    >
+      Cancelar
+    </v-btn>
+
+    <p v-if="mensaje" class="mt-3 text-center">
+      {{ mensaje }}
+    </p>
+
+  </v-form>
 </template>
 
+
 <script setup>
-import { ref } from 'vue'
-import { useReglaFirewallStore } from '@/stores/reglafirewallStore'
-import { useRoute } from "vue-router";
+import {
+  ref,
+  onMounted
+} from 'vue'
 
-const route = useRoute();
-const dispositivoId = Number(route.params.id);
-const emit = defineEmits(['creada']);
+import {
+  useReglaFirewallStore,
+} from '@/stores/reglafirewallStore'
 
+import {
+  obtenerAddressesPorDispositivo,
+  obtenerAddressPorId
+} from '@/services/addressService'
 
+import {
+  obtenerInterfacesPorDispositivo,
+  obtenerInterfacesUsuario
+} from '@/services/interfazService'
 
-const store = useReglaFirewallStore()
-
-const regla = ref({
-  nombre: '',
-  origen: '',
-  destino: '',
-  ipOrigen: '',
-  ipDestino: '',
-  servicio: 'ALL',
-  schedule :'always',
-  action: 'accept',
-  nat: 'disable',
-  habilitada: true,
-  dispositivoId: dispositivoId
+const props = defineProps({
+  reglaEdit: {
+    type: Object,
+    default: null
+  },
+  modo: {
+    type: String,
+    default: 'simple'
+  },
+  dispositivoId: {
+    type: Number,
+    required: false
+  }
 })
+const emit = defineEmits([
+  'creada',
+  'cancelar'
+])
+const store = useReglaFirewallStore()
+const nombre = ref('')
+const origen = ref('')
+const destino = ref('')
+const ipOrigen = ref('')
+const ipDestino = ref('')
+const servicio = ref('ALL')
+const nat = ref('')
+const action = ref('')
+const mensaje = ref('')
+const direcciones = ref([])
+const interfaces = ref([])
 
-async function guardar() {
-  await store.crearRegla(regla.value)
-  emit('creada')
+onMounted(async () => {
+  if (props.reglaEdit) {
+    nombre.value =  props.reglaEdit.nombre
+    origen.value = props.reglaEdit.origen
+    destino.value = props.reglaEdit.destino
+    ipOrigen.value =props.reglaEdit.ipOrigen ||props.reglaEdit.iporigen
+    ipDestino.value =props.reglaEdit.ipDestino ||props.reglaEdit.ipdestino
+    servicio.value = props.reglaEdit.servicio
+    nat.value =props.reglaEdit.nat
+    action.value = props.reglaEdit.action
+  }
+  await cargarDirecciones()
+  await cargarInterfaces()
+})
+const cargarDirecciones =
+async () => {
+  try {let res = null
+    if (props.modo === 'simple') {
+      res =  await obtenerAddressPorId()
+    } else {
+      res =
+        await obtenerAddressesPorDispositivo(
+          props.dispositivoId
+        )
+    }
+    const baseAddresses = [
+      {
+        title: 'ALL',
+        value: 'all'
+      }
+    ]
+    direcciones.value = [
+      ...baseAddresses,
+      ...res.data
+        .filter(addr =>
+          addr.name.toLowerCase()
+            !== 'all'
+        )
+        .map(addr => ({
+          title: addr.name,
+          value: addr.name
+        }))
+    ]
+  } catch (error) {
+    console.error(
+      'Error cargando direcciones',
+      error
+    )
+  }
+}
+const cargarInterfaces =
+async () => {
+  try {
+    let res = null
+    if (props.modo === 'simple') {
+      res =await obtenerInterfacesUsuario()
+    } else {
+      res =
+        await obtenerInterfacesPorDispositivo(
+          props.dispositivoId
+        )
+    }
+    const puertosBase = [
+      {
+        title: 'Port1',
+        value: 'port1'
+      },
+      {
+        title: 'Port2',
+        value: 'port2'
+      },
+      {
+        title: 'Port3',
+        value: 'port3'
+      },
+      {
+        title: 'Port4',
+        value: 'port4'
+      }
+    ]
+
+    const nombresBase =
+      new Set(
+        puertosBase.map(
+          p => p.value.toLowerCase()
+        )
+      )
+    interfaces.value = [
+      ...puertosBase,
+      ...res.data
+        .filter(inter =>
+          !nombresBase.has(
+            inter.name.toLowerCase()
+          )
+        )
+        .map(inter => ({
+          title: inter.name,
+          value: inter.name
+        }))
+    ]
+  } catch (error) {
+    console.error(
+      'Error cargando interfaces',
+      error
+    )
+  }
+}
+
+const handleSubmit =
+async () => {
+  try {
+    const payload = {
+      nombre: nombre.value,
+      origen: origen.value,
+      destino: destino.value,
+      ipOrigen: ipOrigen.value,
+      ipDestino: ipDestino.value,
+      servicio: servicio.value,
+      nat: nat.value,
+      action: action.value,
+      schedule: 'always',
+      habilitada: true
+    }
+    if (props.reglaEdit) {
+      if (
+        props.reglaEdit
+          .dispositivosIds?.length
+      ) {
+        payload.dispositivosId =
+          props.reglaEdit
+            .dispositivosIds
+      }
+      else if (props.modo === 'full' &&props.dispositivoId) {
+        payload.dispositivosId = [ props.dispositivoId]
+      }
+      if (props.reglaEdit.sinImplementacion) {
+        await store.actualizarReglaSinImplementar(props.reglaEdit.id,payload)
+      } else {
+      await store.actualizarRegla(props.reglaEdit.id,payload)
+      }
+      mensaje.value ='Regla actualizada correctamente'
+    }
+    else {
+      if (props.modo === 'full'&& props.dispositivoId) {
+        payload.dispositivosId = [ props.dispositivoId]
+        await store.crearReglaCompleta(payload)
+      } else {
+        await store.crearRegla(payload)
+      }
+      mensaje.value ='Regla creada correctamente'
+    }
+    emit('creada')
+  } catch (error) {
+    console.error(error)
+    mensaje.value =
+      props.reglaEdit
+        ? 'Error al actualizar regla'
+        : 'Error al crear regla'
+  }
 }
 </script>

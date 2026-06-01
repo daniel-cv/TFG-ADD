@@ -1,17 +1,15 @@
 <template>
-  <v-form @submit.prevent="handleCrearService">
-    
-    <!-- NAME -->
+  <v-form @submit.prevent="handleSubmit">
     <v-text-field
       v-model="name"
       label="Nombre del Servicio"
       prepend-inner-icon="mdi-label"
       variant="outlined"
       class="mb-3"
+      :disabled="serviceEdit"
       required
     />
 
-    <!-- PROTOCOLO -->
     <v-select
       v-model="protocol"
       :items="protocolos"
@@ -19,29 +17,32 @@
       prepend-inner-icon="mdi-swap-horizontal"
       variant="outlined"
       class="mb-3"
+      :disabled="serviceEdit"
       required
     />
 
-    <v-text-field
+    <v-select
       v-if="protocol === 'TCP' || protocol === 'UDP'"
-      v-model="address"
-      label="Dirección IP (ej: 192.168.1.1)"  
+      v-model="ip"
+      :items="direcciones"
+      item-title="title"
+      item-value="value"
+      label="Dirección IP"
       prepend-inner-icon="mdi-lan-connect"
       variant="outlined"
       class="mb-3"
     />
 
-    <!-- UDP PORT RANGE -->
     <v-text-field
       v-if="protocol === 'TCP' || protocol === 'UDP'"
       v-model="portRange"
-      label="Rango de Puertos UDP (ej: 53 o 1000-2000)"
+      label="Puerto o rango (ej: 53 o 1000-2000)"
       prepend-inner-icon="mdi-lan-connect"
       variant="outlined"
       class="mb-3"
+      required
     />
 
-    <!-- COMENTARIO -->
     <v-textarea
       v-model="comentario"
       label="Comentario"
@@ -51,7 +52,17 @@
     />
 
     <v-btn color="primary" size="large" block type="submit">
-      Crear Service
+      {{ serviceEdit ? 'Actualizar Service' : 'Crear Service' }}
+    </v-btn>
+
+    <v-btn
+      variant="outlined"
+      size="large"
+      block
+      class="mt-2"
+      @click="emit('cancelar')"
+    >
+      Cancelar
     </v-btn>
 
     <p v-if="mensaje" class="mt-3 text-center">{{ mensaje }}</p>
@@ -59,52 +70,114 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRoute } from "vue-router";
-import { useServiceStore } from "@/stores/serviceStore";
+import { ref, onMounted } from "vue"
+import { useServiceStore } from "@/stores/serviceStore"
+import {
+  obtenerAddressesPorDispositivo,
+  obtenerAddressesPorUsuario
+} from "@/services/addressService"
 
-const route = useRoute();
-const emit = defineEmits(['creada'])
+const props = defineProps({
+  dispositivoId: { type: Number, required: true },
+  serviceEdit: { type: Object, default: null },
+  modo: { type: String, default: "simple" }
+})
+
+const emit = defineEmits(["creada", "cancelar"])
 
 const serviceStore = useServiceStore()
 
-const name = ref("");
-const protocol = ref("");
-const address = ref("");
-const portRange = ref("");
-const comentario = ref("");
-const mensaje = ref("");
+const name = ref("")
+const protocol = ref("")
+const ip = ref(null)
+const portRange = ref("")
+const comentario = ref("")
+const mensaje = ref("")
 
-const protocolos = ["TCP", "UDP", "ICMP"];
+const protocolos = ["TCP", "UDP", "ICMP"]
 
-const dispositivoId = Number(route.params.id);
+const direcciones = ref([])
 
-const handleCrearService = async () => {
-  try {
-    const payload = {
-      name: name.value,
-      protocol: protocol.value,
-      address: address.value,
-      portRange: protocol.value === "ICMP" ? null : portRange.value,
-      comentario: comentario.value,
-      dispositivoId: dispositivoId
-    };
-
-    await serviceStore.crearService(payload);
-
-    mensaje.value = "Service creado correctamente";
-
-    emit("creada");
-
-    // Reset del formulario
-    name.value = "";
-    protocol.value = "";
-    portRange.value = "";
-    comentario.value = "";
-
-
-  } catch (error) {
-    mensaje.value = "Error al crear el service";
+onMounted(async () => {
+  if (props.serviceEdit) {
+    name.value = props.serviceEdit.nombre
+    protocol.value = props.serviceEdit.tipoProtocolo
+    portRange.value = props.serviceEdit.destinationPort
+    comentario.value = props.serviceEdit.comentario
   }
-};
+
+  try {
+    let addresses = []
+
+    if (props.modo === "simple") {
+      const resUsuario = await obtenerAddressesPorUsuario()
+      addresses = resUsuario.data
+    } else {
+      const res = await obtenerAddressesPorDispositivo(props.dispositivoId)
+      addresses = res.data
+    }
+
+    direcciones.value = addresses.map(addr => ({
+      title: addr.name,
+      value: addr.id,
+      ip: addr.ip
+    }))
+
+    if (props.serviceEdit?.ip) {
+      const encontrada = direcciones.value.find(
+        d => d.ip === props.serviceEdit.ip
+      )
+      if (encontrada) {
+        ip.value = encontrada.value
+      }
+    }
+  } catch (error) {
+    console.error("Error cargando direcciones", error)
+  }
+})
+
+const handleSubmit = async () => {
+  try {
+    const selectedAddress = direcciones.value.find(
+      d => d.value === ip.value
+    )
+
+    const payload = {
+      nombre: name.value,
+      tipoProtocolo: protocol.value,
+      ip: selectedAddress?.ip || "",
+      destinationPort: portRange.value,
+      comentario: comentario.value
+    }
+
+    if (props.serviceEdit) {
+      if (props.serviceEdit.dispositivosIds?.length) {
+        payload.dispositivosIds = props.serviceEdit.dispositivosIds
+      }
+
+      await serviceStore.actualizarService(
+        props.serviceEdit.id,
+        payload
+      )
+
+      mensaje.value = "Service actualizado correctamente"
+    } else {
+      if (props.modo === "full") {
+        payload.dispositivosId = [props.dispositivoId]
+        await serviceStore.crearServiceCompleto(payload)
+      } else {
+        await serviceStore.crearService(payload)
+      }
+
+      mensaje.value = "Service creado correctamente"
+    }
+
+    emit("creada")
+  } catch (error) {
+    console.error(error)
+    mensaje.value = props.serviceEdit
+      ? "Error actualizando"
+      : "Error creando"
+  }
+}
 </script>

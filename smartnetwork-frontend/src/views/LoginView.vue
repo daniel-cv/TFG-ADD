@@ -40,15 +40,11 @@
               Iniciar sesión
             </v-btn>
 
-            <div class="text-center mt-4">
+            <div class="text-center mt-4 register-link">
               <span>¿No tienes cuenta?</span>
-              <v-btn
-                variant="text"
-                color="primary"
-                @click="irARegistro"
-              >
+              <span class="link" @click="irARegistro">
                 Crear usuario
-              </v-btn>
+              </span>
             </div>
 
             <p v-if="userStore.mensaje" class="mt-3 text-center">{{ userStore.mensaje }}</p>
@@ -82,7 +78,108 @@ const handleLogin = async () => {
 };
 
 const irARegistro = () => {
-  router.push("/register"); // Asegúrate de tener esta ruta creada
+  router.push("/register");
 };
 
 </script>
+
+<style scoped>
+.login-bg{
+  background:
+    radial-gradient(circle at 20% 20%, rgba(59,130,246,0.15), transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(59,130,246,0.12), transparent 40%),
+    #0b1220;
+}
+
+.v-card{
+  background: #111827;
+  border-radius: 14px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 10px 35px rgba(0,0,0,0.5);
+}
+
+.v-card-title{
+  color: white;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+}
+
+.v-card-subtitle{
+  color: #9aa4b2;
+  font-size: 14px;
+}
+
+.v-text-field{
+  --v-field-border-opacity: 0;
+}
+
+.v-field{
+  background: #020617;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.v-field:hover{
+  border-color: #3b82f6;
+}
+
+.v-field--active{
+  border-color: #3b82f6;
+}
+
+.v-field input{
+  color: #e6edf3;
+}
+
+.v-label{
+  color: #9aa4b2;
+}
+
+.v-field .v-icon{
+  color: #64748b;
+}
+
+.v-btn{
+  background: linear-gradient(135deg,#3b82f6,#2563eb);
+  border-radius: 8px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+  transition: all 0.2s ease;
+}
+
+.v-btn:hover{
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37,99,235,0.5);
+}
+
+.register-link{
+  font-size:14px;
+  color:#64748b;
+}
+
+.link{
+  color:#3b82f6;
+  cursor:pointer;
+  font-weight:500;
+  margin-left:6px;
+  transition:color .2s ease;
+}
+
+.link:hover{
+  color:#1d4ed8;
+  text-decoration:underline;
+}
+
+p{
+  color: #ef4444;
+  font-size: 13px;
+}
+
+@media (max-width:600px){
+  .v-card{
+    padding: 28px !important;
+  }
+}
+</style>

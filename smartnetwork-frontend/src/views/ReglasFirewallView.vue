@@ -19,7 +19,7 @@ import { useDispositivoSeleccionadoStore } from "@/stores/dispositivoSeleccionad
 import { onMounted } from 'vue'
 
 const seleccionadoStore = useDispositivoSeleccionadoStore();
-const dispositivoId = seleccionadoStore.id;
+const dispositivoId = seleccionadoStore.dispositivo.id;
 
 const reglaStore = useReglaFirewallStore()
 

@@ -10,6 +10,8 @@ import ConfigurationView from "@/views/ConfigurationView.vue";
 import InterfazView from "@/views/InterfazView.vue";
 import AddressView from "@/views/AddressView.vue";
 import ServiceView from "@/views/ServiceView.vue";
+import VirtualIpView from "@/views/VirtualIpView.vue";
+import UsuarioFirewallView from "@/views/UsuarioFirewallView.vue";
 
 const routes = [
   {
@@ -22,7 +24,7 @@ const routes = [
     component: LoginView,
   },
   {
-    path: "/register", // ruta para crear usuario
+    path: "/register", 
     name: "register",
     component: CreateUserView,
   },
@@ -66,12 +68,39 @@ const routes = [
     path: "/service/:id",
     name: "CrearService",
     component: ServiceView,
+  },
+  {
+    path: "/virtualIp/:id",
+    name: "CrearVirtualIp",
+    component: VirtualIpView,
+  },
+  {
+    path: "/usuariofirewall/:id",
+    name: "UsuarioFirewall",
+    component: UsuarioFirewallView,
   }
 ];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
+});
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("token");
+
+  const publicPages = ["/login", "/register"];
+  const authRequired = !publicPages.includes(to.path);
+
+  if (authRequired && !token) {
+    return next("/login");
+  }
+
+  if ((to.path === "/login" || to.path === "/register") && token) {
+    return next("/dashboard");
+  }
+
+  next();
 });
 
 export default router;

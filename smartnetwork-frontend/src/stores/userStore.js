@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import axios from "axios";
-import api from "@/services/api";   // ← usa la instancia global
+import api from "@/services/api";  
 
 export const useUserStore = defineStore("user", {
   state: () => ({
@@ -43,10 +43,12 @@ export const useUserStore = defineStore("user", {
 
         const token = response.data.token;
 
+        localStorage.setItem("token", token);
+        localStorage.setItem("username", username);
+
         this.usuarioActual = { username, token };
         this.autenticado = true;
 
-        // Añadir token a TODAS las peticiones
         api.defaults.headers.common["Authorization"] = "Bearer " + token;
 
         return this.usuarioActual;
@@ -58,10 +60,25 @@ export const useUserStore = defineStore("user", {
       }
     },
 
+    cargarSesion() {
+        const token = localStorage.getItem("token");
+        const username = localStorage.getItem("username");
+
+        if (token) {
+          this.usuarioActual = { username, token };
+          this.autenticado = true;
+        
+          api.defaults.headers.common["Authorization"] =
+            "Bearer " + token;
+        }
+    },
+
     logout() {
-      this.usuarioActual = null;
-      this.autenticado = false;
-      this.mensaje = "";
+      localStorage.removeItem("token")
+      localStorage.removeItem("username")
+
+      this.usuarioActual = null
+      this.autenticado = false
 
       delete api.defaults.headers.common["Authorization"];
     }

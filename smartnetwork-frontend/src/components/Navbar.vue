@@ -1,18 +1,16 @@
 <template>
   <v-app-bar
     color="primary"
-    dark
+    background-color="#3b82f6"
     flat
     app
   >
-    <!-- Logo / Nombre -->
+
     <v-toolbar-title class="font-weight-bold">
       SmartNetwork
     </v-toolbar-title>
 
     <v-spacer />
-
-    <!-- Links -->
     <v-btn variant="text" to="/dashboard">
       Dashboard
     </v-btn>
@@ -22,15 +20,11 @@
     </v-btn>
 
     <v-divider vertical class="mx-3" />
-
-    <!-- Si NO está autenticado → mostrar Login -->
     <template v-if="!userStore.autenticado">
       <v-btn variant="outlined" color="white" to="/login">
         Login
       </v-btn>
     </template>
-
-    <!-- Si SÍ está autenticado → mostrar Logout -->
     <template v-else>
       <span class="mr-4">Hola, {{ userStore.usuarioActual.username }}</span>
 

@@ -26,8 +26,8 @@ public class CustomUserDetailsService implements UserDetailsService {
                         new UsernameNotFoundException("Usuario no encontrado: " + username));
 
         return User.withUsername(usuario.getUsername())
-                .password(usuario.getPassword())   // ya encriptada
-                .roles("USER")                     // aquí ya no da error
+                .password(usuario.getPassword())
+                .roles("USER")
                 .build();
 
 
