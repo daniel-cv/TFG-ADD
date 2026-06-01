@@ -56,7 +56,6 @@
             </td>
 
             <td>
-
               <v-btn
                 color="red"
                 size="small"
@@ -64,7 +63,6 @@
               >
                 ELIMINAR
               </v-btn>
-
               <v-btn
                 color="blue"
                 size="small"
@@ -72,7 +70,6 @@
               >
                 APLICAR
               </v-btn>
-
             </td>
           </tr>
         </tbody>
@@ -93,11 +90,8 @@
         <v-card-title>
           Aplicar Service
         </v-card-title>
-
         <v-card-text>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivos"
               :key="d.id"
@@ -105,14 +99,11 @@
               :class="{ selected: seleccionados.includes(d.id) }"
               @click="toggleSeleccion(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
                   :model-value="seleccionados.includes(d.id)"
                   hide-details
                 />
-
                 <div>
                   <div class="device-name">
                     {{ d.nombre }}
@@ -122,41 +113,27 @@
                     {{ d.ip }}
                   </div>
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn @click="dialogAplicar = false">
             Cancelar
           </v-btn>
-
           <v-btn color="primary" @click="aplicarAhora">
             Aplicar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
     </v-dialog>
-
     <v-dialog v-model="dialogEliminar" max-width="650px">
       <v-card>
-
         <v-card-title>
           Eliminar Service
         </v-card-title>
-
         <v-card-text>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivosEliminar"
               :key="d.id"
@@ -164,47 +141,48 @@
               :class="{ selected: seleccionadosEliminar.includes(d.id) }"
               @click="toggleSeleccionEliminar(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
                   :model-value="seleccionadosEliminar.includes(d.id)"
                   hide-details
                 />
-
                 <div>
                   <div class="device-name">
                     {{ d.nombre }}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn @click="dialogEliminar = false">
             Cancelar
           </v-btn>
-
           <v-btn color="red" @click="eliminarAhora">
             Eliminar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
     </v-dialog>
+<v-dialog v-model="dialogAlert" max-width="400px">
+      <v-card>
+        <v-card-title>Atención</v-card-title>
+        <v-card-text>
+          {{ mensajeAlert }}
+        </v-card-text>
 
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="dialogAlert = false">
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -217,7 +195,13 @@ import { preeliminarService } from '@/services/serviceService'
 
 const serviceStore = useServiceStore()
 const dispositivoStore = useDispositivoStore()
+const dialogAlert = ref(false)
+const mensajeAlert = ref('')
 
+const mostrarAlerta = (msg) => {
+  mensajeAlert.value = msg
+  dialogAlert.value = true
+}
 const services = ref([])
 const dispositivos = ref([])
 const implementaciones = ref({})
@@ -306,6 +290,10 @@ function toggleSeleccion(id) {
 }
 
 async function aplicarAhora() {
+  if (!seleccionados.value.length) {
+  mostrarAlerta('Selecciona al menos un dispositivo para continuar')
+  return
+}
   await serviceStore.asignarService(
     serviceAplicar.value.id,
     seleccionados.value
@@ -343,7 +331,10 @@ function toggleSeleccionEliminar(id) {
 }
 
 async function eliminarAhora() {
-  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
+  if (!seleccionadosEliminar.value.length) {
+  mostrarAlerta('Selecciona al menos un dispositivo para continuar')
+  return
+}
   await serviceStore.eliminarServiceEnDispositivos(serviceEliminar.value.id,seleccionadosEliminar.value)
   dialogEliminar.value = false
   await cargarDatos()

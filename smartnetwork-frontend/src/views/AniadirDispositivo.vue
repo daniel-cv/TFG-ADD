@@ -18,7 +18,6 @@
               required
             />
 
-            <!-- FABRICANTE PRIMERO -->
             <v-select
               v-model="fabricante"
               :items="fabricantes"
@@ -30,7 +29,6 @@
               required
             />
 
-            <!-- TIPO DEPENDE DEL FABRICANTE -->
             <v-select
               v-model="tipo"
               :items="tipos"

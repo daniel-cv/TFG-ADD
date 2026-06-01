@@ -50,9 +50,7 @@
                 No aplicado
               </span>
             </td>
-
             <td>
-
               <v-btn
                 color="green"
                 size="small"
@@ -60,7 +58,6 @@
               >
                 EDITAR
               </v-btn>
-
               <v-btn
                 color="red"
                 size="small"
@@ -68,7 +65,6 @@
               >
                 ELIMINAR
               </v-btn>
-
               <v-btn
                 color="blue"
                 size="small"
@@ -76,7 +72,6 @@
               >
                 APLICAR
               </v-btn>
-
             </td>
           </tr>
         </tbody>
@@ -93,17 +88,12 @@
     </div>
     <v-dialog v-model="dialogEditar" max-width="650px">
       <v-card class="apply-card">
-
         <v-card-title class="apply-title">
           Editar Usuario y Sincronizar
         </v-card-title>
-
         <v-card-text>
-
           <p>Selecciona dispositivos donde actualizar:</p>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivosEditDisponibles"
               :key="d.id"
@@ -111,65 +101,47 @@
               :class="{ selected: seleccionados.includes(d.id) }"
               @click="toggleSeleccion(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
                   :model-value="seleccionados.includes(d.id)"
                   hide-details
                 />
-
                 <div>
                   <div class="device-name">
                     {{ d.nombre || d.name || d.hostname }}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
             variant="text"
             @click="dialogEditar = false"
           >
             Cancelar
           </v-btn>
-
           <v-btn
             color="green"
             @click="confirmarEditar"
           >
             Continuar a Edición
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
     </v-dialog>
     <v-dialog v-model="dialogAplicar" max-width="650px">
       <v-card class="apply-card">
-
         <v-card-title class="apply-title">
           Aplicar Usuario
         </v-card-title>
-
         <v-card-text>
-
           <p>Selecciona dispositivos:</p>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivos"
               :key="d.id"
@@ -177,65 +149,47 @@
               :class="{ selected: seleccionados.includes(d.id) }"
               @click="toggleSeleccion(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
                   :model-value="seleccionados.includes(d.id)"
                   hide-details
                 />
-
                 <div>
                   <div class="device-name">
                     {{ d.nombre || d.name || d.hostname }}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
             variant="text"
             @click="dialogAplicar = false"
           >
             Cancelar
           </v-btn>
-
           <v-btn
             color="primary"
             @click="aplicarAhora"
           >
             Aplicar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
     </v-dialog>
     <v-dialog v-model="dialogEliminar" max-width="650px">
       <v-card class="apply-card">
-
         <v-card-title class="apply-title">
           Eliminar Usuario
         </v-card-title>
-
         <v-card-text>
-
           <p>Selecciona dispositivos donde eliminar:</p>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivosEliminar"
               :key="d.id"
@@ -243,53 +197,55 @@
               :class="{ selected: seleccionadosEliminar.includes(d.id) }"
               @click="toggleSeleccionEliminar(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
                   :model-value="seleccionadosEliminar.includes(d.id)"
                   hide-details
                 />
-
                 <div>
                   <div class="device-name">
                     {{ d.nombre || d.name || d.hostname }}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
             variant="text"
             @click="dialogEliminar = false"
           >
             Cancelar
           </v-btn>
-
           <v-btn
             color="red"
             @click="eliminarAhora"
           >
             Eliminar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
     </v-dialog>
+<v-dialog v-model="dialogAlert" max-width="400px">
+      <v-card>
+        <v-card-title>Atención</v-card-title>
 
+        <v-card-text>
+          {{ mensajeAlert }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="dialogAlert = false">
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -307,7 +263,13 @@ const dispositivoStore = useDispositivoStore()
 const usuarios = ref([])
 const dispositivos = ref([])
 const implementaciones = ref({})
+const dialogAlert = ref(false)
+const mensajeAlert = ref('')
 
+const mostrarAlerta = (msg) => {
+  mensajeAlert.value = msg
+  dialogAlert.value = true
+}
 const mostrandoFormulario = ref(false)
 
 const usuarioSeleccionado = ref(null)
@@ -408,10 +370,10 @@ const editarUsuario = async (usuario) => {
 }
 
 const confirmarEditar = () => {
-  if (!seleccionados.value.length) {
-    alert('Debes seleccionar al menos un dispositivo para continuar la edición')
-    return
-  }
+ if (!seleccionados.value.length) {
+  mostrarAlerta('Selecciona al menos un dispositivo para continuar con la edición')
+  return
+}
 
   usuarioSeleccionado.value = {
     ...usuarioEditar.value,
@@ -453,8 +415,9 @@ const toggleSeleccion = (id) => {
 const aplicarAhora = async () => {
 
   if (!seleccionados.value.length) {
-    return alert('Selecciona al menos un dispositivo')
-  }
+  mostrarAlerta('Selecciona al menos un dispositivo para continuar')
+  return
+}
   await usuarioFirewallStore.asignarUsuarioFirewallADispositivos(
     usuarioAplicar.value.id,
     seleccionados.value
@@ -487,7 +450,10 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) {return alert('Selecciona al menos un dispositivo')}
+  if (!seleccionadosEliminar.value.length) {
+  mostrarAlerta('Selecciona al menos un dispositivo para continuar')
+  return
+}
   await usuarioFirewallStore.eliminarUsuarioFirewallEnDispositivos(usuarioEliminar.value.id, seleccionadosEliminar.value)
   dialogEliminar.value = false
   await usuarioFirewallStore.cargarUsuariosPorUsuario()

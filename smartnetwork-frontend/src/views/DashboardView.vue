@@ -52,8 +52,6 @@ const currentComponent = computed(() => {
 .dashboard {
   padding: 30px;
 }
-
-/* PESTAÑAS */
 .tabs-container {
   display: flex;
   gap: 20px;

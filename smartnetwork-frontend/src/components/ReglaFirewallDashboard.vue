@@ -1,22 +1,11 @@
 <template>
   <div class="services-wrapper">
-
     <div v-if="!mostrandoFormulario">
-
       <div class="table-header">
         <h2>Firewall Policies</h2>
-
-        <v-btn
-          class="add-btn"
-          size="small"
-          @click="mostrarCrear"
-        >
-          Añadir Policy
-        </v-btn>
+        <v-btn class="add-btn" size="small" @click="mostrarCrear">Añadir Policy</v-btn>
       </div>
-
       <v-table class="professional-table">
-
         <thead>
           <tr>
             <th>Nombre</th>
@@ -29,45 +18,30 @@
             <th>Acciones</th>
           </tr>
         </thead>
-
         <tbody>
-
-          <tr
-            v-for="regla in reglas"
-            :key="regla.id"
-          >
-
+          <tr v-for="regla in reglas":key="regla.id">
             <td class="name">
               {{ regla.nombre }}
             </td>
-
             <td>
               {{ regla.origen }}
             </td>
-
             <td>
               {{ regla.destino }}
             </td>
-
             <td class="ip">
               {{ regla.ipOrigen }}
             </td>
-
             <td class="ip">
               {{ regla.ipDestino }}
             </td>
-
             <td>
               <span class="service-badge">
                 {{ regla.servicio }}
               </span>
             </td>
             <td>
-
-              <div
-                v-if="implementaciones[regla.id]?.length"
-              >
-
+              <div v-if="implementaciones[regla.id]?.length">
                 <v-chip
                   v-for="nombreDisp in implementaciones[regla.id]"
                   :key="nombreDisp"
@@ -78,327 +52,187 @@
                 >
                   {{ nombreDisp }}
                 </v-chip>
-
               </div>
-
-              <span
-                v-else
-                class="text-caption text-grey"
-              >
-                No aplicado
-              </span>
-
+              <span v-else class="text-caption text-grey" >No aplicado</span>
             </td>
             <td class="actions">
-
-              <v-btn
-                color="green"
-                size="small"
-                @click="editarRegla(regla)"
-              >
-                EDITAR
-              </v-btn>
-
-              <v-btn
-                color="red"
-                size="small"
-                @click="abrirEliminar(regla)"
-              >
-                ELIMINAR
-              </v-btn>
-
-              <v-btn
-                color="blue"
-                size="small"
-                @click="aplicarReglaToDispositivos(regla)"
-              >
-                APLICAR
-              </v-btn>
-
+               <v-btn color="green"size="small"@click="editarRegla(regla)">EDITAR</v-btn>
+              <v-btn color="red"size="small"@click="abrirEliminar(regla)">ELIMINAR</v-btn>
+              <v-btn color="blue"size="small"@click="aplicarReglaToDispositivos(regla)">APLICAR</v-btn>
             </td>
-
           </tr>
-
         </tbody>
-
       </v-table>
-
     </div>
-
-    <div
-      v-else
-      class="formulario-inline"
-    >
-
-      <ReglaFirewallForm
-        :regla-edit="reglaSeleccionada"
-        modo="simple"
-        @creada="recargarYCerrar"
-        @cancelar="cerrarFormulario"
-      />
-
+    <div v-elseclass="formulario-inline">
+      <ReglaFirewallForm:regla-edit="reglaSeleccionada" modo="simple"@creada="recargarYCerrar"@cancelar="cerrarFormulario"/>
     </div>
-
-    <v-dialog
-      v-model="dialogEditar"
-      max-width="650px"
-    >
-
+    <v-dialog v-model="dialogEditar"max-width="650px">
       <v-card class="apply-card">
-
-        <v-card-title class="apply-title">
-          Editar Policy y Sincronizar
-        </v-card-title>
-
+        <v-card-title class="apply-title">Editar Policy y Sincronizar</v-card-title>
         <v-card-text>
-
-          <p>
-            Selecciona dispositivos donde quieres actualizar:
-          </p>
-
+          <p> Selecciona dispositivos donde quieres actualizar:</p>
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivosEditDisponibles"
               :key="d.id"
               class="device-item-modern"
-              :class="{
-                selected:
-                  seleccionados.includes(d.id)
-              }"
+              :class="{selected: seleccionados.includes(d.id)}"
               @click="toggleSeleccion(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
-                  :model-value="
-                    seleccionados.includes(d.id)
-                  "
-                  hide-details
-                />
-
+                :model-value="seleccionados.includes(d.id)"hide-details/>
                 <div>
-
                   <div class="device-name">
-                    {{
-                      d.name ||
-                      d.nombre ||
-                      d.hostname ||
-                      'Sin nombre'
-                    }}
+                    {{d.name ||d.nombre ||d.hostname ||'Sin nombre'}}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
-
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
             variant="text"
             @click="dialogEditar = false"
           >
             Cancelar
           </v-btn>
-
           <v-btn
             color="green"
             @click="confirmarEditar"
           >
             Continuar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
-
     </v-dialog>
-
     <v-dialog
       v-model="dialogAplicar"
       max-width="650px"
     >
-
       <v-card class="apply-card">
-
         <v-card-title class="apply-title">
           Aplicar Policy
         </v-card-title>
-
         <v-card-text>
-
           <p>
             Selecciona dispositivos:
           </p>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivos"
               :key="d.id"
               class="device-item-modern"
-              :class="{
-                selected:
-                  seleccionados.includes(d.id)
-              }"
+              :class="{selected:seleccionados.includes(d.id)}"
               @click="toggleSeleccion(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
-                  :model-value="
-                    seleccionados.includes(d.id)
-                  "
+                  :model-value="seleccionados.includes(d.id)"
                   hide-details
                 />
-
                 <div>
-
                   <div class="device-name">
-                    {{
-                      d.name ||
-                      d.nombre ||
-                      d.hostname ||
-                      'Sin nombre'
-                    }}
+                    {{d.name || d.nombre || d.hostname ||'Sin nombre'}}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
-
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
             variant="text"
             @click="dialogAplicar = false"
           >
             Cancelar
           </v-btn>
-
           <v-btn
             color="primary"
             @click="aplicarAhora"
           >
             Aplicar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
-
     </v-dialog>
-
     <v-dialog
       v-model="dialogEliminar"
       max-width="650px"
     >
-
       <v-card class="apply-card">
-
         <v-card-title class="apply-title">
           Eliminar Policy
         </v-card-title>
-
         <v-card-text>
-
           <p>
             Selecciona dispositivos:
           </p>
-
           <div class="device-list">
-
             <v-card
               v-for="d in dispositivosEliminar"
               :key="d.id"
               class="device-item-modern"
-              :class="{
-                selected:
-                  seleccionadosEliminar.includes(d.id)
-              }"
-              @click="
-                toggleSeleccionEliminar(d.id)
-              "
+              :class="{selected:seleccionadosEliminar.includes(d.id)}"
+              @click="toggleSeleccionEliminar(d.id)"
             >
-
               <div class="device-info">
-
                 <v-checkbox
-                  :model-value="
-                    seleccionadosEliminar.includes(d.id)
-                  "
+                  :model-value="seleccionadosEliminar.includes(d.id)"
                   hide-details
                 />
-
                 <div>
-
                   <div class="device-name">
-                    {{
-                      d.name ||
-                      d.nombre ||
-                      d.hostname ||
-                      'Sin nombre'
-                    }}
+                    {{d.name ||d.nombre ||d.hostname ||'Sin nombre'}}
                   </div>
-
                   <div class="device-ip">
                     {{ d.ip }}
                   </div>
-
                 </div>
-
               </div>
-
             </v-card>
-
           </div>
-
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
             variant="text"
             @click="dialogEliminar = false"
           >
             Cancelar
           </v-btn>
-
           <v-btn
             color="red"
             @click="eliminarAhora"
           >
             Eliminar
           </v-btn>
-
         </v-card-actions>
-
       </v-card>
-
     </v-dialog>
+    <v-dialog v-model="dialogAlert" max-width="400px">
+      <v-card>
+        <v-card-title>Atención</v-card-title>
 
+        <v-card-text>
+          {{ mensajeAlert }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="dialogAlert = false">
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -444,7 +278,13 @@ const cargarDatos = async () => {
   dispositivos.value =dispositivoStore.dispositivos
   await mapearImplementaciones()
 }
+const dialogAlert = ref(false)
+const mensajeAlert = ref('')
 
+const mostrarAlerta = (msg) => {
+  mensajeAlert.value = msg
+  dialogAlert.value = true
+}
 const mapearImplementaciones = async () => {
   const mapa = {}
   for (const disp of dispositivos.value) {
@@ -504,10 +344,10 @@ const editarRegla = async (regla) => {
 }
 
 const confirmarEditar = () => {
-  if (!seleccionados.value.length) {
-    alert('Debes seleccionar al menos un dispositivo para continuar la edición')
-    return
-  }
+ if (!seleccionados.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar con la edición')
+  return
+}
 
   reglaSeleccionada.value = {
     ...reglaEditar.value,
@@ -533,6 +373,10 @@ const toggleSeleccion = (id) => {
   }
 }
 const aplicarAhora = async () => {
+    if (!seleccionados.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar')
+  return
+}
  await reglaStore.asignarRegla( reglaAplicar.value.id, seleccionados.value)
   dialogAplicar.value = false
   await mapearImplementaciones()
@@ -561,7 +405,10 @@ const toggleSeleccionEliminar = (id) => {
   }
 }
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
+  if (!seleccionadosEliminar.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar')
+  return
+}
   await reglaStore.eliminarReglaEnDispositivos( reglaEliminar.value.id,seleccionadosEliminar.value )
   dialogEliminar.value = false
   await cargarDatos()

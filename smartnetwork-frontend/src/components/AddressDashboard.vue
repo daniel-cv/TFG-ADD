@@ -192,7 +192,22 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogAlert" max-width="400px">
+      <v-card>
+        <v-card-title>Atención</v-card-title>
 
+        <v-card-text>
+          {{ mensajeAlert }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="dialogAlert = false">
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -251,7 +266,13 @@ const cargarDatos = async () => {
 
   await mapearImplementaciones()
 }
+const dialogAlert = ref(false)
+const mensajeAlert = ref('')
 
+const mostrarAlerta = (msg) => {
+  mensajeAlert.value = msg
+  dialogAlert.value = true
+}
 const mapearImplementaciones = async () => {
   const mapa = {}
   for (const disp of dispositivos.value) {
@@ -310,9 +331,9 @@ const editarAddress = async (address) => {
 
 const confirmarEditar = () => {
   if (!seleccionados.value.length) {
-    alert('Debes seleccionar al menos un dispositivo para continuar la edición')
-    return
-  }
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar la edición')
+  return
+}
 
   addressSeleccionada.value = {
     ...addressEditar.value,
@@ -357,7 +378,10 @@ const toggleSeleccion = (id) => {
 }
 
 const aplicarAhora = async () => {
-  if (!seleccionados.value.length) return alert('Selecciona al menos un dispositivo')
+  if (!seleccionados.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar')
+  return
+}
   await addressStore.aplicarAddressToDispositivos(addressAplicar.value.id, seleccionados.value)
   dialogAplicar.value = false
   await mapearImplementaciones()
@@ -384,7 +408,10 @@ const toggleSeleccionEliminar = (id) => {
 
 const eliminarAhora = async () => {
   console.log(seleccionadosEliminar.value.length)
-  if (!seleccionadosEliminar.value.length || seleccionadosEliminar.value.length==0) alert('Selecciona al menos un dispositivo')
+  if (!seleccionadosEliminar.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar')
+  return
+}
   await addressStore.eliminarAddressEnDispositivos(addressEliminar.value.id, seleccionadosEliminar.value)
   dialogEliminar.value = false
   await addressStore.obtenerMisAddresses()

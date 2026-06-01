@@ -199,7 +199,22 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <v-dialog v-model="dialogAlert" max-width="400px">
+      <v-card>
+        <v-card-title>Atención</v-card-title>
 
+        <v-card-text>
+          {{ mensajeAlert }}
+        </v-card-text>
+
+        <v-card-actions>
+          <v-spacer />
+          <v-btn color="primary" @click="dialogAlert = false">
+            OK
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
@@ -215,7 +230,13 @@ const dispositivoStore = useDispositivoStore()
 const interfaces = ref([])
 const dispositivos = ref([])
 const implementaciones = ref({})
+const dialogAlert = ref(false)
+const mensajeAlert = ref('')
 
+const mostrarAlerta = (msg) => {
+  mensajeAlert.value = msg
+  dialogAlert.value = true
+}
 const mostrandoFormulario = ref(false)
 const interfazSeleccionada = ref(null)
 
@@ -299,9 +320,9 @@ const editarInterfaz = async (interfaz) => {
 
 const confirmarEditar = () => {
   if (!seleccionados.value.length) {
-    alert('Debes seleccionar al menos un dispositivo para continuar')
-    return
-  }
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar')
+  return
+}
 
   interfazSeleccionada.value = {
     ...interfazEditar.value,
@@ -325,7 +346,10 @@ const toggleSeleccion = (id) => {
 }
 
 const aplicarAhora = async () => {
-  if (!seleccionados.value.length) return alert('Selecciona al menos uno')
+  if (!seleccionados.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar con la edicón')
+  return
+}
 
   await interfazStore.asignarInterfaz(
     interfazAplicar.value.id,
@@ -367,7 +391,10 @@ const toggleSeleccionEliminar = (id) => {
 }
 
 const eliminarAhora = async () => {
-  if (!seleccionadosEliminar.value.length) return alert('Selecciona al menos un dispositivo')
+  if (!seleccionadosEliminar.value.length) {
+  mostrarAlerta('Debes seleccionar al menos un dispositivo para continuar')
+  return
+}
   await interfazStore.eliminarInterfazEnDispositivos(interfazEliminar.value.id,seleccionadosEliminar.value)
   dialogEliminar.value = false
   await cargar()
