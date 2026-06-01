@@ -15,7 +15,8 @@
           <tr>
             <th>ID</th>
             <th>Fecha</th>
-            <th>Nivel</th>
+            <th>Acción</th>
+            <th>Usuario</th>
             <th>Mensaje</th>
             <th>Detalles</th>
           </tr>
@@ -24,8 +25,9 @@
           <tr v-for="(log, index) in logs" :key="log.id || index">
             <td>{{ log.id ?? '-' }}</td>
             <td>{{ formatoFecha(log) || '-' }}</td>
-            <td>{{ formatoNivel(log) || '-' }}</td>
-            <td>{{ formatoMensaje(log) || '-' }}</td>
+            <td>{{ formatoAccion(log) || '-' }}</td>
+            <td>{{ formatoUsuario(log) || '-' }}</td>
+            <td>{{ log.mensaje ?? log.message ?? '-' }}</td>
             <td>
               <pre class="json-data">{{ formatoDetalles(log) }}</pre>
             </td>
@@ -75,21 +77,41 @@ const cargarLogs = async () => {
 }
 
 const formatoFecha = (log) => {
-  return log.timestamp || log.fecha || log.date || log.createdAt || ''
+  const val = log.fechaHora || log.fecha || log.timestamp || log.date || log.createdAt
+  if (!val) return ''
+  try {
+    const d = new Date(val)
+    return d.toLocaleString()
+  } catch (e) {
+    return String(val)
+  }
 }
 
-const formatoNivel = (log) => {
-  return log.level || log.severity || log.tipo || log.levelName || ''
+const formatoAccion = (log) => {
+  return log.accion || log.action || log.tipo || ''
 }
 
-const formatoMensaje = (log) => {
-  return log.message || log.mensaje || log.descripcion || log.detail || ''
+const formatoUsuario = (log) => {
+  const u = log.usuario || log.user || log.usuarioDto
+  if (!u) return ''
+  return u.username || u.nombre || u.email || u.id || ''
 }
 
 const formatoDetalles = (log) => {
-  const { id, timestamp, fecha, date, createdAt, level, severity, tipo, levelName, message, mensaje, descripcion, detail, ...rest } = log
+  const {
+    id,
+    fechaHora,
+    accion,
+    usuario,
+    dispositivo,
+    mensaje,
+    message,
+    ...rest
+  } = log
   const extra = Object.keys(rest).length ? JSON.stringify(rest, null, 2) : ''
-  return extra
+  // include dispositivo id/name if available
+  const dispositivoInfo = dispositivo ? `dispositivo: ${dispositivo.id || dispositivo.nombre || dispositivo.name}` : ''
+  return [dispositivoInfo, extra].filter(Boolean).join('\n')
 }
 
 onMounted(cargarLogs)
