@@ -181,6 +181,10 @@ public class DispositivoService {
 
         Dispositivo dispositivo = dispositivoRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
+        System.out.println("Usuario autenticado: " + usuario.getUsername());
+        System.out.println("Propietario dispositivo: " + dispositivo.getUsuario().getUsername());
+        System.out.println("ID usuario autenticado: " + usuario.getId());
+        System.out.println("ID propietario: " + dispositivo.getUsuario().getId());
 
         if (!dispositivo.getUsuario().getId().equals(usuario.getId())) {
             throw new RuntimeException("No tienes permiso para eliminar este dispositivo");
@@ -348,5 +352,24 @@ public class DispositivoService {
                 ((mask >>> 8) & 0xff) + "." +
                 (mask & 0xff);
     }
+    @Transactional
+    public Dispositivo editarDispositivo(Long id, Dispositivo datos, String username) {
+        System.out.println("EDITAR EJECUTADO");
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        Dispositivo dispositivo = dispositivoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dispositivo no encontrado"));
+
+        System.out.println("Usuario autenticado: " + usuario.getUsername());
+        System.out.println("Propietario dispositivo: " + dispositivo.getUsuario().getUsername());
+        if (!dispositivo.getUsuario().getId().equals(usuario.getId())) {
+            throw new RuntimeException("No tienes permiso");
+        }
+
+        dispositivo.setNombre(datos.getNombre());
+        dispositivo.setIp(datos.getIp());
+
+        return dispositivoRepository.save(dispositivo);
+    }
 }

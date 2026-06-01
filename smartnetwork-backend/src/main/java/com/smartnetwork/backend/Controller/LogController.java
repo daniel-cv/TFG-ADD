@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.smartnetwork.backend.domain.dtos.firewalls.LogDTO;
 
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class LogController {
         this.logService = logService;
     }
     @GetMapping("/{id}")
-    public List<Log> listarLogs(
+    public List<LogDTO> listarLogs(
             @PathVariable Long id,
             Authentication auth
     ){

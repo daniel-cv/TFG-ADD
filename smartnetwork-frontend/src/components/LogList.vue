@@ -17,8 +17,8 @@
             <th>Fecha</th>
             <th>Acción</th>
             <th>Usuario</th>
+            <th>Dispositivo</th>
             <th>Mensaje</th>
-            <th>Detalles</th>
           </tr>
         </thead>
         <tbody>
@@ -26,11 +26,10 @@
             <td>{{ log.id ?? '-' }}</td>
             <td>{{ formatoFecha(log) || '-' }}</td>
             <td>{{ formatoAccion(log) || '-' }}</td>
-            <td>{{ formatoUsuario(log) || '-' }}</td>
-            <td>{{ log.mensaje ?? log.message ?? '-' }}</td>
-            <td>
-              <pre class="json-data">{{ formatoDetalles(log) }}</pre>
-            </td>
+            <td>{{ log.usuario || '-' }}</td>
+            <td>{{ log.dispositivo || '-' }}</td>
+            <td>{{ log.mensaje || '-' }}</td>
+
           </tr>
         </tbody>
       </v-table>
@@ -68,6 +67,7 @@ const cargarLogs = async () => {
 
   try {
     const response = await obtenerLogsPorDispositivo(props.deviceId)
+    console.log('Logs obtenidos:', response.data)
     logs.value = response.data || []
   } catch (err) {
     error.value = err?.response?.data?.message || err?.message || 'Error cargando logs.'

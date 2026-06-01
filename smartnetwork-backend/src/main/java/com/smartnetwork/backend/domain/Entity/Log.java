@@ -1,5 +1,6 @@
 package com.smartnetwork.backend.domain.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.smartnetwork.backend.domain.Enum.TipoAccion;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,10 +30,12 @@ public class Log {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
+    @JsonIgnore
     private Usuario usuario;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dispositivo_id", nullable = false)
+    @JsonIgnore
     private Dispositivo dispositivo;
 
     private String mensaje;

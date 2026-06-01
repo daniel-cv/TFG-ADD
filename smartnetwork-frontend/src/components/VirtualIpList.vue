@@ -4,7 +4,6 @@
     <div v-if="!mostrandoFormulario">
       <div class="table-header">
         <h2>Virtual IPs</h2>
-        <v-btn class="add-btn" size="small" @click="mostrarCrear()">Añadir Virtual IP</v-btn>
       </div>
 
       <v-table class="professional-table">

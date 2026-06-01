@@ -86,7 +86,7 @@ export const useDispositivoStore = defineStore("dispositivo", {
     async eliminarDispositivo(id) {
       try {
         const userStore = useUserStore();
-        
+
         if (!userStore.autenticado) {
           this.mensaje = "Debes iniciar sesión";
           return;
@@ -98,6 +98,26 @@ export const useDispositivoStore = defineStore("dispositivo", {
         console.error(error);
         this.mensaje = "Error al eliminar el dispositivo";
         throw error;
+      }
+    },
+    async editarDispositivo(id, datos) {
+      try {
+        const response = await api.put(`/api/dispositivos/${id}`, {
+          nombre: datos.nombre,
+          ip: datos.ip
+        });
+
+        const index = this.dispositivos.findIndex(d => d.id === id);
+
+        if (index !== -1) {
+          this.dispositivos[index] = response.data
+        }
+
+        return response.data
+
+      } catch (error) {
+        console.error(error)
+        throw error
       }
     }
   }

@@ -47,12 +47,20 @@ public class DispositivoController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
     public Dispositivo eliminarDispositivo(
             @PathVariable Long id,
             Authentication auth
     ) {
         return dispositivoService.eliminarDispositivo(id, auth.getName());
+    }
+    @PutMapping("/{id}")
+    public Dispositivo editarDispositivo(
+            @PathVariable Long id,
+            @RequestBody Dispositivo datos,
+            Authentication auth
+    ) {
+        return dispositivoService.editarDispositivo(id, datos, auth.getName());
     }
 }
 
