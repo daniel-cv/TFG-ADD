@@ -14,12 +14,13 @@
           </li>
           <li :class="{ active: selectedForm === 'address' }" @click="selectSection('address')">
             Addresses
-
           </li>
           <li :class="{ active: selectedForm === 'service' }" @click="selectSection('service')">
             Services</li>
           <li :class="{ active: selectedForm === 'vip' }" @click="selectSection('vip')">Virtual IPs
-
+          </li>
+          <li :class="{ active: selectedForm === 'interfaces' }" @click="selectSection('interface')">
+            Interfaces
           </li>
           <li :class="{ active: selectedForm === 'user' }" @click="selectSection('user')">
             Users

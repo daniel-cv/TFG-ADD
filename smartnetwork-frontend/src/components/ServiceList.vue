@@ -100,7 +100,7 @@ const editarService = (service) => {
 
 const eliminarService = async (id) => {
   try {
-    await serviceStore.eliminarService(id)
+    await serviceStore.eliminarService(id, [dispositivoId.value])
     await serviceStore.cargarServices(dispositivoId.value)
   } catch (error) {
     console.error("Error eliminando service", error)

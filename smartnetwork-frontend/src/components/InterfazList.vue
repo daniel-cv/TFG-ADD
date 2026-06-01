@@ -26,12 +26,12 @@
           <tr v-for="interfaz in interfaces" :key="interfaz.id">
             <td>{{ interfaz.name }}</td>
             <td>{{ interfaz.tipo }}</td>
-            <td>{{ interfaz.vlanid }}</td>
+            <td>{{ interfaz.vlanid || "-"}}</td>
             <td>{{ interfaz.vdom }}</td>
-            <td>{{ interfaz.mode }}</td>
-            <td>{{ interfaz.interfacePadre }}</td>
-            <td>{{ interfaz.allowaccess }}</td>
-            <td>{{ interfaz.role }}</td>
+            <td>{{ interfaz.mode || "-"}}</td>
+            <td>{{ interfaz.interfacePadre || "-"}}</td>
+            <td>{{ interfaz.allowaccess|| "-" }}</td>
+            <td>{{ interfaz.role || "-"}}</td>
             <td>{{ interfaz.description }}</td>
             <td>
               <v-btn color="green" size="small" @click="editarInterfaz(interfaz)">EDITAR</v-btn>

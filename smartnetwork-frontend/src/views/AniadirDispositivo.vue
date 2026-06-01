@@ -83,13 +83,15 @@
             />
 
             <v-text-field
-              v-model="puerto"
+              v-model.number="puerto"
               label="Puerto"
               type="number"
+              min="0"
               prepend-inner-icon="mdi-ethernet"
               variant="outlined"
               class="mb-4"
               required
+              :rules="[requiredRule, positiveNumberRule]"
             />
 
             <v-btn color="primary" size="large" block type="submit">
@@ -114,7 +116,10 @@ import { useRouter } from "vue-router";
 
 const dispositivoStore = useDispositivoStore();
 const router = useRouter();
+const requiredRule = v => v !== null && v !== undefined && v !== '' || "Campo obligatorio"
 
+const positiveNumberRule = v =>
+  Number(v) >= 0 || "Puerto inexistente"
 const form = ref(null);
 const mensaje = ref("");
 

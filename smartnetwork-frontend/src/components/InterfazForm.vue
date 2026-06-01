@@ -208,10 +208,16 @@ const handleSubmit = async () => {
         payload.dispositivosId = [props.dispositivoId]
       }
       if (props.interfazEdit.sinImplementacion){
-        await interfazStore.actualizarInterfazSinImplementar(props.interfazEdit.id,payload)
-      } else {
-        await interfazStore.actualizarInterfaz( props.addressEdit.id,payload)
-      }
+  await interfazStore.actualizarInterfazSinImplementar(
+    props.interfazEdit.id,
+    payload
+  )
+} else {
+  await interfazStore.actualizarInterfaz(
+    props.interfazEdit.id,
+    payload
+  )
+}
       mensaje.value = "Actualizada"
     }
     else {
