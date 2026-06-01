@@ -62,6 +62,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/usuario/create").permitAll()
                         .requestMatchers("/api/dispositivos/**").authenticated()
                         .requestMatchers("/api/switch/**").authenticated()
+                        .requestMatchers("/api/log/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -19,6 +19,9 @@
           <li :class="{ active: selectedForm === 'user' }" @click="selectSection('user')">
             Users
           </li>
+          <li :class="{ active: selectedForm === 'logs' }" @click="selectSection('logs')">
+            Logs
+          </li>
         </template>
 
         <template v-if="esSwitch">
@@ -35,14 +38,12 @@
             VLANs
           </li>
 
-          <li class="menu-title">Routing</li>
-          <li :class="{ active: selectedForm === 'routing' }" @click="selectSection('routing')">
-            Routing básico
-          </li>
-
           <li class="menu-title">Seguridad</li>
           <li :class="{ active: selectedForm === 'security' }" @click="selectSection('security')">
             ACLs
+          </li>
+          <li :class="{ active: selectedForm === 'logs' }" @click="selectSection('logs')">
+            Logs
           </li>
         </template>
       </ul>
@@ -124,10 +125,8 @@ import InterfazFormS from "@/components/Switch/InterfazForm.vue"
 import InterfazListS from "@/components/Switch/InterfazList.vue"
 
 import VlanList from "@/components/Switch/VlanList.vue"
-
-import RoutingForm from "@/components/Switch/RoutingForm.vue";
-import RoutingList from "@/components/Switch/IpRouteList.vue";
 import AclList from "@/components/Switch/AclsList.vue";
+import LogList from "@/components/LogList.vue"
 
 
 const route = useRoute();
@@ -185,9 +184,7 @@ const componentMap: Record<string, any> = {
     create: InterfazForm
   },
   vlans: { list: VlanList },
-
-  routing: { list: RoutingList },
-
+  logs: { list: LogList },
   interfaces:{ list: InterfazListS},
   "interface-config": { list: InterfazFormS },
 
