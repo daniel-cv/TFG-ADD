@@ -17,7 +17,6 @@
             <th>Fecha</th>
             <th>Acción</th>
             <th>Usuario</th>
-            <th>Dispositivo</th>
             <th>Mensaje</th>
           </tr>
         </thead>
@@ -27,7 +26,6 @@
             <td>{{ formatoFecha(log) || '-' }}</td>
             <td>{{ formatoAccion(log) || '-' }}</td>
             <td>{{ log.usuario || '-' }}</td>
-            <td>{{ log.dispositivo || '-' }}</td>
             <td>{{ log.mensaje || '-' }}</td>
 
           </tr>
