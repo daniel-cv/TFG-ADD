@@ -9,7 +9,7 @@ import {
   crearAddressCompleto,
   eliminarAddress as eliminarAddressService,
   actualizarAddress as actualizarAddressService,
-  actualizarSinImplementacionService
+  actualizarSinImplementacion
 } from '@/services/addressService'
 
 export const useAddressStore = defineStore('address', {
@@ -31,7 +31,7 @@ export const useAddressStore = defineStore('address', {
       const res = await obtenerAddressesPorUsuario()
       this.addresses = res.data
     },
-    
+
      async crearAddress(address) {
       try {
         const res = await crearAddress(address)
@@ -58,8 +58,8 @@ export const useAddressStore = defineStore('address', {
 
      async eliminarAddress(id, dispositivos) {
       try {
-        await eliminarAddressService(id, dispositivos) 
-        this.addresses = this.addresses.filter(a => a.id !== id) 
+        await eliminarAddressService(id, dispositivos)
+        this.addresses = this.addresses.filter(a => a.id !== id)
       } catch (error) {
         console.error("Error eliminando address", error)
         throw error
@@ -81,7 +81,7 @@ export const useAddressStore = defineStore('address', {
     async obtenerMisAddresses() {
       try {
         const userStore = useUserStore();
-        
+
         if (!userStore.autenticado) {
           this.mensaje = "Debes iniciar sesión";
           return;
@@ -102,9 +102,9 @@ export const useAddressStore = defineStore('address', {
           this.mensaje = "Selecciona al menos un dispositivo"
           return
         }
-      
+
         await aplicarAddressToDispositivos(addressId, dispositivosIds)
-      
+
         this.mensaje = "Address aplicada correctamente"
       } catch (error) {
         console.error("Error aplicando address", error)
@@ -132,7 +132,7 @@ export const useAddressStore = defineStore('address', {
 },
 async actualizarAddressSinImplementar(id, address) {
   try {
-    const res = await actualizarSinImplementacionService(id, address)
+    const res = await actualizarSinImplementacion(id, address)
     const index = this.addresses.findIndex(a => a.id === id)
     if (index !== -1) {
       this.addresses[index] = res.data

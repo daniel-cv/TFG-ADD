@@ -9,7 +9,7 @@ import {
   actualizarInterfaz as apiActualizarInterfaz,
   eliminarInterfaz as apiEliminarInterfaz,
   asignarInterfaz as apiAsignarInterfaz,
-  actualizarSinImplementacionService
+  actualizarSinImplementacion
 } from '@/services/interfazService'
 
 export const useInterfazStore = defineStore('interfaz', {
@@ -140,7 +140,7 @@ async eliminarInterfazEnDispositivos(interfazId, dispositivosIds) {
 
 async actualizarInterfazSinImplementar(id, interfaz) {
   try {
-    const res = await actualizarSinImplementacionService(id, interfaz)
+    const res = await actualizarSinImplementacion(id, interfaz)
     const index = this.interfaces.findIndex(a => a.id === id)
     if (index !== -1) {
       this.interfaces[index] = res.data

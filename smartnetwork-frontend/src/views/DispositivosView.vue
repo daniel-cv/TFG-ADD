@@ -31,17 +31,51 @@
             {{ d.estado }}
           </div>
           <div class="device-actions">
+
             <v-btn variant="text" class="action-btn" @click.stop="configurar(d)">
               Configurar
             </v-btn>
 
-            <v-btn variant="text" class="action-btn edit-btn" @click.stop="abrirEditar(d)">
-              Editar
-            </v-btn>
+            <v-menu location="bottom end">
+              <template #activator="{ props }">
+                <v-btn icon variant="text" v-bind="props" @click.stop>
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
 
-            <v-btn variant="text" class="action-btn delete-btn" @click.stop="abrirDialogoEliminar(d)">
-              Eliminar
-            </v-btn>
+              <v-card class="menu-card" min-width="180">
+                <v-list density="compact">
+
+                  <v-list-item @click="abrirEditar(d)">
+                    <template #prepend>
+                      <v-icon color="warning">
+                        mdi-pencil
+                      </v-icon>
+                    </template>
+
+                    <v-list-item-title>
+                      Editar
+                    </v-list-item-title>
+                  </v-list-item>
+
+                  <v-divider />
+
+                  <v-list-item @click="abrirDialogoEliminar(d)">
+                    <template #prepend>
+                      <v-icon color="error">
+                        mdi-delete
+                      </v-icon>
+                    </template>
+
+                    <v-list-item-title class="text-error">
+                      Eliminar
+                    </v-list-item-title>
+                  </v-list-item>
+
+                </v-list>
+              </v-card>
+            </v-menu>
+
           </div>
         </v-card>
       </v-col>
@@ -282,8 +316,8 @@ const irACrearDispositivo = () => {
 .device-actions {
   margin-top: 20px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .action-btn {
@@ -364,11 +398,35 @@ const irACrearDispositivo = () => {
 .confirm-delete-btn:hover {
   background: #dc2626;
 }
+
 .edit-btn {
   color: #f59e0b;
 }
 
 .edit-btn:hover {
   color: #fbbf24;
+}
+.menu-card {
+  background: linear-gradient(
+    135deg,
+    #111827 0%,
+    #1f2937 100%
+  );
+
+  border: 1px solid #3b82f6;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.menu-card .v-list {
+  background: transparent;
+}
+
+.menu-card .v-list-item {
+  color: #e6edf3;
+}
+
+.menu-card .v-list-item:hover {
+  background: rgba(59, 130, 246, 0.15);
 }
 </style>
