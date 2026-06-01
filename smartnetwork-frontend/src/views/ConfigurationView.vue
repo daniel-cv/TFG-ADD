@@ -3,12 +3,13 @@
     <aside class="sidebar">
       <h2>CONFIGURACIÓN</h2>
       <ul>
+        <div class="device-type">
+          <div :class="['device-badge', esFirewall ? 'firewall' : 'switch']">
+            {{ esFirewall ? 'FIREWALL' : 'SWITCH' }}
+          </div>
+        </div>
         <template v-if="esFirewall">
-          <div class="device-type">
-  <div :class="['device-badge', esFirewall ? 'firewall' : 'switch']">
-    {{ esFirewall ? 'FIREWALL' : 'SWITCH' }}
-  </div>
-</div>
+          
           <li :class="{ active: selectedForm === 'policy' }" @click="selectSection('policy')">
             Policies
           </li>
@@ -31,20 +32,12 @@
         </template>
 
         <template v-if="esSwitch">
-          <li class="menu-title">Interfaces</li>
           <li :class="{ active: selectedForm === 'interfaces' }" @click="selectSection('interfaces')">
-            Lista de interfaces
+            Interfaces
           </li>
-          <li :class="{ active: selectedForm === 'interface-config' }" @click="selectSection('interface-config')">
-            Configurar puerto
-          </li>
-
-          <li class="menu-title">VLANs</li>
           <li :class="{ active: selectedForm === 'vlans' }" @click="selectSection('vlans')">
             VLANs
           </li>
-
-          <li class="menu-title">Seguridad</li>
           <li :class="{ active: selectedForm === 'security' }" @click="selectSection('security')">
             ACLs
           </li>
