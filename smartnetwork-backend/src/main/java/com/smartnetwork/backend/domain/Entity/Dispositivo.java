@@ -103,5 +103,7 @@ public class Dispositivo {
     @OneToMany(mappedBy = "dispositivo", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<DispositivoUsuarioFirewall> dispositivoUsuarioFirewalls = new ArrayList<>();
+
+
 }
 

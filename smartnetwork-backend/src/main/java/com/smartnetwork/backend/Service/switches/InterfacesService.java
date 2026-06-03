@@ -98,7 +98,8 @@ public class InterfacesService {
         interfaz.setDescripcion(dto.getDescripcion());
         interfaz.setMode(dto.getMode());
         if (dto.getMode() != null &&
-                !List.of("access", "trunk", "routed").contains(dto.getMode())) {
+                !List.of("access", "trunk", "routed", "bridged").contains(dto.getMode())) {
+            System.out.println("MODE RECIBIDO = [" + dto.getMode() + "]");
             throw new RuntimeException("Modo inválido");
         }
 

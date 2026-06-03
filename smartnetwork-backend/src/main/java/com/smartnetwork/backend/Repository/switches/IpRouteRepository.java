@@ -18,5 +18,5 @@ public interface IpRouteRepository extends JpaRepository<IpRoute, Long> {
             String gateway,
             Dispositivo dispositivo
     );
-
+    void deleteAllByDispositivo(Dispositivo dispositivo);
 }

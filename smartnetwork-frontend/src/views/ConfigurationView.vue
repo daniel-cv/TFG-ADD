@@ -9,7 +9,7 @@
           </div>
         </div>
         <template v-if="esFirewall">
-          
+
           <li :class="{ active: selectedForm === 'policy' }" @click="selectSection('policy')">
             Policies
           </li>
@@ -38,6 +38,9 @@
           <li :class="{ active: selectedForm === 'vlans' }" @click="selectSection('vlans')">
             VLANs
           </li>
+          <li :class="{ active: selectedForm === 'iproutes' }" @click="selectSection('iproutes')">
+            IP Routes
+          </li>
           <li :class="{ active: selectedForm === 'security' }" @click="selectSection('security')">
             ACLs
           </li>
@@ -49,27 +52,27 @@
     </aside>
     <main class="content" v-if="seleccionadoStore.dispositivo">
       <div class="device-header">
-  <div class="device-title-row">
-    <h1 class="device-name">
-      {{ seleccionadoStore.dispositivo.nombre }}
-    </h1>
+        <div class="device-title-row">
+          <h1 class="device-name">
+            {{ seleccionadoStore.dispositivo.nombre }}
+          </h1>
 
-    <span :class="['status status-pill',
-      seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline']">
-      {{ seleccionadoStore.dispositivo.estado }}
-    </span>
-  </div>
+          <span :class="['status status-pill',
+            seleccionadoStore.dispositivo.estado === 'ONLINE' ? 'online' : 'offline']">
+            {{ seleccionadoStore.dispositivo.estado }}
+          </span>
+        </div>
 
-  <div class="device-meta">
-    <span class="device-brand">
-      {{ seleccionadoStore.dispositivo.fabricante }}
-    </span>
+        <div class="device-meta">
+          <span class="device-brand">
+            {{ seleccionadoStore.dispositivo.fabricante }}
+          </span>
 
-    <span class="device-ip">
-      {{ seleccionadoStore.dispositivo.ip }}
-    </span>
-  </div>
-</div>
+          <span class="device-ip">
+            {{ seleccionadoStore.dispositivo.ip }}
+          </span>
+        </div>
+      </div>
 
       <div class="card configuration-view">
         <h2>Información del dispositivo</h2>
@@ -94,14 +97,8 @@
       </div>
 
       <div class="card form-container">
-        <component
-          :is="currentComponent"
-          :device-id="dispositivoId"
-          :modo="modo"
-          @crear="currentMode = 'create'"
-          @creada="currentMode = 'list'"
-          @cancelar="currentMode = 'list'"
-        />
+        <component :is="currentComponent" :device-id="dispositivoId" :modo="modo" @crear="currentMode = 'create'"
+          @creada="currentMode = 'list'" @cancelar="currentMode = 'list'" />
       </div>
 
     </main>
@@ -138,6 +135,7 @@ import InterfazListS from "@/components/Switch/InterfazList.vue"
 import VlanList from "@/components/Switch/VlanList.vue"
 import AclList from "@/components/Switch/AclsList.vue";
 import LogList from "@/components/LogList.vue"
+import IpRouteList from "@/components/Switch/IpRouteList.vue"
 
 
 const route = useRoute();
@@ -145,7 +143,7 @@ const seleccionadoStore = useDispositivoSeleccionadoStore();
 const dispositivoStore = useDispositivoStore();
 const dispositivoId = route.params.id;
 
-const modo ="full";
+const modo = "full";
 
 const esFirewall = computed(() =>
   seleccionadoStore.dispositivo?.tipo === "FIREWALL"
@@ -196,9 +194,9 @@ const componentMap: Record<string, any> = {
   },
   vlans: { list: VlanList },
   logs: { list: LogList },
-  interfaces:{ list: InterfazListS},
+  interfaces: { list: InterfazListS },
   "interface-config": { list: InterfazFormS },
-
+  iproutes: { list: IpRouteList },
   security: { list: AclList }
 }
 

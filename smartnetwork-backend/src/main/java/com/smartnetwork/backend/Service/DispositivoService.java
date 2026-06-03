@@ -190,6 +190,10 @@ public class DispositivoService {
             throw new RuntimeException("No tienes permiso para eliminar este dispositivo");
         }
 
+        if (dispositivo.getTipo() == TipoDispositivo.SWITCH) {
+            interfacesRepository.deleteAllByDispositivo(dispositivo);
+            ipRouteRepository.deleteAllByDispositivo(dispositivo);
+        }
         dispositivoRepository.delete(dispositivo);
 
         return dispositivo;
