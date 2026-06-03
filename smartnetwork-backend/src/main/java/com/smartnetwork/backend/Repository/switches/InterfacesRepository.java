@@ -15,5 +15,5 @@ public interface InterfacesRepository extends JpaRepository<Interfaces, Long> {
     List<Interfaces> findByDispositivoId(Long dispositivoId);
     Optional<Interfaces> findByNameAndDispositivo(String name, Dispositivo dispositivo);
     List<Interfaces> findByVlanAccess(Vlan vlan);
-
+    void deleteAllByDispositivo(Dispositivo dispositivo);
 }
