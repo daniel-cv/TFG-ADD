@@ -2,6 +2,7 @@ package com.smartnetwork.backend.Controller;
 
 import com.smartnetwork.backend.Service.DispositivoService;
 import com.smartnetwork.backend.domain.Entity.Dispositivo;
+import com.smartnetwork.backend.domain.Enum.Fabricante;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -61,6 +62,12 @@ public class DispositivoController {
             Authentication auth
     ) {
         return dispositivoService.editarDispositivo(id, datos, auth.getName());
+    }
+
+    @GetMapping("/find/{fabricante}")
+    public List<Dispositivo> dispositivosPorFabricante(@PathVariable Fabricante fabricante, Authentication authentication) {
+        String username = authentication.getName();
+        return dispositivoService.obtenerDispositivosDelUsuarioPorFabricante(username, fabricante);
     }
 }
 

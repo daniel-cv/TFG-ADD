@@ -55,7 +55,7 @@
                 Iniciar sesión
               </span>
             </div>
-            <p v-if="userStore.mensaje" class="mt-3 text-center">{{ userStore.mensaje }}</p>
+            <p v-if="userStore.mensaje" class="mt-3 text-center" :class="{ 'success-message': isSuccess, 'error-message': !isSuccess }">{{ userStore.mensaje }}</p>
           </v-form>
         </v-card>
       </v-col>
@@ -72,6 +72,7 @@ const router = useRouter();
 const username = ref("");
 const email = ref("");
 const password = ref("");
+const isSuccess = ref(false);
 
 const userStore = useUserStore();
 
@@ -86,8 +87,14 @@ const handleCrearUsuario = async () => {
     username.value = "";
     email.value = "";
     password.value = "";
+    isSuccess.value = true;
+
+    setTimeout(() => {
+      router.push("/login");
+    }, 1000);
   } catch (error) {
     console.error(error);
+    isSuccess.value = false;
   }
 };
 
@@ -186,8 +193,16 @@ const irALogin = () => {
 }
 
 p{
-  color: #ef4444;
   font-size: 13px;
+}
+
+.success-message {
+  color: #10b981;
+  font-weight: 500;
+}
+
+.error-message {
+  color: #ef4444;
 }
 
 @media (max-width:600px){

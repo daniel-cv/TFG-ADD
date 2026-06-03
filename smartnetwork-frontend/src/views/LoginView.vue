@@ -56,7 +56,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useUserStore } from "@/stores/userStore";
 import { useRouter } from "vue-router";
 
@@ -64,6 +64,10 @@ const username = ref("");
 const password = ref("");
 const userStore = useUserStore();
 const router = useRouter();
+
+onMounted(() => {
+  userStore.mensaje = "";
+});
 
 const handleLogin = async () => {
   try {

@@ -3,7 +3,7 @@
     <div v-if="!mostrandoFormulario">
       <div class="table-header">
         <h2>Firewall Policies</h2>
-        <v-btn class="add-btn" size="small" @click="mostrarCrear">Añadir Policy</v-btn>
+        <v-btn class="add-btn" size="small" @click="mostrarCrear()">Añadir Policy</v-btn>
       </div>
       <v-table class="professional-table">
         <thead>
@@ -19,7 +19,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="regla in reglas":key="regla.id">
+          <tr v-for="regla in reglas" :key="regla.id">
             <td class="name">
               {{ regla.nombre }}
             </td>
@@ -64,8 +64,8 @@
         </tbody>
       </v-table>
     </div>
-    <div v-elseclass="formulario-inline">
-      <ReglaFirewallForm:regla-edit="reglaSeleccionada" modo="simple"@creada="recargarYCerrar"@cancelar="cerrarFormulario"/>
+    <div v-else class="formulario-inline">
+      <ReglaFirewallForm :regla-edit="reglaSeleccionada" modo="simple" @creada="recargarYCerrar" @cancelar="cerrarFormulario" />
     </div>
     <v-dialog v-model="dialogEditar"max-width="650px">
       <v-card class="apply-card">
@@ -82,7 +82,9 @@
             >
               <div class="device-info">
                 <v-checkbox
-                :model-value="seleccionados.includes(d.id)"hide-details/>
+                  :model-value="seleccionados.includes(d.id)"
+                  hide-details
+                />
                 <div>
                   <div class="device-name">
                     {{d.name ||d.nombre ||d.hostname ||'Sin nombre'}}
@@ -244,6 +246,7 @@ import ReglaFirewallForm from '@/components/ReglaFirewallForm.vue'
 import {preeliminarregla} from '@/services/reglaFirewallService';
 const reglaStore = useReglaFirewallStore()
 const dispositivoStore = useDispositivoStore()
+const fabricante = 'FORTINET'
 const reglas = ref([])
 const dispositivos = ref([])
 const implementaciones = ref({})
@@ -272,7 +275,7 @@ const dispositivosEliminar = computed(() => {
 const cargarDatos = async () => {
   await Promise.all([
     reglaStore.cargarReglasUsuario(),
-    dispositivoStore.getMisDispositivos()
+    dispositivoStore.getDispositivosByFabricante(fabricante)
   ])
   reglas.value = reglaStore.reglas
   dispositivos.value =dispositivoStore.dispositivos

@@ -11,6 +11,7 @@ import com.smartnetwork.backend.domain.Entity.switches.Interfaces;
 import com.smartnetwork.backend.domain.Entity.switches.IpRoute;
 import com.smartnetwork.backend.domain.Entity.switches.Vlan;
 import com.smartnetwork.backend.Service.switches.VlanService;
+import com.smartnetwork.backend.domain.Enum.Fabricante;
 import com.smartnetwork.backend.domain.Enum.TipoDispositivo;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -164,6 +165,13 @@ public class DispositivoService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         return dispositivoRepository.findByUsuario(usuario);
+    }
+
+    public List<Dispositivo> obtenerDispositivosDelUsuarioPorFabricante(String username, Fabricante fabricante){
+        Usuario usuario = usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return dispositivoRepository.findByUsuarioAndFabricante(usuario, fabricante);
     }
 
     public Optional<Dispositivo> getDispositivo(Long id, String username) {

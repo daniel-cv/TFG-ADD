@@ -195,6 +195,7 @@ import { preeliminarService } from '@/services/serviceService'
 
 const serviceStore = useServiceStore()
 const dispositivoStore = useDispositivoStore()
+const fabricante = 'FORTINET'
 const dialogAlert = ref(false)
 const mensajeAlert = ref('')
 
@@ -229,7 +230,7 @@ onMounted(cargarDatos)
 async function cargarDatos() {
   await Promise.all([
     serviceStore.cargarServicesUsuario(),
-    dispositivoStore.getMisDispositivos()
+    dispositivoStore.getDispositivosByFabricante(fabricante)
   ])
   services.value = serviceStore.services
   dispositivos.value = dispositivoStore.dispositivos

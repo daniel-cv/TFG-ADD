@@ -226,6 +226,7 @@ import InterfazForm from '@/components/InterfazForm.vue'
 import { preeliminarInterfaz } from '@/services/interfazService'
 const interfazStore = useInterfazStore()
 const dispositivoStore = useDispositivoStore()
+const fabricante = 'FORTINET'
 
 const interfaces = ref([])
 const dispositivos = ref([])
@@ -255,7 +256,7 @@ const seleccionadosEliminar = ref([])
 const cargar = async () => {
   await Promise.all([
     interfazStore.cargarInterfacesUsuario(),
-    dispositivoStore.getMisDispositivos()
+    dispositivoStore.getDispositivosByFabricante(fabricante)
   ])
 
   interfaces.value = interfazStore.interfaces

@@ -259,6 +259,7 @@ import UsuarioFirewallForm from '@/components/UsuarioFirewallForm.vue'
 
 const usuarioFirewallStore = useUsuarioFirewallStore()
 const dispositivoStore = useDispositivoStore()
+const fabricante = 'FORTINET'
 
 const usuarios = ref([])
 const dispositivos = ref([])
@@ -303,7 +304,7 @@ const obtenerNombreDispositivo = (d) => {
 const cargarDatos = async () => {
   await Promise.all([
     usuarioFirewallStore.cargarUsuariosPorUsuario(),
-    dispositivoStore.getMisDispositivos()
+    dispositivoStore.getDispositivosByFabricante(fabricante)
   ])
   usuarios.value = usuarioFirewallStore.usuarios
   dispositivos.value = dispositivoStore.dispositivos

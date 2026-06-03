@@ -27,6 +27,23 @@ export const useDispositivoStore = defineStore("dispositivo", {
       }
     },
 
+    async getDispositivosByFabricante(fabricante) {
+      try {
+        const userStore = useUserStore();
+
+        if (!userStore.autenticado) {
+          this.mensaje = "Debes iniciar sesión";
+          return;
+        }
+
+        const response = await api.get(`/api/dispositivos/find/${fabricante}`);
+        this.dispositivos = response.data;
+      } catch (error) {
+        console.error(error);
+        this.mensaje = "Error al obtener dispositivos por fabricante";
+      }
+    },
+
     async crearNuevoDispositivo(dispositivo) {
       try {
         const userStore = useUserStore();

@@ -1,10 +1,15 @@
 <template>
   <div class="dashboard">
 
-    <h1>Panel de Control</h1>
-    <p>Bienvenido al sistema de gestión de red</p>
-
-    <router-link to="/devices">Mis dispositivos</router-link>
+    <div class="header-section">
+      <div>
+        <h1>Panel de Control</h1>
+        <p>Bienvenido al sistema de gestión de red</p>
+      </div>
+      <v-btn to="/devices" class="nav-btn" size="large">
+        Mis dispositivos
+      </v-btn>
+    </div>
 
     <div class="tabs-container">
       <div
@@ -52,6 +57,42 @@ const currentComponent = computed(() => {
 .dashboard {
   padding: 30px;
 }
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  gap: 20px;
+}
+
+.header-section h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 8px;
+}
+
+.header-section p {
+  font-size: 14px;
+  color: white;
+  margin: 0;
+}
+
+.nav-btn {
+  background: #3b82f6;
+  color: white;
+  text-transform: none;
+  font-weight: 500;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+  background: #2563eb;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 .tabs-container {
   display: flex;
   gap: 20px;

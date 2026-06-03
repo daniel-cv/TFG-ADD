@@ -227,6 +227,7 @@ const dispositivoId = Number(route.params.id)
 const addressStore = useAddressStore()
 const dispositivoStore = useDispositivoStore()
 const interfazStore = useInterfazStore()
+const fabricante = 'FORTINET'
 
 const addresses = ref([])
 const dispositivos = ref([])
@@ -257,7 +258,7 @@ const seleccionadosEliminar = ref([])
 const cargarDatos = async () => {
   await Promise.all([
     addressStore.obtenerMisAddresses(),
-    dispositivoStore.getMisDispositivos(),
+    dispositivoStore.getDispositivosByFabricante(fabricante),
     interfazStore.cargarInterfacesUsuario()
   ])
 
